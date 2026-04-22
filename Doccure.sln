@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36511.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microservices", "Microservices", "{F951A47C-3A2E-4F8F-BC42-98D0C1961008}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.BranchService", "Microservices\Doccure.BranchService\Doccure.BranchService.csproj", "{A51420AD-9156-4A68-A160-79C5157CEBBC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.DoctorService", "Microservices\Doccure.DoctorService\Doccure.DoctorService.csproj", "{98580791-87A7-4C76-BBA4-D25A28A53B37}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirements", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "JsonData", "JsonData", "{4B06778F-882C-4A66-BAD7-27294B6A9E57}"
+	ProjectSection(SolutionItems) = preProject
+		DoctorExamples.txt = DoctorExamples.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.ReviewService", "Microservices\Doccure.ReviewService\Doccure.ReviewService.csproj", "{B2BB46B1-A42D-46E1-BC8F-BC6664426936}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.AppointmentService", "Microservices\Doccure.AppointmentService\Doccure.AppointmentService.csproj", "{B01CCA17-E05F-4518-AA79-7E1C2606020C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.IdentityService", "Microservices\Doccure.IdentityService\Doccure.IdentityService.csproj", "{A4734E96-5FA7-4044-B707-392BDF2431A2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A51420AD-9156-4A68-A160-79C5157CEBBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A51420AD-9156-4A68-A160-79C5157CEBBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A51420AD-9156-4A68-A160-79C5157CEBBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A51420AD-9156-4A68-A160-79C5157CEBBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98580791-87A7-4C76-BBA4-D25A28A53B37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98580791-87A7-4C76-BBA4-D25A28A53B37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98580791-87A7-4C76-BBA4-D25A28A53B37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98580791-87A7-4C76-BBA4-D25A28A53B37}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2BB46B1-A42D-46E1-BC8F-BC6664426936}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2BB46B1-A42D-46E1-BC8F-BC6664426936}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2BB46B1-A42D-46E1-BC8F-BC6664426936}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2BB46B1-A42D-46E1-BC8F-BC6664426936}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B01CCA17-E05F-4518-AA79-7E1C2606020C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B01CCA17-E05F-4518-AA79-7E1C2606020C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B01CCA17-E05F-4518-AA79-7E1C2606020C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B01CCA17-E05F-4518-AA79-7E1C2606020C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4734E96-5FA7-4044-B707-392BDF2431A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4734E96-5FA7-4044-B707-392BDF2431A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4734E96-5FA7-4044-B707-392BDF2431A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4734E96-5FA7-4044-B707-392BDF2431A2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A51420AD-9156-4A68-A160-79C5157CEBBC} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+		{98580791-87A7-4C76-BBA4-D25A28A53B37} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+		{4B06778F-882C-4A66-BAD7-27294B6A9E57} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{B2BB46B1-A42D-46E1-BC8F-BC6664426936} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+		{B01CCA17-E05F-4518-AA79-7E1C2606020C} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+		{A4734E96-5FA7-4044-B707-392BDF2431A2} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6794892D-F830-403C-AFC1-D9269F669C31}
+	EndGlobalSection
+EndGlobal

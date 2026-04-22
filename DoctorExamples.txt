@@ -1,0 +1,59 @@
+{
+  "name": "Ahmet",
+  "surname": "Yýlmaz",
+  "branchId": "67f1a2b3c4d5e6f789012345",
+  "email": "ahmet.yilmaz@doccure.com",
+  "phone": "+905551112233",
+  "imageUrl": "https://randomuser.me/api/portraits/men/45.jpg",
+  "about": "Kardiyoloji alanýnda 12 yýllýk deneyime sahip olan Dr. Ahmet Yýlmaz, özellikle kalp ritim bozukluklarý ve hipertansiyon üzerine uzmanlaþmýþtýr.",
+  "experienceYear": 12,
+  "pricePerHour": 1500,
+  "educations": [
+    {
+      "schoolName": "Ýstanbul Üniversitesi Týp Fakültesi",
+      "degree": "Týp Doktoru",
+      "year": "2006-2012"
+    },
+    {
+      "schoolName": "Hacettepe Üniversitesi",
+      "degree": "Kardiyoloji Uzmanlýðý",
+      "year": "2013-2017"
+    }
+  ],
+  "experiences": [
+    {
+      "clinicName": "Acýbadem Hastanesi",
+      "yearRange": "2017-2020"
+    },
+    {
+      "clinicName": "Memorial Hastanesi",
+      "yearRange": "2020-2024"
+    }
+  ],
+  "awards": [
+    {
+      "title": "En Baþarýlý Kardiyolog",
+      "year": "2021",
+      "description": "Türkiye Kardiyoloji Derneði tarafýndan verilmiþtir."
+    },
+    {
+      "title": "Uluslararasý Týp Baþarý Ödülü",
+      "year": "2023",
+      "description": "Avrupa Kardiyoloji Kongresi kapsamýnda verilmiþtir."
+    }
+  ],
+  "services": [
+    "Kalp Muayenesi",
+    "EKG",
+    "Efor Testi",
+    "Holter Takibi"
+  ],
+  "specializations": [
+    "Kardiyoloji",
+    "Hipertansiyon",
+    "Kalp Ritmi Bozukluklarý"
+  ]
+}
+
+---------------------------------------------------------------------------
+
