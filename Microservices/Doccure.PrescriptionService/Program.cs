@@ -1,18 +1,14 @@
-﻿using Doccure.IdentityService.Context;
-using Doccure.IdentityService.Entities;
-using Doccure.IdentityService.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Doccure.PrescriptionService.Context;
+using Doccure.PrescriptionService.Services.PrescriptionService;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<DoccureContext>();
+builder.Services.AddDbContext<PrescriptionContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreConnection")));
 
-builder.Services.AddIdentity<AppUser, IdentityRole>()
-    .AddEntityFrameworkStores<DoccureContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -29,7 +25,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();

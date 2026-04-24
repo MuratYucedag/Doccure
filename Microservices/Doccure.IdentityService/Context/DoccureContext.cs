@@ -6,8 +6,9 @@ namespace Doccure.IdentityService.Context
 {
     public class DoccureContext : IdentityDbContext<AppUser>
     {
-        public DoccureContext(DbContextOptions<IdentityDbContext> options): base(options)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            optionsBuilder.UseSqlServer("Server=DESKTOP-R7AR1ND;initial catalog=DoccureIdentityDb;integrated security=true");
         }
     }
 }
