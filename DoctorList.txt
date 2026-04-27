@@ -1,0 +1,1096 @@
+﻿<main id="app-content">
+
+<style>
+  /* ── Stat Grid ── */
+  .dc-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px; margin-bottom: 24px;
+  }
+  @media(max-width:900px){ .dc-stat-grid{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:480px){ .dc-stat-grid{grid-template-columns:1fr 1fr;gap:10px} }
+
+  .dc-stat-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:18px 20px;
+    display:flex; align-items:center; gap:14px;
+    box-shadow:var(--shadow);
+    transition:box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .dc-stat-card:hover { box-shadow:0 4px 20px rgba(59,130,246,.13); transform:translateY(-2px); }
+  .dc-si {
+    width:44px; height:44px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+  }
+  .dc-si-blue   { background:var(--primary-bg); color:var(--primary); }
+  .dc-si-green  { background:var(--success-bg); color:var(--success); }
+  .dc-si-orange { background:var(--warning-bg); color:var(--warning); }
+  .dc-si-red    { background:var(--danger-bg);  color:var(--danger); }
+  .dc-stat-val { font-size:22px; font-weight:700; color:var(--text); line-height:1.1; }
+  .dc-stat-lbl { font-size:11px; color:var(--text-muted); font-weight:500; margin-top:2px; }
+  .dc-stat-sub { font-size:11px; font-weight:600; margin-top:4px; }
+  .dc-stat-sub.up   { color:var(--success); }
+  .dc-stat-sub.down { color:var(--danger); }
+
+  /* ── Toolbar ── */
+  .dc-toolbar {
+    display:flex; align-items:center; gap:10px;
+    flex-wrap:wrap; margin-bottom:20px;
+  }
+  .dc-local-search { position:relative; flex:1; min-width:160px; max-width:280px; }
+  .dc-local-search i {
+    position:absolute; left:11px; top:50%; transform:translateY(-50%);
+    color:var(--text-muted); font-size:13px; pointer-events:none;
+  }
+  .dc-local-search input {
+    width:100%; border:1px solid var(--border); border-radius:20px;
+    padding:8px 14px 8px 32px;
+    font-size:13px; font-family:inherit;
+    background:var(--surface); color:var(--text); outline:none;
+    transition:border-color var(--dur), box-shadow var(--dur);
+  }
+  .dc-local-search input:focus {
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px rgba(59,130,246,.1);
+  }
+  .dc-local-search input::placeholder { color:var(--text-muted); }
+
+  .dc-tabs { display:flex; gap:5px; flex-wrap:wrap; }
+  .dc-tab {
+    border:1px solid var(--border); background:var(--surface);
+    border-radius:20px; padding:7px 15px;
+    font-size:12px; font-weight:600; color:var(--text-muted);
+    cursor:pointer; transition:all var(--dur) var(--ease); white-space:nowrap;
+  }
+  .dc-tab:hover  { background:var(--primary-bg); color:var(--primary); border-color:#C7D9F8; }
+  .dc-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  .dc-sort-select {
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:7px 12px; font-size:12px; font-family:inherit;
+    background:var(--surface); color:var(--text); outline:none;
+    cursor:pointer;
+  }
+
+  .dc-view-toggle {
+    display:flex; border:1px solid var(--border); border-radius:var(--radius-sm);
+    overflow:hidden; flex-shrink:0;
+  }
+  .dc-vbtn {
+    width:34px; height:34px; border:none; background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--text-muted); cursor:pointer;
+    transition:all var(--dur);
+  }
+  .dc-vbtn.active { background:var(--primary-bg); color:var(--primary); }
+
+  /* ── Card Grid ── */
+  #dc-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(280px,1fr));
+    gap:18px;
+  }
+  #dc-grid.list-mode { grid-template-columns:1fr; }
+
+  /* Entry animation */
+  .dc-card { animation:dcFadeUp .3s var(--ease) both; }
+  .dc-card:nth-child(1){animation-delay:.04s}.dc-card:nth-child(2){animation-delay:.08s}
+  .dc-card:nth-child(3){animation-delay:.12s}.dc-card:nth-child(4){animation-delay:.16s}
+  .dc-card:nth-child(5){animation-delay:.20s}.dc-card:nth-child(6){animation-delay:.24s}
+  .dc-card:nth-child(7){animation-delay:.28s}.dc-card:nth-child(8){animation-delay:.32s}
+  @keyframes dcFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Card */
+  .dc-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    display:flex; flex-direction:column; overflow:hidden;
+    transition:box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur);
+    position:relative;
+  }
+  .dc-card:hover { box-shadow:0 4px 24px rgba(59,130,246,.13); transform:translateY(-3px); border-color:#C7D9F8; }
+
+  .dc-card-top {
+    padding:22px 20px 16px;
+    display:flex; flex-direction:column; align-items:center;
+    text-align:center; gap:10px;
+    position:relative;
+  }
+  .dc-card-top-bg {
+    position:absolute; top:0; left:0; right:0; height:70px;
+    opacity:.07; border-radius:var(--radius) var(--radius) 0 0;
+  }
+
+  /* Status badge top-right */
+  .dc-status-badge {
+    position:absolute; top:14px; right:14px;
+    font-size:10px; font-weight:700;
+    padding:3px 9px; border-radius:20px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .dc-status-badge::before {
+    content:''; width:6px; height:6px; border-radius:50%; flex-shrink:0;
+  }
+  .dc-status-badge.on  { background:var(--success-bg); color:#065F46; }
+  .dc-status-badge.on::before  { background:var(--success); }
+  .dc-status-badge.off { background:var(--warning-bg); color:#92400E; }
+  .dc-status-badge.off::before { background:var(--warning); }
+  .dc-status-badge.leave { background:#F1F5F9; color:var(--text-muted); }
+  .dc-status-badge.leave::before { background:#94A3B8; }
+
+  /* Avatar */
+  .dc-avatar {
+    width:72px; height:72px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px; font-weight:700; color:#fff;
+    border:3px solid var(--surface);
+    box-shadow:0 4px 14px rgba(0,0,0,.12);
+    flex-shrink:0; position:relative; z-index:1;
+  }
+  .dc-avatar-ring {
+    width:80px; height:80px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    padding:4px;
+    position:relative; z-index:1;
+  }
+
+  .dc-doc-name { font-size:15px; font-weight:700; color:var(--text); line-height:1.3; }
+  .dc-doc-spec { font-size:12px; color:var(--text-muted); font-weight:500; }
+  .dc-doc-dept {
+    font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px;
+    background:var(--primary-bg); color:var(--primary);
+  }
+
+  /* Stars */
+  .dc-stars { display:flex; align-items:center; gap:3px; font-size:12px; }
+  .dc-stars i { color:#FBBF24; font-size:12px; }
+  .dc-stars span { font-weight:700; color:var(--text); margin-left:3px; }
+  .dc-stars small { color:var(--text-muted); font-size:10px; }
+
+  /* Stats row */
+  .dc-card-stats {
+    display:flex; border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+  .dc-cs-cell {
+    flex:1; text-align:center; padding:10px 4px;
+    border-right:1px solid var(--border);
+    background:var(--bg); transition:background var(--dur);
+  }
+  .dc-cs-cell:last-child { border-right:none; }
+  .dc-cs-cell:hover { background:var(--primary-bg); }
+  .dc-cs-val { font-size:14px; font-weight:700; color:var(--text); line-height:1.1; }
+  .dc-cs-lbl { font-size:10px; color:var(--text-muted); font-weight:500; margin-top:2px; }
+
+  /* Availability slots */
+  .dc-slots {
+    padding:12px 18px 14px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .dc-slots-title {
+    font-size:10.5px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;
+  }
+  .dc-slot-row { display:flex; gap:5px; flex-wrap:wrap; }
+  .dc-slot {
+    font-size:11px; font-weight:600; padding:4px 10px;
+    border-radius:6px; border:1px solid var(--border);
+    background:var(--bg); color:var(--text-muted);
+  }
+  .dc-slot.free     { background:var(--success-bg); color:#065F46; border-color:#A7F3D0; cursor:pointer; transition:all var(--dur); }
+  .dc-slot.free:hover { background:var(--success); color:#fff; border-color:var(--success); }
+  .dc-slot.busy     { background:var(--danger-bg); color:#991B1B; border-color:#FCA5A5; }
+
+  /* Footer */
+  .dc-card-footer {
+    padding:11px 14px; border-top:1px solid var(--border);
+    background:#FAFBFE; display:flex; gap:6px; margin-top:auto;
+  }
+  .dc-btn {
+    flex:1; border:1px solid var(--border); background:var(--surface);
+    border-radius:var(--radius-sm); padding:7px 8px;
+    font-size:12px; font-weight:600; font-family:inherit;
+    display:inline-flex; align-items:center; justify-content:center; gap:5px;
+    cursor:pointer; transition:all var(--dur) var(--ease); color:var(--text-muted);
+  }
+  .dc-btn:hover      { background:var(--bg); color:var(--text); }
+  .dc-btn.primary    { color:var(--primary); border-color:#C7D9F8; background:var(--primary-bg); }
+  .dc-btn.primary:hover { background:var(--primary); color:#fff; box-shadow:0 3px 10px rgba(59,130,246,.25); }
+  .dc-btn.success    { color:var(--success); border-color:#A7F3D0; background:var(--success-bg); }
+  .dc-btn.success:hover { background:var(--success); color:#fff; box-shadow:0 3px 10px rgba(16,185,129,.25); }
+  .dc-btn.danger:hover  { background:var(--danger-bg); border-color:#FCA5A5; color:var(--danger); }
+
+  /* ── LIST MODE ── */
+  #dc-grid.list-mode .dc-card { flex-direction:row; align-items:stretch; }
+  #dc-grid.list-mode .dc-card-top {
+    flex-direction:row; text-align:left; align-items:center;
+    padding:14px 20px; gap:14px; min-width:260px; flex-shrink:0;
+    border-right:1px solid var(--border);
+  }
+  #dc-grid.list-mode .dc-card-top-bg { display:none; }
+  #dc-grid.list-mode .dc-status-badge { position:static; }
+  #dc-grid.list-mode .dc-avatar-ring { width:52px; height:52px; padding:3px; }
+  #dc-grid.list-mode .dc-avatar { width:46px; height:46px; font-size:16px; }
+  #dc-grid.list-mode .dc-stars small { display:none; }
+  #dc-grid.list-mode .dc-card-stats {
+    flex:1; border-top:none; border-bottom:none;
+    border-right:1px solid var(--border);
+    flex-direction:column;
+  }
+  #dc-grid.list-mode .dc-cs-cell {
+    border-right:none; border-bottom:1px solid var(--border); padding:8px 16px;
+    display:flex; justify-content:space-between; align-items:center; text-align:left;
+  }
+  #dc-grid.list-mode .dc-cs-cell:last-child { border-bottom:none; }
+  #dc-grid.list-mode .dc-cs-lbl { font-size:11px; }
+  #dc-grid.list-mode .dc-slots { display:none; }
+  #dc-grid.list-mode .dc-card-footer {
+    flex-direction:column; border-top:none; border-left:none;
+    padding:12px; min-width:120px; gap:5px; justify-content:center;
+  }
+  #dc-grid.list-mode .dc-btn { flex:unset; width:100%; }
+
+  /* ── Empty ── */
+  .dc-empty {
+    grid-column:1/-1; text-align:center; padding:72px 24px; color:var(--text-muted);
+  }
+  .dc-empty i { font-size:48px; opacity:.15; display:block; margin-bottom:14px; }
+  .dc-empty-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
+
+  /* ── Modals ── */
+  .dc-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:500;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .dc-overlay.show { opacity:1; pointer-events:all; }
+  .dc-modal-box {
+    background:var(--surface); border-radius:var(--radius);
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    width:100%; max-width:560px;
+    transform:scale(.93) translateY(16px);
+    transition:transform .26s cubic-bezier(.34,1.56,.64,1);
+  }
+  .dc-overlay.show .dc-modal-box { transform:scale(1) translateY(0); }
+  .dc-modal-header {
+    padding:18px 22px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  }
+  .dc-modal-title    { font-size:15px; font-weight:700; color:var(--text); }
+  .dc-modal-subtitle { font-size:11px; color:var(--text-muted); margin-top:3px; }
+  .dc-modal-close {
+    width:30px; height:30px; border:1px solid var(--border); background:transparent;
+    border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--text-muted); cursor:pointer; flex-shrink:0;
+    transition:background var(--dur);
+  }
+  .dc-modal-close:hover { background:var(--bg); }
+  .dc-modal-body   { padding:20px 22px; }
+  .dc-modal-footer { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+  .dc-form-label { display:block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px; }
+  .dc-form-control {
+    width:100%; border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:9px 12px; font-size:13px; font-family:inherit;
+    color:var(--text); background:var(--bg); outline:none;
+    transition:border-color var(--dur), box-shadow var(--dur);
+  }
+  .dc-form-control:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+  .dc-form-group { margin-bottom:16px; }
+
+  /* Profile modal */
+  .dc-profile-header {
+    display:flex; align-items:center; gap:16px;
+    padding:20px 22px; border-bottom:1px solid var(--border);
+    background:linear-gradient(135deg, #EFF6FF 0%, #F8FAFC 100%);
+  }
+  .dc-profile-av {
+    width:64px; height:64px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:700; color:#fff;
+    border:3px solid #fff; box-shadow:0 4px 14px rgba(0,0,0,.12);
+  }
+  .dc-profile-name { font-size:17px; font-weight:700; color:var(--text); }
+  .dc-profile-title { font-size:13px; color:var(--text-muted); margin-top:3px; }
+  .dc-profile-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .dc-profile-table td { padding:9px 0; border-bottom:1px solid var(--border); vertical-align:top; }
+  .dc-profile-table tr:last-child td { border-bottom:none; }
+  .dc-profile-table td:first-child { color:var(--text-muted); font-weight:600; width:140px; font-size:11.5px; }
+
+  /* Delete danger note */
+  .dc-danger-note {
+    background:var(--danger-bg); border:1px solid #FCA5A5;
+    border-radius:var(--radius-sm); padding:11px 13px;
+    font-size:12px; color:#991B1B; margin-top:12px;
+    display:flex; gap:8px; align-items:flex-start;
+  }
+  .dc-danger-note i { flex-shrink:0; margin-top:1px; }
+
+  /* Global button atoms */
+  .dc-btn-primary {
+    background:var(--primary); color:#fff; border:none;
+    border-radius:var(--radius-sm); padding:10px 18px;
+    font-size:13px; font-weight:600; font-family:inherit;
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    transition:background var(--dur), box-shadow var(--dur), transform var(--dur);
+  }
+  .dc-btn-primary:hover { background:var(--primary-dk); box-shadow:0 4px 12px rgba(59,130,246,.3); transform:translateY(-1px); }
+  .dc-btn-primary:active { transform:scale(.98); }
+  .dc-btn-outline {
+    background:transparent; color:var(--text-muted);
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:9px 16px; font-size:13px; font-weight:500; font-family:inherit;
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    transition:all var(--dur);
+  }
+  .dc-btn-outline:hover { background:var(--bg); color:var(--text); }
+
+  .dc-page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .dc-page-title  { font-size:22px; font-weight:700; color:var(--text); }
+  .dc-page-sub    { font-size:13px; color:var(--text-muted); margin-top:3px; }
+</style>
+
+
+<!-- ── Page Header ── -->
+<div class="dc-page-header">
+  <div>
+    <h1 class="dc-page-title">Doktor Yönetimi</h1>
+    <p class="dc-page-sub">Tüm doktorları ve uzmanları yönetin, randevu ve profil işlemlerini gerçekleştirin</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="dc-btn-outline" onclick="DC.exportList()"><i class="bi bi-download"></i> Dışa Aktar</button>
+    <button class="dc-btn-primary" onclick="DC.openAdd()"><i class="bi bi-person-plus"></i> Yeni Doktor</button>
+  </div>
+</div>
+
+<!-- ── Stat Cards ── -->
+<div class="dc-stat-grid">
+  <div class="dc-stat-card">
+    <div class="dc-si dc-si-blue"><i class="bi bi-person-badge"></i></div>
+    <div>
+      <div class="dc-stat-val" id="dc-count">8</div>
+      <div class="dc-stat-lbl">Toplam Doktor</div>
+      <div class="dc-stat-sub up"><i class="bi bi-arrow-up-short"></i>+3 bu ay</div>
+    </div>
+  </div>
+  <div class="dc-stat-card">
+    <div class="dc-si dc-si-green"><i class="bi bi-circle-fill" style="font-size:13px"></i></div>
+    <div>
+      <div class="dc-stat-val">6</div>
+      <div class="dc-stat-lbl">Aktif / Görevde</div>
+      <div class="dc-stat-sub up">2 randevuda</div>
+    </div>
+  </div>
+  <div class="dc-stat-card">
+    <div class="dc-si dc-si-orange"><i class="bi bi-calendar3"></i></div>
+    <div>
+      <div class="dc-stat-val">347</div>
+      <div class="dc-stat-lbl">Aylık Randevu</div>
+      <div class="dc-stat-sub up"><i class="bi bi-arrow-up-short"></i>+12% bu hafta</div>
+    </div>
+  </div>
+  <div class="dc-stat-card">
+    <div class="dc-si dc-si-red"><i class="bi bi-star-fill"></i></div>
+    <div>
+      <div class="dc-stat-val">4.8</div>
+      <div class="dc-stat-lbl">Ort. Hasta Puanı</div>
+      <div class="dc-stat-sub up"><i class="bi bi-arrow-up-short"></i>+0.2 geçen ay</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toolbar ── -->
+<div class="dc-toolbar">
+  <div class="dc-local-search">
+    <i class="bi bi-search"></i>
+    <input id="dc-search" placeholder="İsim, branş veya uzmanlık ara..." oninput="DC.filter()">
+  </div>
+  <div class="dc-tabs">
+    <button class="dc-tab active" data-cat="all"      onclick="DC.setTab(this)">Tümü</button>
+    <button class="dc-tab"        data-cat="dahili"   onclick="DC.setTab(this)">Dahili Tıp</button>
+    <button class="dc-tab"        data-cat="cerrahi"  onclick="DC.setTab(this)">Cerrahi</button>
+    <button class="dc-tab"        data-cat="tani"     onclick="DC.setTab(this)">Tanı</button>
+    <button class="dc-tab"        data-cat="musait"   onclick="DC.setTab(this)">Müsait</button>
+  </div>
+  <select class="dc-sort-select" onchange="DC.sort(this.value)">
+    <option value="name">Ada Göre</option>
+    <option value="rating">Puana Göre</option>
+    <option value="exp">Deneyime Göre</option>
+    <option value="appt">Randevuya Göre</option>
+  </select>
+  <div class="dc-view-toggle" style="margin-left:auto">
+    <button class="dc-vbtn active" id="dc-vg" title="Kart" onclick="DC.setView('grid')"><i class="bi bi-grid-1x2"></i></button>
+    <button class="dc-vbtn"        id="dc-vl" title="Liste" onclick="DC.setView('list')"><i class="bi bi-list-ul"></i></button>
+  </div>
+</div>
+
+<!-- ── Doctor Grid ── -->
+<div id="dc-grid">
+
+  <!-- 1. Dr. Mehmet Demir -->
+  <div class="dc-card" data-cat="dahili" data-status="on" data-name="mehmet demir kardiyoloji">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:var(--primary)"></div>
+      <span class="dc-status-badge on">Müsait</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">MD</div>
+      </div>
+      <div class="dc-doc-name">Dr. Mehmet Demir</div>
+      <div class="dc-doc-spec">Kardiyoloji Uzmanı</div>
+      <span class="dc-doc-dept">Kardiyoloji</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i>
+        <span>4.9</span><small>(124 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">12 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">87</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">1.240</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot free" onclick="DC.book('Dr. Mehmet Demir','10:30')">10:30</span>
+        <span class="dc-slot busy">11:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Mehmet Demir','13:00')">13:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Mehmet Demir','14:30')">14:30</span>
+        <span class="dc-slot busy">15:00</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Mehmet Demir','Kardiyoloji Uzmanı','12 yıl','Hacettepe Üniversitesi','Pazartesi-Cuma 09:00-17:00','mehmet.demir@medipanel.com','+90 212 555 0101','1.240','87','4.9')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Mehmet Demir','Kardiyoloji','12','dahili','Hacettepe Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Mehmet Demir',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Dr. Selin Arslan -->
+  <div class="dc-card" data-cat="dahili" data-status="on" data-name="selin arslan dermatoloji">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:var(--success)"></div>
+      <span class="dc-status-badge on">Müsait</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#10B981,#059669)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">SA</div>
+      </div>
+      <div class="dc-doc-name">Dr. Selin Arslan</div>
+      <div class="dc-doc-spec">Dermatoloji Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#ECFDF5;color:var(--success)">Dermatoloji</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-half"></i>
+        <span>4.7</span><small>(98 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">8 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">58</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">876</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot free" onclick="DC.book('Dr. Selin Arslan','09:00')">09:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Selin Arslan','09:30')">09:30</span>
+        <span class="dc-slot busy">11:30</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Selin Arslan','14:00')">14:00</span>
+        <span class="dc-slot busy">16:00</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Selin Arslan','Dermatoloji Uzmanı','8 yıl','İstanbul Üniversitesi','Salı-Cumartesi 08:00-16:00','selin.arslan@medipanel.com','+90 212 555 0102','876','58','4.7')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Selin Arslan','Dermatoloji','8','dahili','İstanbul Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Selin Arslan',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Dr. Can Öztürk -->
+  <div class="dc-card" data-cat="cerrahi" data-status="off" data-name="can öztürk ortopedi">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:var(--warning)"></div>
+      <span class="dc-status-badge off">Randevuda</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#F59E0B,#D97706)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706)">CO</div>
+      </div>
+      <div class="dc-doc-name">Dr. Can Öztürk</div>
+      <div class="dc-doc-spec">Ortopedi ve Travmatoloji Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#FFFBEB;color:var(--warning)">Ortopedi</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-half"></i>
+        <span>4.7</span><small>(142 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">10 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">74</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">1.050</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot busy">09:00</span>
+        <span class="dc-slot busy">10:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Can Öztürk','13:30')">13:30</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Can Öztürk','15:00')">15:00</span>
+        <span class="dc-slot busy">16:30</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Can Öztürk','Ortopedi Uzmanı','10 yıl','Ankara Üniversitesi','Pazartesi-Perşembe 09:00-17:00','can.ozturk@medipanel.com','+90 212 555 0103','1.050','74','4.7')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Can Öztürk','Ortopedi','10','cerrahi','Ankara Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Can Öztürk',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. Dr. Zeynep Kara -->
+  <div class="dc-card" data-cat="dahili" data-status="on" data-name="zeynep kara nöroloji">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:#7C3AED"></div>
+      <span class="dc-status-badge on">Müsait</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">ZK</div>
+      </div>
+      <div class="dc-doc-name">Dr. Zeynep Kara</div>
+      <div class="dc-doc-spec">Nöroloji Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#F3F0FF;color:#7C3AED">Nöroloji</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i>
+        <span>4.9</span><small>(211 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">15 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">42</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">1.890</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot free" onclick="DC.book('Dr. Zeynep Kara','09:30')">09:30</span>
+        <span class="dc-slot busy">11:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Zeynep Kara','12:00')">12:00</span>
+        <span class="dc-slot busy">14:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Zeynep Kara','16:00')">16:00</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Zeynep Kara','Nöroloji Uzmanı','15 yıl','Ege Üniversitesi','Çarşamba-Pazar 10:00-18:00','zeynep.kara@medipanel.com','+90 212 555 0104','1.890','42','4.9')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Zeynep Kara','Nöroloji','15','dahili','Ege Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Zeynep Kara',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. Dr. Ahmet Yılmaz -->
+  <div class="dc-card" data-cat="dahili" data-status="on" data-name="ahmet yılmaz pediatri">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:#06B6D4"></div>
+      <span class="dc-status-badge on">Müsait</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">AY</div>
+      </div>
+      <div class="dc-doc-name">Dr. Ahmet Yılmaz</div>
+      <div class="dc-doc-spec">Pediatri Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#ECFEFF;color:#06B6D4">Pediatri</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-half"></i>
+        <span>4.8</span><small>(189 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">9 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">65</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">1.340</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot busy">09:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Ahmet Yılmaz','10:00')">10:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Ahmet Yılmaz','11:00')">11:00</span>
+        <span class="dc-slot busy">13:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Ahmet Yılmaz','15:30')">15:30</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Ahmet Yılmaz','Pediatri Uzmanı','9 yıl','Marmara Üniversitesi','Pazartesi-Cuma 08:30-16:30','ahmet.yilmaz@medipanel.com','+90 212 555 0105','1.340','65','4.8')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Ahmet Yılmaz','Pediatri','9','dahili','Marmara Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Ahmet Yılmaz',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 6. Dr. Neslihan Baş -->
+  <div class="dc-card" data-cat="tani" data-status="on" data-name="neslihan baş radyoloji">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:#6366F1"></div>
+      <span class="dc-status-badge on">Müsait</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#6366F1,#4F46E5)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#6366F1,#4F46E5)">NB</div>
+      </div>
+      <div class="dc-doc-name">Dr. Neslihan Baş</div>
+      <div class="dc-doc-spec">Radyoloji Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#EEF2FF;color:#6366F1">Radyoloji</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-half"></i>
+        <span>4.5</span><small>(77 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">7 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">120</div><div class="dc-cs-lbl">İşlem/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">640</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot free" onclick="DC.book('Dr. Neslihan Baş','08:30')">08:30</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Neslihan Baş','09:00')">09:00</span>
+        <span class="dc-slot busy">10:30</span>
+        <span class="dc-slot busy">12:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Neslihan Baş','14:00')">14:00</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Neslihan Baş','Radyoloji Uzmanı','7 yıl','Dokuz Eylül Üniversitesi','Pazartesi-Cuma 08:00-16:00','neslihan.bas@medipanel.com','+90 212 555 0106','640','120','4.5')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Neslihan Baş','Radyoloji','7','tani','Dokuz Eylül Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Neslihan Baş',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. Dr. Tarık Kurt -->
+  <div class="dc-card" data-cat="cerrahi" data-status="leave" data-name="tarık kurt travmatoloji cerrahi">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:#94A3B8"></div>
+      <span class="dc-status-badge leave">İzinde</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#64748B,#475569)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#64748B,#475569)">TK</div>
+      </div>
+      <div class="dc-doc-name">Dr. Tarık Kurt</div>
+      <div class="dc-doc-spec">Travmatoloji Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#F1F5F9;color:#64748B">Ortopedi</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star"></i>
+        <span>4.3</span><small>(56 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">7 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">—</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">720</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Durum</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot" style="background:#F1F5F9;color:#94A3B8;border-color:#E2E8F0;font-size:12px">
+          <i class="bi bi-calendar-x" style="margin-right:4px"></i>30 Nis – 10 May izinde
+        </span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Tarık Kurt','Travmatoloji Uzmanı','7 yıl','Gazi Üniversitesi','Pazartesi-Cuma 09:00-17:00','tarik.kurt@medipanel.com','+90 212 555 0107','720','74','4.3')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Tarık Kurt','Ortopedi','7','cerrahi','Gazi Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Tarık Kurt',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. Dr. Lale Çetin -->
+  <div class="dc-card" data-cat="dahili" data-status="on" data-name="lale çetin dermatoloji">
+    <div class="dc-card-top">
+      <div class="dc-card-top-bg" style="background:#EC4899"></div>
+      <span class="dc-status-badge on">Müsait</span>
+      <div class="dc-avatar-ring" style="background:linear-gradient(135deg,#EC4899,#DB2777)">
+        <div class="dc-avatar" style="background:linear-gradient(135deg,#EC4899,#DB2777)">LÇ</div>
+      </div>
+      <div class="dc-doc-name">Dr. Lale Çetin</div>
+      <div class="dc-doc-spec">Dermatoloji Uzmanı</div>
+      <span class="dc-doc-dept" style="background:#ECFDF5;color:var(--success)">Dermatoloji</span>
+      <div class="dc-stars">
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+        <i class="bi bi-star-half"></i>
+        <span>4.6</span><small>(63 değerlendirme)</small>
+      </div>
+    </div>
+    <div class="dc-card-stats">
+      <div class="dc-cs-cell"><div class="dc-cs-val">5 yıl</div><div class="dc-cs-lbl">Deneyim</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">48</div><div class="dc-cs-lbl">Randevu/ay</div></div>
+      <div class="dc-cs-cell"><div class="dc-cs-val">390</div><div class="dc-cs-lbl">Toplam Hasta</div></div>
+    </div>
+    <div class="dc-slots">
+      <div class="dc-slots-title">Bugünkü Müsait Saatler</div>
+      <div class="dc-slot-row">
+        <span class="dc-slot free" onclick="DC.book('Dr. Lale Çetin','10:00')">10:00</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Lale Çetin','10:30')">10:30</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Lale Çetin','11:00')">11:00</span>
+        <span class="dc-slot busy">13:30</span>
+        <span class="dc-slot free" onclick="DC.book('Dr. Lale Çetin','15:00')">15:00</span>
+      </div>
+    </div>
+    <div class="dc-card-footer">
+      <button class="dc-btn primary" onclick="DC.openProfile('Dr. Lale Çetin','Dermatoloji Uzmanı','5 yıl','İstanbul Üniversitesi','Salı-Cumartesi 09:00-17:00','lale.cetin@medipanel.com','+90 212 555 0108','390','48','4.6')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="dc-btn" onclick="DC.openEdit('Dr. Lale Çetin','Dermatoloji','5','dahili','İstanbul Üniversitesi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="dc-btn danger" onclick="DC.confirmDelete('Dr. Lale Çetin',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /#dc-grid -->
+
+
+<!-- ════════ MODALLER ════════ -->
+
+<!-- Profil -->
+<div class="dc-overlay" id="dc-m-profile" onclick="if(event.target===this)DC.close('dc-m-profile')">
+  <div class="dc-modal-box" style="max-width:540px">
+    <div class="dc-profile-header">
+      <div class="dc-profile-av" id="dc-pr-av">MD</div>
+      <div>
+        <div class="dc-profile-name" id="dc-pr-name"></div>
+        <div class="dc-profile-title" id="dc-pr-title"></div>
+        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          <span id="dc-pr-dept" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--primary-bg);color:var(--primary)"></span>
+        </div>
+      </div>
+      <button class="dc-modal-close" style="margin-left:auto;align-self:flex-start" onclick="DC.close('dc-m-profile')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="dc-modal-body" style="padding:16px 22px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="dc-pr-patients"></div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:2px">Toplam Hasta</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="dc-pr-appt"></div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:2px">Randevu/ay</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="dc-pr-rating"></div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:2px">Hasta Puanı</div>
+        </div>
+      </div>
+      <table class="dc-profile-table">
+        <tr><td>Uzmanlık</td><td id="dc-pr-spec"></td></tr>
+        <tr><td>Deneyim</td><td id="dc-pr-exp"></td></tr>
+        <tr><td>Mezuniyet</td><td id="dc-pr-edu"></td></tr>
+        <tr><td>Çalışma Saatleri</td><td id="dc-pr-hours"></td></tr>
+        <tr><td>E-posta</td><td id="dc-pr-email" style="color:var(--primary)"></td></tr>
+        <tr><td>Dahili Tel</td><td id="dc-pr-phone"></td></tr>
+      </table>
+    </div>
+    <div class="dc-modal-footer">
+      <button class="dc-btn-outline" onclick="DC.close('dc-m-profile')">Kapat</button>
+      <button class="dc-btn-primary" onclick="DC.close('dc-m-profile');Shell.toast('Randevu talebi oluşturuldu!','success','bi-calendar-check')">
+        <i class="bi bi-calendar-plus"></i> Randevu Al
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Düzenle -->
+<div class="dc-overlay" id="dc-m-edit" onclick="if(event.target===this)DC.close('dc-m-edit')">
+  <div class="dc-modal-box" style="max-width:500px">
+    <div class="dc-modal-header">
+      <div>
+        <div class="dc-modal-title"><i class="bi bi-pencil-square me-2" style="color:var(--primary)"></i>Doktor Bilgilerini Düzenle</div>
+        <div class="dc-modal-subtitle" id="dc-edit-subtitle"></div>
+      </div>
+      <button class="dc-modal-close" onclick="DC.close('dc-m-edit')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="dc-modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="dc-form-group">
+          <label class="dc-form-label">Ad Soyad</label>
+          <input class="dc-form-control" id="dc-edit-name" placeholder="Dr. Ad Soyad">
+        </div>
+        <div class="dc-form-group">
+          <label class="dc-form-label">Uzmanlık</label>
+          <input class="dc-form-control" id="dc-edit-spec" placeholder="Kardiyoloji">
+        </div>
+        <div class="dc-form-group">
+          <label class="dc-form-label">Deneyim (yıl)</label>
+          <input class="dc-form-control" type="number" id="dc-edit-exp" min="0" placeholder="0">
+        </div>
+        <div class="dc-form-group">
+          <label class="dc-form-label">Kategori</label>
+          <select class="dc-form-control" id="dc-edit-cat">
+            <option value="dahili">Dahili Tıp</option>
+            <option value="cerrahi">Cerrahi</option>
+            <option value="tani">Tanı</option>
+          </select>
+        </div>
+      </div>
+      <div class="dc-form-group">
+        <label class="dc-form-label">Mezun Olduğu Kurum</label>
+        <input class="dc-form-control" id="dc-edit-edu" placeholder="Üniversite adı">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="dc-form-group mb-0">
+          <label class="dc-form-label">Durum</label>
+          <select class="dc-form-control">
+            <option>Aktif</option><option>İzinde</option><option>Pasif</option>
+          </select>
+        </div>
+        <div class="dc-form-group mb-0">
+          <label class="dc-form-label">Dahili Tel</label>
+          <input class="dc-form-control" placeholder="+90 212 555 0100">
+        </div>
+      </div>
+    </div>
+    <div class="dc-modal-footer">
+      <button class="dc-btn-outline" onclick="DC.close('dc-m-edit')">İptal</button>
+      <button class="dc-btn-primary" onclick="DC.saveEdit()"><i class="bi bi-floppy"></i> Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sil onay -->
+<div class="dc-overlay" id="dc-m-delete" onclick="if(event.target===this)DC.close('dc-m-delete')">
+  <div class="dc-modal-box" style="max-width:420px">
+    <div class="dc-modal-header">
+      <div class="dc-modal-title" style="color:var(--danger)">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>Doktoru Sil
+      </div>
+      <button class="dc-modal-close" onclick="DC.close('dc-m-delete')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="dc-modal-body">
+      <p style="font-size:14px;line-height:1.7;color:var(--text)">
+        <strong id="dc-del-name" style="color:var(--danger)"></strong> sistemden kalıcı olarak silinecektir. Bu işlemi onaylıyor musunuz?
+      </p>
+      <div class="dc-danger-note">
+        <i class="bi bi-info-circle-fill"></i>
+        Doktora ait tüm randevular iptal edilir ve geçmiş kayıtlar arşive taşınır.
+      </div>
+    </div>
+    <div class="dc-modal-footer">
+      <button class="dc-btn-outline" onclick="DC.close('dc-m-delete')">Vazgeç</button>
+      <button class="dc-btn-primary" style="background:var(--danger)" onclick="DC.execDelete()">
+        <i class="bi bi-trash3"></i> Evet, Sil
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Yeni Doktor (placeholder) -->
+<div class="dc-overlay" id="dc-m-add" onclick="if(event.target===this)DC.close('dc-m-add')">
+  <div class="dc-modal-box" style="max-width:440px">
+    <div class="dc-modal-header">
+      <div class="dc-modal-title"><i class="bi bi-person-plus me-2" style="color:var(--primary)"></i>Yeni Doktor Ekle</div>
+      <button class="dc-modal-close" onclick="DC.close('dc-m-add')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="dc-modal-body" style="text-align:center;padding:36px 24px">
+      <i class="bi bi-person-badge" style="font-size:44px;color:var(--primary);opacity:.2;display:block;margin-bottom:14px"></i>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sayfa henüz bağlanmadı</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7">Yeni doktor ekleme sayfanızı oluşturup<br>bu modal içeriğini kendi formunuzla değiştirin.</p>
+    </div>
+    <div class="dc-modal-footer">
+      <button class="dc-btn-outline" onclick="DC.close('dc-m-add')">Kapat</button>
+      <button class="dc-btn-primary" onclick="DC.close('dc-m-add');Shell.toast('Ekleme sayfasına yönlendiriliyor...','info','bi-arrow-right-circle')">
+        <i class="bi bi-box-arrow-up-right"></i> Sayfaya Git
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── PAGE JS ── -->
+<script>
+const DC = (() => {
+  let _cat     = 'all';
+  let _delName = '';
+  let _delCard = null;
+
+  /* ─ View ─ */
+  function setView(v) {
+    document.getElementById('dc-grid').classList.toggle('list-mode', v === 'list');
+    document.getElementById('dc-vg').classList.toggle('active', v === 'grid');
+    document.getElementById('dc-vl').classList.toggle('active', v === 'list');
+  }
+
+  /* ─ Tab ─ */
+  function setTab(el) {
+    document.querySelectorAll('.dc-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    _cat = el.dataset.cat;
+    filter();
+  }
+
+  /* ─ Filter ─ */
+  function filter() {
+    const q = (document.getElementById('dc-search').value || '').toLowerCase().trim();
+    let n = 0;
+    document.querySelectorAll('#dc-grid .dc-card').forEach(c => {
+      const catOk = _cat === 'all'
+        || (_cat === 'musait' && c.dataset.status === 'on')
+        || c.dataset.cat === _cat;
+      const nameOk = c.dataset.name.includes(q);
+      const show = catOk && nameOk;
+      c.style.display = show ? '' : 'none';
+      if (show) n++;
+    });
+    const cnt = document.getElementById('dc-count');
+    if (cnt) cnt.textContent = n;
+    let empty = document.getElementById('dc-empty');
+    if (n === 0 && !empty) {
+      empty = document.createElement('div');
+      empty.id = 'dc-empty'; empty.className = 'dc-empty';
+      empty.innerHTML = '<i class="bi bi-person-x"></i><div class="dc-empty-title">Doktor bulunamadı</div><div style="font-size:13px">Farklı bir arama terimi veya filtre deneyin.</div>';
+      document.getElementById('dc-grid').appendChild(empty);
+    } else if (n > 0 && empty) { empty.remove(); }
+  }
+
+  /* ─ Sort ─ */
+  function sort(by) {
+    Shell.toast(`Doktorlar ${by === 'name' ? 'ada' : by === 'rating' ? 'puana' : by === 'exp' ? 'deneyime' : 'randevuya'} göre sıralandı.`, 'info', 'bi-sort-down');
+  }
+
+  /* ─ Book ─ */
+  function book(doc, time) {
+    Shell.toast(`${doc} · ${time} için randevu oluşturuldu!`, 'success', 'bi-calendar-check');
+  }
+
+  /* ─ Modals ─ */
+  function open(id) {
+    document.getElementById(id).classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function close(id) {
+    document.getElementById(id).classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  /* ─ Add ─ */
+  function openAdd() { open('dc-m-add'); }
+
+  /* ─ Profile ─ */
+  function openProfile(name, spec, exp, edu, hours, email, phone, patients, appt, rating) {
+    const initials = name.replace('Dr. ','').split(' ').map(w=>w[0]).join('').slice(0,2);
+    const av = document.getElementById('dc-pr-av');
+    av.textContent = initials;
+    document.getElementById('dc-pr-name').textContent    = name;
+    document.getElementById('dc-pr-title').textContent   = spec;
+    document.getElementById('dc-pr-dept').textContent    = spec.replace(' Uzmanı','');
+    document.getElementById('dc-pr-spec').textContent    = spec;
+    document.getElementById('dc-pr-exp').textContent     = exp + ' deneyim';
+    document.getElementById('dc-pr-edu').textContent     = edu;
+    document.getElementById('dc-pr-hours').textContent   = hours;
+    document.getElementById('dc-pr-email').textContent   = email;
+    document.getElementById('dc-pr-phone').textContent   = phone;
+    document.getElementById('dc-pr-patients').textContent= patients;
+    document.getElementById('dc-pr-appt').textContent    = appt;
+    document.getElementById('dc-pr-rating').textContent  = '⭐ ' + rating;
+    open('dc-m-profile');
+  }
+
+  /* ─ Edit ─ */
+  function openEdit(name, spec, exp, cat, edu) {
+    document.getElementById('dc-edit-name').value     = name;
+    document.getElementById('dc-edit-spec').value     = spec;
+    document.getElementById('dc-edit-exp').value      = exp;
+    document.getElementById('dc-edit-cat').value      = cat;
+    document.getElementById('dc-edit-edu').value      = edu;
+    document.getElementById('dc-edit-subtitle').textContent = name + ' · ' + spec;
+    open('dc-m-edit');
+  }
+  function saveEdit() {
+    const n = document.getElementById('dc-edit-name').value.trim();
+    if (!n) { Shell.toast('Ad Soyad boş olamaz!', 'danger', 'bi-exclamation-circle'); return; }
+    close('dc-m-edit');
+    Shell.toast(`${n} bilgileri güncellendi.`, 'success', 'bi-check-circle');
+  }
+
+  /* ─ Delete ─ */
+  function confirmDelete(name, btn) {
+    _delName = name;
+    _delCard = btn.closest('.dc-card');
+    document.getElementById('dc-del-name').textContent = name;
+    open('dc-m-delete');
+  }
+  function execDelete() {
+    close('dc-m-delete');
+    if (_delCard) {
+      _delCard.style.transition = 'opacity .3s ease, transform .3s ease';
+      _delCard.style.opacity    = '0';
+      _delCard.style.transform  = 'scale(.94)';
+      setTimeout(() => { _delCard?.remove(); _delCard = null; filter(); }, 320);
+    }
+    Shell.toast(`${_delName} sistemden silindi.`, 'danger', 'bi-trash3');
+  }
+
+  /* ─ Export ─ */
+  function exportList() {
+    Shell.toast('Doktor listesi Excel olarak hazırlanıyor...', 'info', 'bi-file-earmark-spreadsheet');
+  }
+
+  /* ─ ESC ─ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape')
+      document.querySelectorAll('.dc-overlay.show').forEach(m => close(m.id));
+  });
+
+  /* ─ Topbar ─ */
+  if (typeof Shell !== 'undefined' && Shell.setPage)
+    Shell.setPage('Doktorlar', 'Admin Paneli / Klinik / Doktorlar');
+
+  return { setView, setTab, filter, sort, book, openAdd, openProfile, openEdit, saveEdit, confirmDelete, execDelete, exportList, close };
+})();
+</script>
+
+</main>

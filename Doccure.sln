@@ -24,6 +24,47 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.IdentityService", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.PrescriptionService", "Microservices\Doccure.PrescriptionService\Doccure.PrescriptionService.csproj", "{1AC65793-5293-40EC-A3DC-B27B9EAA0BE2}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MainAdminCodes", "MainAdminCodes", "{37054622-6C03-4698-91B4-911E5F2CE08F}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\Downloads\hastane-dashboard.html = ..\..\..\Downloads\hastane-dashboard.html
+		Layout2.txt = Layout2.txt
+		TextFile1.txt = TextFile1.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontends", "Frontends", "{3ADC0906-45B5-41D7-A8E7-7C6EE84E7501}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.WebUI", "Frontends\Doccure.WebUI\Doccure.WebUI.csproj", "{DAE877CD-EA51-414B-858F-CE14AB0C50AF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AdminLayout", "AdminLayout", "{675A9AEE-79D7-4862-A924-87C91E1B8637}"
+	ProjectSection(SolutionItems) = preProject
+		Branches.txt = Branches.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Branches", "Branches", "{184B8298-3BD3-438F-BAAD-D2509480DE95}"
+	ProjectSection(SolutionItems) = preProject
+		BranchList.txt = BranchList.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doctors", "Doctors", "{82ABE57D-EB51-4CEF-AFDF-E1530388479E}"
+	ProjectSection(SolutionItems) = preProject
+		DoctorList.txt = DoctorList.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nurses", "Nurses", "{06F2D220-3D89-43A5-910D-2D88CA02FD15}"
+	ProjectSection(SolutionItems) = preProject
+		NursesList.txt = NursesList.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Patient", "Patient", "{024BF5E5-CC7E-4201-8156-F4EACEC71A0F}"
+	ProjectSection(SolutionItems) = preProject
+		PatientList.txt = PatientList.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Appointment", "Appointment", "{3476E478-CDF9-4673-8241-5226D7E0DB7A}"
+	ProjectSection(SolutionItems) = preProject
+		AppointmentList.txt = AppointmentList.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +95,10 @@ Global
 		{1AC65793-5293-40EC-A3DC-B27B9EAA0BE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1AC65793-5293-40EC-A3DC-B27B9EAA0BE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1AC65793-5293-40EC-A3DC-B27B9EAA0BE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAE877CD-EA51-414B-858F-CE14AB0C50AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAE877CD-EA51-414B-858F-CE14AB0C50AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAE877CD-EA51-414B-858F-CE14AB0C50AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAE877CD-EA51-414B-858F-CE14AB0C50AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +111,14 @@ Global
 		{B01CCA17-E05F-4518-AA79-7E1C2606020C} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
 		{A4734E96-5FA7-4044-B707-392BDF2431A2} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
 		{1AC65793-5293-40EC-A3DC-B27B9EAA0BE2} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+		{37054622-6C03-4698-91B4-911E5F2CE08F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{DAE877CD-EA51-414B-858F-CE14AB0C50AF} = {3ADC0906-45B5-41D7-A8E7-7C6EE84E7501}
+		{675A9AEE-79D7-4862-A924-87C91E1B8637} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{184B8298-3BD3-438F-BAAD-D2509480DE95} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{82ABE57D-EB51-4CEF-AFDF-E1530388479E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{06F2D220-3D89-43A5-910D-2D88CA02FD15} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{024BF5E5-CC7E-4201-8156-F4EACEC71A0F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{3476E478-CDF9-4673-8241-5226D7E0DB7A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6794892D-F830-403C-AFC1-D9269F669C31}

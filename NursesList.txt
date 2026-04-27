@@ -1,0 +1,1293 @@
+﻿<main id="app-content">
+
+<style>
+  /* ── Stat Grid ── */
+  .hn-stat-grid {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:14px; margin-bottom:24px;
+  }
+  @media(max-width:900px){ .hn-stat-grid{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:480px){ .hn-stat-grid{grid-template-columns:1fr 1fr;gap:10px} }
+
+  .hn-stat-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:18px 20px;
+    display:flex; align-items:center; gap:14px;
+    box-shadow:var(--shadow);
+    transition:box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  }
+  .hn-stat-card:hover { box-shadow:0 4px 20px rgba(59,130,246,.13); transform:translateY(-2px); }
+  .hn-si {
+    width:44px; height:44px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:19px;
+  }
+  .hn-si-blue   { background:var(--primary-bg); color:var(--primary); }
+  .hn-si-green  { background:var(--success-bg); color:var(--success); }
+  .hn-si-orange { background:var(--warning-bg); color:var(--warning); }
+  .hn-si-purple { background:#F3F0FF; color:#7C3AED; }
+  .hn-stat-val { font-size:22px; font-weight:700; color:var(--text); line-height:1.1; }
+  .hn-stat-lbl { font-size:11px; color:var(--text-muted); font-weight:500; margin-top:2px; }
+  .hn-stat-sub { font-size:11px; font-weight:600; margin-top:4px; }
+  .hn-stat-sub.up   { color:var(--success); }
+  .hn-stat-sub.down { color:var(--danger); }
+
+  /* ── Toolbar ── */
+  .hn-toolbar {
+    display:flex; align-items:center; gap:10px;
+    flex-wrap:wrap; margin-bottom:20px;
+  }
+  .hn-search-wrap { position:relative; flex:1; min-width:160px; max-width:280px; }
+  .hn-search-wrap i {
+    position:absolute; left:11px; top:50%; transform:translateY(-50%);
+    color:var(--text-muted); font-size:13px; pointer-events:none;
+  }
+  .hn-search-wrap input {
+    width:100%; border:1px solid var(--border); border-radius:20px;
+    padding:8px 14px 8px 32px; font-size:13px; font-family:inherit;
+    background:var(--surface); color:var(--text); outline:none;
+    transition:border-color var(--dur), box-shadow var(--dur);
+  }
+  .hn-search-wrap input:focus {
+    border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.1);
+  }
+  .hn-search-wrap input::placeholder { color:var(--text-muted); }
+
+  .hn-tabs { display:flex; gap:5px; flex-wrap:wrap; }
+  .hn-tab {
+    border:1px solid var(--border); background:var(--surface);
+    border-radius:20px; padding:7px 15px;
+    font-size:12px; font-weight:600; color:var(--text-muted);
+    cursor:pointer; transition:all var(--dur) var(--ease); white-space:nowrap;
+  }
+  .hn-tab:hover  { background:var(--primary-bg); color:var(--primary); border-color:#C7D9F8; }
+  .hn-tab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  .hn-sort-select {
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:8px 12px; font-size:12px; font-family:inherit;
+    background:var(--surface); color:var(--text); outline:none; cursor:pointer;
+  }
+
+  .hn-view-toggle {
+    display:flex; border:1px solid var(--border); border-radius:var(--radius-sm);
+    overflow:hidden; flex-shrink:0;
+  }
+  .hn-vbtn {
+    width:34px; height:34px; border:none; background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--text-muted); cursor:pointer; transition:all var(--dur);
+  }
+  .hn-vbtn.active { background:var(--primary-bg); color:var(--primary); }
+
+  /* ── Grid ── */
+  #hn-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(290px,1fr));
+    gap:18px;
+  }
+  #hn-grid.list-mode { grid-template-columns:1fr; }
+
+  /* Entry animation */
+  .hn-card { animation:hnFadeUp .3s var(--ease) both; }
+  .hn-card:nth-child(1){animation-delay:.04s} .hn-card:nth-child(2){animation-delay:.08s}
+  .hn-card:nth-child(3){animation-delay:.12s} .hn-card:nth-child(4){animation-delay:.16s}
+  .hn-card:nth-child(5){animation-delay:.20s} .hn-card:nth-child(6){animation-delay:.24s}
+  .hn-card:nth-child(7){animation-delay:.28s} .hn-card:nth-child(8){animation-delay:.32s}
+  @keyframes hnFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Card */
+  .hn-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    display:flex; flex-direction:column; overflow:hidden;
+    transition:box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur);
+  }
+  .hn-card:hover { box-shadow:0 4px 24px rgba(59,130,246,.13); transform:translateY(-3px); border-color:#C7D9F8; }
+
+  /* Card header band */
+  .hn-card-band { height:6px; width:100%; flex-shrink:0; }
+
+  /* Card body */
+  .hn-card-body { padding:20px 20px 14px; flex:1; }
+
+  /* Top section: avatar + info */
+  .hn-card-top {
+    display:flex; align-items:flex-start; gap:14px; margin-bottom:14px;
+  }
+  .hn-avatar-wrap { position:relative; flex-shrink:0; }
+  .hn-avatar {
+    width:58px; height:58px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:700; color:#fff;
+    border:3px solid var(--surface);
+    box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  .hn-online-dot {
+    position:absolute; bottom:2px; right:2px;
+    width:12px; height:12px; border-radius:50%;
+    border:2px solid var(--surface);
+  }
+  .hn-online-dot.on     { background:var(--success); }
+  .hn-online-dot.off    { background:var(--warning); }
+  .hn-online-dot.leave  { background:#94A3B8; }
+
+  .hn-info { flex:1; min-width:0; }
+  .hn-name { font-size:15px; font-weight:700; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hn-role { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+  .hn-tags { display:flex; gap:5px; flex-wrap:wrap; }
+  .hn-tag  {
+    font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;
+    white-space:nowrap;
+  }
+  .hn-tag.dept  { background:var(--primary-bg); color:var(--primary-dk); }
+  .hn-tag.shift-day   { background:var(--success-bg); color:#065F46; }
+  .hn-tag.shift-night { background:#1E1B4B11; color:#4338CA; }
+  .hn-tag.shift-eve   { background:var(--warning-bg); color:#92400E; }
+
+  /* Status badge */
+  .hn-status {
+    margin-left:auto; flex-shrink:0;
+    font-size:10px; font-weight:700; padding:3px 9px; border-radius:20px;
+    display:flex; align-items:center; gap:4px;
+  }
+  .hn-status.on    { background:var(--success-bg); color:#065F46; }
+  .hn-status.off   { background:var(--warning-bg); color:#92400E; }
+  .hn-status.leave { background:#F1F5F9; color:#475569; }
+  .hn-status-dot   { width:6px; height:6px; border-radius:50%; }
+  .hn-status.on .hn-status-dot    { background:var(--success); }
+  .hn-status.off .hn-status-dot   { background:var(--warning); }
+  .hn-status.leave .hn-status-dot { background:#94A3B8; }
+
+  /* Stat cells */
+  .hn-stats {
+    display:flex; border:1px solid var(--border); border-radius:var(--radius-sm);
+    overflow:hidden; margin-bottom:14px;
+  }
+  .hn-sc {
+    flex:1; text-align:center; padding:9px 4px;
+    border-right:1px solid var(--border); background:var(--bg);
+    transition:background var(--dur);
+  }
+  .hn-sc:last-child { border-right:none; }
+  .hn-sc:hover { background:var(--primary-bg); }
+  .hn-sc-val { font-size:14px; font-weight:700; color:var(--text); line-height:1.1; }
+  .hn-sc-lbl { font-size:10px; color:var(--text-muted); font-weight:500; margin-top:2px; }
+
+  /* Skills */
+  .hn-skills { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; }
+  .hn-skill {
+    font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:6px;
+    border:1px solid var(--border); background:var(--bg); color:var(--text-muted);
+    transition:all var(--dur);
+  }
+  .hn-skill:hover { background:var(--primary-bg); color:var(--primary); border-color:#C7D9F8; }
+
+  /* Progress bar */
+  .hn-prog-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+  .hn-prog-lbl { font-size:11px; color:var(--text-muted); white-space:nowrap; min-width:80px; }
+  .hn-prog-track { flex:1; height:5px; background:var(--border); border-radius:10px; overflow:hidden; }
+  .hn-prog-fill  { height:100%; border-radius:10px; transition:width .6s var(--ease); }
+  .hn-prog-pct   { font-size:11px; font-weight:700; min-width:28px; text-align:right; }
+
+  /* Card footer */
+  .hn-card-footer {
+    padding:11px 14px; border-top:1px solid var(--border);
+    background:#FAFBFE; display:flex; gap:6px;
+  }
+  .hn-btn {
+    flex:1; border:1px solid var(--border); background:var(--surface);
+    border-radius:var(--radius-sm); padding:7px 8px;
+    font-size:12px; font-weight:600; font-family:inherit;
+    display:inline-flex; align-items:center; justify-content:center; gap:5px;
+    cursor:pointer; transition:all var(--dur) var(--ease); color:var(--text-muted);
+  }
+  .hn-btn:hover      { background:var(--bg); color:var(--text); }
+  .hn-btn.primary    { color:var(--primary); border-color:#C7D9F8; background:var(--primary-bg); }
+  .hn-btn.primary:hover { background:var(--primary); color:#fff; box-shadow:0 3px 10px rgba(59,130,246,.25); }
+  .hn-btn.danger:hover  { background:var(--danger-bg); border-color:#FCA5A5; color:var(--danger); }
+
+  /* ── LIST MODE ── */
+  #hn-grid.list-mode .hn-card         { flex-direction:row; }
+  #hn-grid.list-mode .hn-card-band    { width:5px; height:auto; }
+  #hn-grid.list-mode .hn-card-body    { display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:13px 18px; }
+  #hn-grid.list-mode .hn-card-top     { margin-bottom:0; flex-shrink:0; align-items:center; }
+  #hn-grid.list-mode .hn-avatar       { width:44px; height:44px; font-size:14px; }
+  #hn-grid.list-mode .hn-info         { min-width:160px; }
+  #hn-grid.list-mode .hn-tags         { margin-top:4px; }
+  #hn-grid.list-mode .hn-stats        { margin-bottom:0; flex-shrink:0; min-width:196px; }
+  #hn-grid.list-mode .hn-skills       { display:none; }
+  #hn-grid.list-mode .hn-prog-row     { display:none; }
+  #hn-grid.list-mode .hn-card-footer  {
+    flex-direction:column; border-top:none; border-left:1px solid var(--border);
+    padding:11px 11px; min-width:116px; gap:5px; justify-content:center;
+  }
+  #hn-grid.list-mode .hn-btn { flex:unset; width:100%; }
+
+  /* ── Empty ── */
+  .hn-empty {
+    grid-column:1/-1; text-align:center; padding:72px 24px; color:var(--text-muted);
+  }
+  .hn-empty i { font-size:48px; opacity:.15; display:block; margin-bottom:14px; }
+  .hn-empty-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
+
+  /* ── Nöbet Takvimi Panel ── */
+  .hn-schedule-card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    margin-top:24px; overflow:hidden;
+  }
+  .hn-schedule-header {
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .hn-schedule-title { font-size:14px; font-weight:700; color:var(--text); }
+  .hn-schedule-grid-wrap { overflow-x:auto; padding:0 0 4px; }
+  .hn-schedule-grid {
+    display:grid;
+    grid-template-columns:160px repeat(7,1fr);
+    min-width:640px;
+  }
+  .hn-sg-head {
+    padding:10px 12px; background:var(--bg);
+    border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+    font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);
+  }
+  .hn-sg-head:last-child { border-right:none; }
+  .hn-sg-name {
+    padding:10px 14px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:8px; background:var(--surface);
+  }
+  .hn-sg-name:last-of-type { border-bottom:none; }
+  .hn-sg-av {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:9px; font-weight:700; color:#fff;
+  }
+  .hn-sg-nm { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .hn-sg-cell {
+    padding:8px 6px; border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    background:var(--surface); transition:background var(--dur);
+  }
+  .hn-sg-cell:last-child { border-right:none; }
+  .hn-sg-cell:hover { background:var(--bg); }
+  .hn-shift-chip {
+    font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px;
+    white-space:nowrap; cursor:default;
+  }
+  .hn-shift-chip.day   { background:var(--success-bg); color:#065F46; }
+  .hn-shift-chip.night { background:#EEF2FF; color:#4338CA; }
+  .hn-shift-chip.eve   { background:var(--warning-bg); color:#92400E; }
+  .hn-shift-chip.off   { background:#F1F5F9; color:#94A3B8; }
+
+  /* ── Modal ── */
+  .hn-overlay {
+    position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:500;
+    display:flex; align-items:center; justify-content:center; padding:16px;
+    opacity:0; pointer-events:none; transition:opacity .2s ease;
+  }
+  .hn-overlay.show { opacity:1; pointer-events:all; }
+  .hn-modal-box {
+    background:var(--surface); border-radius:var(--radius);
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    width:100%; max-width:520px;
+    transform:scale(.93) translateY(16px);
+    transition:transform .26s cubic-bezier(.34,1.56,.64,1);
+  }
+  .hn-overlay.show .hn-modal-box { transform:scale(1) translateY(0); }
+  .hn-modal-header {
+    padding:18px 22px 14px; border-bottom:1px solid var(--border);
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  }
+  .hn-modal-title    { font-size:15px; font-weight:700; color:var(--text); }
+  .hn-modal-subtitle { font-size:11px; color:var(--text-muted); margin-top:3px; }
+  .hn-modal-close {
+    width:30px; height:30px; border:1px solid var(--border); background:transparent;
+    border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:var(--text-muted); cursor:pointer; flex-shrink:0; transition:background var(--dur);
+  }
+  .hn-modal-close:hover { background:var(--bg); }
+  .hn-modal-body   { padding:20px 22px; }
+  .hn-modal-footer { padding:14px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+  .hn-form-label { display:block; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px; }
+  .hn-form-control {
+    width:100%; border:1px solid var(--border); border-radius:var(--radius-sm);
+    padding:9px 12px; font-size:13px; font-family:inherit;
+    color:var(--text); background:var(--bg); outline:none;
+    transition:border-color var(--dur), box-shadow var(--dur);
+  }
+  .hn-form-control:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+  .hn-form-group { margin-bottom:14px; }
+
+  /* Profile modal header */
+  .hn-prof-head {
+    display:flex; align-items:center; gap:16px;
+    padding:20px 22px; border-bottom:1px solid var(--border);
+    background:linear-gradient(135deg,#EFF6FF,#F8FAFC);
+  }
+  .hn-prof-av {
+    width:64px; height:64px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; font-weight:700; color:#fff;
+    border:3px solid #fff; box-shadow:0 4px 14px rgba(0,0,0,.12);
+  }
+  .hn-prof-name  { font-size:17px; font-weight:700; color:var(--text); }
+  .hn-prof-title { font-size:13px; color:var(--text-muted); margin-top:3px; }
+  .hn-detail-row { display:flex; align-items:flex-start; gap:12px; padding:9px 0; border-bottom:1px solid var(--border); }
+  .hn-detail-row:last-child { border-bottom:none; }
+  .hn-detail-label { font-size:11px; font-weight:700; color:var(--text-muted); width:130px; flex-shrink:0; text-transform:uppercase; letter-spacing:.04em; padding-top:1px; }
+  .hn-detail-val   { font-size:13px; color:var(--text); font-weight:500; }
+
+  .hn-danger-note {
+    background:var(--danger-bg); border:1px solid #FCA5A5;
+    border-radius:var(--radius-sm); padding:11px 13px; font-size:12px; color:#991B1B;
+    margin-top:12px; display:flex; gap:8px; align-items:flex-start;
+  }
+  .hn-danger-note i { flex-shrink:0; margin-top:1px; }
+
+  /* Global btn atoms */
+  .hn-btn-primary {
+    background:var(--primary); color:#fff; border:none; border-radius:var(--radius-sm);
+    padding:10px 18px; font-size:13px; font-weight:600; font-family:inherit;
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+    transition:background var(--dur), box-shadow var(--dur), transform var(--dur);
+  }
+  .hn-btn-primary:hover { background:var(--primary-dk); box-shadow:0 4px 12px rgba(59,130,246,.3); transform:translateY(-1px); }
+  .hn-btn-outline {
+    background:transparent; color:var(--text-muted); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:9px 16px; font-size:13px; font-weight:500; font-family:inherit;
+    display:inline-flex; align-items:center; gap:7px; cursor:pointer; transition:all var(--dur);
+  }
+  .hn-btn-outline:hover { background:var(--bg); color:var(--text); }
+
+  .hn-page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .hn-page-title  { font-size:22px; font-weight:700; color:var(--text); }
+  .hn-page-sub    { font-size:13px; color:var(--text-muted); margin-top:3px; }
+</style>
+
+
+<!-- ── Page Header ── -->
+<div class="hn-page-header">
+  <div>
+    <h1 class="hn-page-title">Hemşire Yönetimi</h1>
+    <p class="hn-page-sub">Hemşirelerin nöbet takvimini, uzmanlıklarını ve performansını yönetin</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="hn-btn-outline" onclick="HN.exportList()"><i class="bi bi-download"></i> Dışa Aktar</button>
+    <button class="hn-btn-outline" onclick="HN.openSchedule()"><i class="bi bi-calendar-week"></i> Nöbet Planla</button>
+    <button class="hn-btn-primary" onclick="HN.openAdd()"><i class="bi bi-person-plus"></i> Yeni Hemşire</button>
+  </div>
+</div>
+
+<!-- ── Stat Cards ── -->
+<div class="hn-stat-grid">
+  <div class="hn-stat-card">
+    <div class="hn-si hn-si-blue"><i class="bi bi-heart-pulse"></i></div>
+    <div>
+      <div class="hn-stat-val" id="hn-count">8</div>
+      <div class="hn-stat-lbl">Toplam Hemşire</div>
+      <div class="hn-stat-sub up"><i class="bi bi-arrow-up-short"></i>+2 bu ay</div>
+    </div>
+  </div>
+  <div class="hn-stat-card">
+    <div class="hn-si hn-si-green"><i class="bi bi-sun"></i></div>
+    <div>
+      <div class="hn-stat-val">4</div>
+      <div class="hn-stat-lbl">Gündüz Nöbeti</div>
+      <div class="hn-stat-sub up">08:00 – 20:00</div>
+    </div>
+  </div>
+  <div class="hn-stat-card">
+    <div class="hn-si hn-si-purple"><i class="bi bi-moon-stars"></i></div>
+    <div>
+      <div class="hn-stat-val">3</div>
+      <div class="hn-stat-lbl">Gece Nöbeti</div>
+      <div class="hn-stat-sub up">20:00 – 08:00</div>
+    </div>
+  </div>
+  <div class="hn-stat-card">
+    <div class="hn-si hn-si-orange"><i class="bi bi-calendar-x"></i></div>
+    <div>
+      <div class="hn-stat-val">1</div>
+      <div class="hn-stat-lbl">İzinde</div>
+      <div class="hn-stat-sub down">30 Nis – 5 May</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toolbar ── -->
+<div class="hn-toolbar">
+  <div class="hn-search-wrap">
+    <i class="bi bi-search"></i>
+    <input id="hn-search" placeholder="İsim, birim veya uzmanlık ara..." oninput="HN.filter()">
+  </div>
+  <div class="hn-tabs">
+    <button class="hn-tab active" data-cat="all"    onclick="HN.setTab(this)">Tümü</button>
+    <button class="hn-tab"        data-cat="dahili" onclick="HN.setTab(this)">Dahili</button>
+    <button class="hn-tab"        data-cat="cerrahi"onclick="HN.setTab(this)">Cerrahi</button>
+    <button class="hn-tab"        data-cat="acil"   onclick="HN.setTab(this)">Acil</button>
+    <button class="hn-tab"        data-cat="musait" onclick="HN.setTab(this)">Görevde</button>
+  </div>
+  <select class="hn-sort-select" onchange="HN.sort(this.value)">
+    <option value="name">Ada Göre</option>
+    <option value="exp">Deneyime Göre</option>
+    <option value="perf">Performansa Göre</option>
+  </select>
+  <div class="hn-view-toggle" style="margin-left:auto">
+    <button class="hn-vbtn active" id="hn-vg" title="Kart" onclick="HN.setView('grid')"><i class="bi bi-grid-1x2"></i></button>
+    <button class="hn-vbtn"        id="hn-vl" title="Liste" onclick="HN.setView('list')"><i class="bi bi-list-ul"></i></button>
+  </div>
+</div>
+
+<!-- ── Hemşire Grid ── -->
+<div id="hn-grid">
+
+  <!-- 1. Fatma Yılmaz -->
+  <div class="hn-card" data-cat="dahili" data-status="on" data-name="fatma yılmaz dahili kardiyoloji">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#3B82F6,#60A5FA)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">FY</div>
+          <div class="hn-online-dot on"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Fatma Yılmaz</div>
+          <div class="hn-role">Kıdemli Hemşire</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept">Kardiyoloji</span>
+            <span class="hn-tag shift-day">Gündüz</span>
+          </div>
+        </div>
+        <div class="hn-status on"><div class="hn-status-dot"></div>Görevde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">11 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">248</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.9</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">EKG Yorumlama</span>
+        <span class="hn-skill">IV Kateter</span>
+        <span class="hn-skill">Kardiyak İzlem</span>
+        <span class="hn-skill">İlk Yardım</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:96%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">96%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:100%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">100%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Fatma Yılmaz','Kıdemli Hemşire','Kardiyoloji','11 yıl','Gündüz 08:00-20:00','f.yilmaz@medipanel.com','+90 212 555 0201','96','248')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Fatma Yılmaz','Kardiyoloji','11','dahili')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Fatma Yılmaz',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Selin Kaya -->
+  <div class="hn-card" data-cat="cerrahi" data-status="on" data-name="selin kaya cerrahi ortopedi">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#F59E0B,#FCD34D)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706)">SK</div>
+          <div class="hn-online-dot on"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Selin Kaya</div>
+          <div class="hn-role">Ameliyathane Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept">Cerrahi</span>
+            <span class="hn-tag shift-day">Gündüz</span>
+          </div>
+        </div>
+        <div class="hn-status on"><div class="hn-status-dot"></div>Görevde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">8 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">186</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.7</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Steril Teknik</span>
+        <span class="hn-skill">Alet Yönetimi</span>
+        <span class="hn-skill">Anestezi Desteği</span>
+        <span class="hn-skill">PACU</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:91%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">91%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:98%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">98%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Selin Kaya','Ameliyathane Hemşiresi','Cerrahi','8 yıl','Gündüz 08:00-20:00','s.kaya@medipanel.com','+90 212 555 0202','91','186')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Selin Kaya','Cerrahi','8','cerrahi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Selin Kaya',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 3. Nilüfer Öztürk -->
+  <div class="hn-card" data-cat="acil" data-status="on" data-name="nilüfer öztürk acil servis">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#EF4444,#F87171)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#EF4444,#DC2626)">NÖ</div>
+          <div class="hn-online-dot on"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Nilüfer Öztürk</div>
+          <div class="hn-role">Acil Servis Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept" style="background:#FEF2F2;color:#991B1B">Acil</span>
+            <span class="hn-tag shift-night">Gece</span>
+          </div>
+        </div>
+        <div class="hn-status on"><div class="hn-status-dot"></div>Görevde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">6 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">312</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.8</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Triaj</span>
+        <span class="hn-skill">CPR / AED</span>
+        <span class="hn-skill">Travma Bakımı</span>
+        <span class="hn-skill">Damar Yolu</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:94%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">94%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:97%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">97%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Nilüfer Öztürk','Acil Servis Hemşiresi','Acil','6 yıl','Gece 20:00-08:00','n.ozturk@medipanel.com','+90 212 555 0203','94','312')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Nilüfer Öztürk','Acil','6','acil')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Nilüfer Öztürk',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 4. Zehra Arslan -->
+  <div class="hn-card" data-cat="dahili" data-status="on" data-name="zehra arslan dahili nöroloji">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#7C3AED,#A78BFA)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">ZA</div>
+          <div class="hn-online-dot on"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Zehra Arslan</div>
+          <div class="hn-role">Yoğun Bakım Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept" style="background:#F3F0FF;color:#7C3AED">Nöroloji</span>
+            <span class="hn-tag shift-night">Gece</span>
+          </div>
+        </div>
+        <div class="hn-status on"><div class="hn-status-dot"></div>Görevde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">9 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">174</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.8</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Ventilatör</span>
+        <span class="hn-skill">Nörolojik Değ.</span>
+        <span class="hn-skill">Entübasyon Des.</span>
+        <span class="hn-skill">Sedasyon</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:93%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">93%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:96%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">96%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Zehra Arslan','Yoğun Bakım Hemşiresi','Nöroloji','9 yıl','Gece 20:00-08:00','z.arslan@medipanel.com','+90 212 555 0204','93','174')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Zehra Arslan','Nöroloji','9','dahili')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Zehra Arslan',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. Büşra Çelik -->
+  <div class="hn-card" data-cat="dahili" data-status="on" data-name="büşra çelik dahili pediatri">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#06B6D4,#67E8F9)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">BÇ</div>
+          <div class="hn-online-dot on"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Büşra Çelik</div>
+          <div class="hn-role">Pediatri Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept" style="background:#ECFEFF;color:#06B6D4">Pediatri</span>
+            <span class="hn-tag shift-day">Gündüz</span>
+          </div>
+        </div>
+        <div class="hn-status on"><div class="hn-status-dot"></div>Görevde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">5 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">196</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.9</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Neonatal Bakım</span>
+        <span class="hn-skill">Aşı Uygulaması</span>
+        <span class="hn-skill">Ped. Muayene</span>
+        <span class="hn-skill">Kan Alma</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:97%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">97%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:99%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">99%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Büşra Çelik','Pediatri Hemşiresi','Pediatri','5 yıl','Gündüz 08:00-20:00','b.celik@medipanel.com','+90 212 555 0205','97','196')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Büşra Çelik','Pediatri','5','dahili')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Büşra Çelik',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 6. Merve Doğan -->
+  <div class="hn-card" data-cat="cerrahi" data-status="off" data-name="merve doğan cerrahi ortopedi">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#10B981,#34D399)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">MD</div>
+          <div class="hn-online-dot off"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Merve Doğan</div>
+          <div class="hn-role">Ortopedi Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept" style="background:#FFFBEB;color:var(--warning)">Ortopedi</span>
+            <span class="hn-tag shift-eve">Akşam</span>
+          </div>
+        </div>
+        <div class="hn-status off"><div class="hn-status-dot"></div>Molada</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">7 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">164</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.6</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Alçı Uygulaması</span>
+        <span class="hn-skill">Protez Bakımı</span>
+        <span class="hn-skill">Fizyoterapi Des.</span>
+        <span class="hn-skill">Yara Bakımı</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:88%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">88%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:95%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">95%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Merve Doğan','Ortopedi Hemşiresi','Ortopedi','7 yıl','Akşam 14:00-22:00','m.dogan@medipanel.com','+90 212 555 0206','88','164')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Merve Doğan','Ortopedi','7','cerrahi')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Merve Doğan',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. Ayşe Kara -->
+  <div class="hn-card" data-cat="acil" data-status="on" data-name="ayşe kara acil servis">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#6366F1,#A5B4FC)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#6366F1,#4F46E5)">AK</div>
+          <div class="hn-online-dot on"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Ayşe Kara</div>
+          <div class="hn-role">Acil Servis Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept" style="background:#FEF2F2;color:#991B1B">Acil</span>
+            <span class="hn-tag shift-day">Gündüz</span>
+          </div>
+        </div>
+        <div class="hn-status on"><div class="hn-status-dot"></div>Görevde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">4 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">284</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.7</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Triaj</span>
+        <span class="hn-skill">İlaç Hazırlama</span>
+        <span class="hn-skill">Monitörizasyon</span>
+        <span class="hn-skill">Hasta Eğitimi</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:90%;background:var(--success)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--success)">90%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:94%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">94%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Ayşe Kara','Acil Servis Hemşiresi','Acil','4 yıl','Gündüz 08:00-20:00','a.kara@medipanel.com','+90 212 555 0207','90','284')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Ayşe Kara','Acil','4','acil')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Ayşe Kara',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. Hande Şahin — İzinde -->
+  <div class="hn-card" data-cat="dahili" data-status="leave" data-name="hande şahin dahili dermatoloji">
+    <div class="hn-card-band" style="background:linear-gradient(90deg,#94A3B8,#CBD5E1)"></div>
+    <div class="hn-card-body">
+      <div class="hn-card-top">
+        <div class="hn-avatar-wrap">
+          <div class="hn-avatar" style="background:linear-gradient(135deg,#64748B,#475569)">HŞ</div>
+          <div class="hn-online-dot leave"></div>
+        </div>
+        <div class="hn-info">
+          <div class="hn-name">Hande Şahin</div>
+          <div class="hn-role">Poliklinik Hemşiresi</div>
+          <div class="hn-tags">
+            <span class="hn-tag dept" style="background:#F1F5F9;color:#64748B">Dermatoloji</span>
+            <span class="hn-tag" style="background:#F1F5F9;color:#94A3B8">İzinde</span>
+          </div>
+        </div>
+        <div class="hn-status leave"><div class="hn-status-dot"></div>İzinde</div>
+      </div>
+      <div class="hn-stats">
+        <div class="hn-sc"><div class="hn-sc-val">3 yıl</div><div class="hn-sc-lbl">Deneyim</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">—</div><div class="hn-sc-lbl">Hasta/ay</div></div>
+        <div class="hn-sc"><div class="hn-sc-val">4.5</div><div class="hn-sc-lbl">Puan</div></div>
+      </div>
+      <div class="hn-skills">
+        <span class="hn-skill">Cilt Bakımı</span>
+        <span class="hn-skill">Biyopsi Desteği</span>
+        <span class="hn-skill">Hasta Eğitimi</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Performans</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:85%;background:var(--warning)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--warning)">85%</span>
+      </div>
+      <div class="hn-prog-row">
+        <span class="hn-prog-lbl">Devam</span>
+        <div class="hn-prog-track"><div class="hn-prog-fill" style="width:88%;background:var(--primary)"></div></div>
+        <span class="hn-prog-pct" style="color:var(--primary)">88%</span>
+      </div>
+    </div>
+    <div class="hn-card-footer">
+      <button class="hn-btn primary" onclick="HN.openProfile('Hande Şahin','Poliklinik Hemşiresi','Dermatoloji','3 yıl','Gündüz 08:00-20:00','h.sahin@medipanel.com','+90 212 555 0208','85','142')">
+        <i class="bi bi-person-lines-fill"></i> Profil
+      </button>
+      <button class="hn-btn" onclick="HN.openEdit('Hande Şahin','Dermatoloji','3','dahili')">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+      <button class="hn-btn danger" onclick="HN.confirmDelete('Hande Şahin',this)">
+        <i class="bi bi-trash3"></i>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /#hn-grid -->
+
+
+<!-- ── Nöbet Takvimi ── -->
+<div class="hn-schedule-card">
+  <div class="hn-schedule-header">
+    <div>
+      <div class="hn-schedule-title"><i class="bi bi-calendar-week me-2" style="color:var(--primary)"></i>Haftalık Nöbet Takvimi</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px">28 Nisan – 4 Mayıs 2026</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;gap:6px;font-size:11px;font-weight:600;align-items:center">
+        <span style="background:var(--success-bg);color:#065F46;padding:3px 9px;border-radius:20px">Gündüz</span>
+        <span style="background:#EEF2FF;color:#4338CA;padding:3px 9px;border-radius:20px">Gece</span>
+        <span style="background:var(--warning-bg);color:#92400E;padding:3px 9px;border-radius:20px">Akşam</span>
+        <span style="background:#F1F5F9;color:#94A3B8;padding:3px 9px;border-radius:20px">İzin</span>
+      </div>
+      <button class="hn-btn-outline" style="padding:6px 12px;font-size:12px" onclick="HN.openSchedule()">
+        <i class="bi bi-pencil"></i> Düzenle
+      </button>
+    </div>
+  </div>
+  <div class="hn-schedule-grid-wrap">
+    <div class="hn-schedule-grid">
+      <!-- Header -->
+      <div class="hn-sg-head">Hemşire</div>
+      <div class="hn-sg-head" style="text-align:center">Pzt<br><span style="font-weight:400;font-size:9px">28 Nis</span></div>
+      <div class="hn-sg-head" style="text-align:center">Sal<br><span style="font-weight:400;font-size:9px">29 Nis</span></div>
+      <div class="hn-sg-head" style="text-align:center">Çar<br><span style="font-weight:400;font-size:9px">30 Nis</span></div>
+      <div class="hn-sg-head" style="text-align:center">Per<br><span style="font-weight:400;font-size:9px">1 May</span></div>
+      <div class="hn-sg-head" style="text-align:center">Cum<br><span style="font-weight:400;font-size:9px">2 May</span></div>
+      <div class="hn-sg-head" style="text-align:center">Cmt<br><span style="font-weight:400;font-size:9px">3 May</span></div>
+      <div class="hn-sg-head" style="text-align:center">Paz<br><span style="font-weight:400;font-size:9px">4 May</span></div>
+
+      <!-- Fatma Yılmaz -->
+      <div class="hn-sg-name">
+        <div class="hn-sg-av" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">FY</div>
+        <div class="hn-sg-nm">Fatma Yılmaz</div>
+      </div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+
+      <!-- Selin Kaya -->
+      <div class="hn-sg-name">
+        <div class="hn-sg-av" style="background:linear-gradient(135deg,#F59E0B,#D97706)">SK</div>
+        <div class="hn-sg-nm">Selin Kaya</div>
+      </div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+
+      <!-- Nilüfer Öztürk -->
+      <div class="hn-sg-name">
+        <div class="hn-sg-av" style="background:linear-gradient(135deg,#EF4444,#DC2626)">NÖ</div>
+        <div class="hn-sg-nm">Nilüfer Öztürk</div>
+      </div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+
+      <!-- Zehra Arslan -->
+      <div class="hn-sg-name">
+        <div class="hn-sg-av" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">ZA</div>
+        <div class="hn-sg-nm">Zehra Arslan</div>
+      </div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip night">Ge</span></div>
+
+      <!-- Büşra Çelik -->
+      <div class="hn-sg-name">
+        <div class="hn-sg-av" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">BÇ</div>
+        <div class="hn-sg-nm">Büşra Çelik</div>
+      </div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip day">G</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell"><span class="hn-shift-chip off">İzin</span></div>
+
+      <!-- Hande Şahin -->
+      <div class="hn-sg-name" style="border-bottom:none">
+        <div class="hn-sg-av" style="background:linear-gradient(135deg,#64748B,#475569)">HŞ</div>
+        <div class="hn-sg-nm" style="color:var(--text-muted)">Hande Şahin</div>
+      </div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+      <div class="hn-sg-cell" style="border-bottom:none"><span class="hn-shift-chip off">İzin</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════ MODALLER ════ -->
+
+<!-- Profil -->
+<div class="hn-overlay" id="hn-m-profile" onclick="if(event.target===this)HN.close('hn-m-profile')">
+  <div class="hn-modal-box" style="max-width:500px">
+    <div class="hn-prof-head">
+      <div class="hn-prof-av" id="hn-pr-av">FY</div>
+      <div>
+        <div class="hn-prof-name"  id="hn-pr-name"></div>
+        <div class="hn-prof-title" id="hn-pr-title"></div>
+        <div style="margin-top:8px">
+          <span id="hn-pr-dept" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--primary-bg);color:var(--primary)"></span>
+        </div>
+      </div>
+      <button class="hn-modal-close" style="margin-left:auto;align-self:flex-start" onclick="HN.close('hn-m-profile')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="hn-modal-body" style="padding:14px 22px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="hn-pr-perf"></div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:2px">Performans</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="hn-pr-patients"></div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:2px">Hasta/ay</div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center">
+          <div style="font-size:18px;font-weight:700;color:var(--text)" id="hn-pr-exp"></div>
+          <div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-top:2px">Deneyim</div>
+        </div>
+      </div>
+      <div class="hn-detail-row"><div class="hn-detail-label">Çalışma Saati</div><div class="hn-detail-val" id="hn-pr-hours"></div></div>
+      <div class="hn-detail-row"><div class="hn-detail-label">E-posta</div><div class="hn-detail-val" id="hn-pr-email" style="color:var(--primary)"></div></div>
+      <div class="hn-detail-row"><div class="hn-detail-label">Dahili Tel</div><div class="hn-detail-val" id="hn-pr-phone"></div></div>
+    </div>
+    <div class="hn-modal-footer">
+      <button class="hn-btn-outline" onclick="HN.close('hn-m-profile')">Kapat</button>
+      <button class="hn-btn-primary" onclick="HN.close('hn-m-profile');Shell.toast('Mesaj oluşturuluyor...','info','bi-chat-dots')">
+        <i class="bi bi-chat-dots"></i> Mesaj Gönder
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Düzenle -->
+<div class="hn-overlay" id="hn-m-edit" onclick="if(event.target===this)HN.close('hn-m-edit')">
+  <div class="hn-modal-box" style="max-width:500px">
+    <div class="hn-modal-header">
+      <div>
+        <div class="hn-modal-title"><i class="bi bi-pencil-square me-2" style="color:var(--primary)"></i>Hemşire Bilgilerini Düzenle</div>
+        <div class="hn-modal-subtitle" id="hn-edit-sub"></div>
+      </div>
+      <button class="hn-modal-close" onclick="HN.close('hn-m-edit')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="hn-modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="hn-form-group">
+          <label class="hn-form-label">Ad Soyad</label>
+          <input class="hn-form-control" id="hn-e-name" placeholder="Ad Soyad">
+        </div>
+        <div class="hn-form-group">
+          <label class="hn-form-label">Birim / Branş</label>
+          <input class="hn-form-control" id="hn-e-dept" placeholder="Kardiyoloji">
+        </div>
+        <div class="hn-form-group">
+          <label class="hn-form-label">Deneyim (yıl)</label>
+          <input class="hn-form-control" type="number" id="hn-e-exp" min="0">
+        </div>
+        <div class="hn-form-group">
+          <label class="hn-form-label">Kategori</label>
+          <select class="hn-form-control" id="hn-e-cat">
+            <option value="dahili">Dahili</option>
+            <option value="cerrahi">Cerrahi</option>
+            <option value="acil">Acil</option>
+          </select>
+        </div>
+        <div class="hn-form-group">
+          <label class="hn-form-label">Nöbet Türü</label>
+          <select class="hn-form-control">
+            <option>Gündüz (08:00-20:00)</option>
+            <option>Gece (20:00-08:00)</option>
+            <option>Akşam (14:00-22:00)</option>
+          </select>
+        </div>
+        <div class="hn-form-group">
+          <label class="hn-form-label">Durum</label>
+          <select class="hn-form-control">
+            <option>Görevde</option><option>Molada</option><option>İzinde</option><option>Pasif</option>
+          </select>
+        </div>
+      </div>
+      <div class="hn-form-group mb-0">
+        <label class="hn-form-label">Uzmanlık / Sertifikalar</label>
+        <input class="hn-form-control" placeholder="Örn: CPR, EKG, Triaj...">
+      </div>
+    </div>
+    <div class="hn-modal-footer">
+      <button class="hn-btn-outline" onclick="HN.close('hn-m-edit')">İptal</button>
+      <button class="hn-btn-primary" onclick="HN.saveEdit()"><i class="bi bi-floppy"></i> Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sil onay -->
+<div class="hn-overlay" id="hn-m-delete" onclick="if(event.target===this)HN.close('hn-m-delete')">
+  <div class="hn-modal-box" style="max-width:420px">
+    <div class="hn-modal-header">
+      <div class="hn-modal-title" style="color:var(--danger)">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>Hemşireyi Sil
+      </div>
+      <button class="hn-modal-close" onclick="HN.close('hn-m-delete')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="hn-modal-body">
+      <p style="font-size:14px;line-height:1.7;color:var(--text)">
+        <strong id="hn-del-name" style="color:var(--danger)"></strong> sistemden kalıcı olarak silinecek. Onaylıyor musunuz?
+      </p>
+      <div class="hn-danger-note">
+        <i class="bi bi-info-circle-fill"></i>
+        Hemşireye ait nöbet kayıtları arşive taşınır ve nöbet takviminden kaldırılır.
+      </div>
+    </div>
+    <div class="hn-modal-footer">
+      <button class="hn-btn-outline" onclick="HN.close('hn-m-delete')">Vazgeç</button>
+      <button class="hn-btn-primary" style="background:var(--danger)" onclick="HN.execDelete()">
+        <i class="bi bi-trash3"></i> Evet, Sil
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Yeni Hemşire (placeholder) -->
+<div class="hn-overlay" id="hn-m-add" onclick="if(event.target===this)HN.close('hn-m-add')">
+  <div class="hn-modal-box" style="max-width:440px">
+    <div class="hn-modal-header">
+      <div class="hn-modal-title"><i class="bi bi-person-plus me-2" style="color:var(--primary)"></i>Yeni Hemşire Ekle</div>
+      <button class="hn-modal-close" onclick="HN.close('hn-m-add')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="hn-modal-body" style="text-align:center;padding:36px 24px">
+      <i class="bi bi-heart-pulse" style="font-size:44px;color:var(--primary);opacity:.2;display:block;margin-bottom:14px"></i>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sayfa henüz bağlanmadı</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7">Yeni hemşire ekleme sayfanızı oluşturup<br>bu modal içeriğini kendi formunuzla değiştirin.</p>
+    </div>
+    <div class="hn-modal-footer">
+      <button class="hn-btn-outline" onclick="HN.close('hn-m-add')">Kapat</button>
+      <button class="hn-btn-primary" onclick="HN.close('hn-m-add');Shell.toast('Ekleme sayfasına yönlendiriliyor...','info','bi-arrow-right-circle')">
+        <i class="bi bi-box-arrow-up-right"></i> Sayfaya Git
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Nöbet Planlama (placeholder) -->
+<div class="hn-overlay" id="hn-m-schedule" onclick="if(event.target===this)HN.close('hn-m-schedule')">
+  <div class="hn-modal-box" style="max-width:440px">
+    <div class="hn-modal-header">
+      <div class="hn-modal-title"><i class="bi bi-calendar-week me-2" style="color:var(--primary)"></i>Nöbet Planla</div>
+      <button class="hn-modal-close" onclick="HN.close('hn-m-schedule')"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="hn-modal-body" style="text-align:center;padding:36px 24px">
+      <i class="bi bi-calendar2-week" style="font-size:44px;color:var(--primary);opacity:.2;display:block;margin-bottom:14px"></i>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px">Nöbet planlama modülü</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7">Detaylı nöbet planlama sayfanızı oluşturup<br>buraya bağlayabilirsiniz.</p>
+    </div>
+    <div class="hn-modal-footer">
+      <button class="hn-btn-outline" onclick="HN.close('hn-m-schedule')">Kapat</button>
+      <button class="hn-btn-primary" onclick="HN.close('hn-m-schedule');Shell.toast('Nöbet planlama sayfasına yönlendiriliyor...','info','bi-calendar-week')">
+        <i class="bi bi-box-arrow-up-right"></i> Sayfaya Git
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── PAGE JS ── -->
+<script>
+const HN = (() => {
+  let _cat     = 'all';
+  let _delName = '';
+  let _delCard = null;
+
+  /* ─ View ─ */
+  function setView(v) {
+    document.getElementById('hn-grid').classList.toggle('list-mode', v === 'list');
+    document.getElementById('hn-vg').classList.toggle('active', v === 'grid');
+    document.getElementById('hn-vl').classList.toggle('active', v === 'list');
+  }
+
+  /* ─ Tab ─ */
+  function setTab(el) {
+    document.querySelectorAll('.hn-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    _cat = el.dataset.cat;
+    filter();
+  }
+
+  /* ─ Filter ─ */
+  function filter() {
+    const q = (document.getElementById('hn-search').value || '').toLowerCase().trim();
+    let n = 0;
+    document.querySelectorAll('#hn-grid .hn-card').forEach(c => {
+      const catOk = _cat === 'all'
+        || (_cat === 'musait' && c.dataset.status === 'on')
+        || c.dataset.cat === _cat;
+      const nameOk = c.dataset.name.includes(q);
+      const show = catOk && nameOk;
+      c.style.display = show ? '' : 'none';
+      if (show) n++;
+    });
+    const cnt = document.getElementById('hn-count');
+    if (cnt) cnt.textContent = n;
+    let empty = document.getElementById('hn-empty');
+    if (n === 0 && !empty) {
+      empty = document.createElement('div');
+      empty.id = 'hn-empty'; empty.className = 'hn-empty';
+      empty.innerHTML = '<i class="bi bi-person-x"></i><div class="hn-empty-title">Hemşire bulunamadı</div><div style="font-size:13px">Farklı arama terimi veya filtre deneyin.</div>';
+      document.getElementById('hn-grid').appendChild(empty);
+    } else if (n > 0 && empty) { empty.remove(); }
+  }
+
+  /* ─ Sort ─ */
+  function sort(by) {
+    Shell.toast(`Hemşireler ${by === 'name' ? 'ada' : by === 'exp' ? 'deneyime' : 'performansa'} göre sıralandı.`, 'info', 'bi-sort-down');
+  }
+
+  /* ─ Modal helpers ─ */
+  function open(id)  { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; }
+  function close(id) { document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; }
+
+  /* ─ Add / Schedule ─ */
+  function openAdd()      { open('hn-m-add'); }
+  function openSchedule() { open('hn-m-schedule'); }
+
+  /* ─ Profile ─ */
+  function openProfile(name, role, dept, exp, hours, email, phone, perf, patients) {
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2);
+    document.getElementById('hn-pr-av').textContent    = initials;
+    document.getElementById('hn-pr-name').textContent  = name;
+    document.getElementById('hn-pr-title').textContent = role;
+    document.getElementById('hn-pr-dept').textContent  = dept;
+    document.getElementById('hn-pr-exp').textContent   = exp;
+    document.getElementById('hn-pr-perf').textContent  = '%' + perf;
+    document.getElementById('hn-pr-patients').textContent = patients;
+    document.getElementById('hn-pr-hours').textContent = hours;
+    document.getElementById('hn-pr-email').textContent = email;
+    document.getElementById('hn-pr-phone').textContent = phone;
+    open('hn-m-profile');
+  }
+
+  /* ─ Edit ─ */
+  function openEdit(name, dept, exp, cat) {
+    document.getElementById('hn-e-name').value = name;
+    document.getElementById('hn-e-dept').value = dept;
+    document.getElementById('hn-e-exp').value  = exp;
+    document.getElementById('hn-e-cat').value  = cat;
+    document.getElementById('hn-edit-sub').textContent = name + ' · ' + dept;
+    open('hn-m-edit');
+  }
+  function saveEdit() {
+    const n = document.getElementById('hn-e-name').value.trim();
+    if (!n) { Shell.toast('Ad Soyad boş olamaz!', 'danger', 'bi-exclamation-circle'); return; }
+    close('hn-m-edit');
+    Shell.toast(`${n} bilgileri güncellendi.`, 'success', 'bi-check-circle');
+  }
+
+  /* ─ Delete ─ */
+  function confirmDelete(name, btn) {
+    _delName = name;
+    _delCard = btn.closest('.hn-card');
+    document.getElementById('hn-del-name').textContent = name;
+    open('hn-m-delete');
+  }
+  function execDelete() {
+    close('hn-m-delete');
+    if (_delCard) {
+      _delCard.style.transition = 'opacity .3s ease, transform .3s ease';
+      _delCard.style.opacity    = '0';
+      _delCard.style.transform  = 'scale(.94)';
+      setTimeout(() => { _delCard?.remove(); _delCard = null; filter(); }, 320);
+    }
+    Shell.toast(`${_delName} sistemden silindi.`, 'danger', 'bi-trash3');
+  }
+
+  /* ─ Export ─ */
+  function exportList() {
+    Shell.toast('Hemşire listesi Excel olarak hazırlanıyor...', 'info', 'bi-file-earmark-spreadsheet');
+  }
+
+  /* ─ ESC ─ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape')
+      document.querySelectorAll('.hn-overlay.show').forEach(m => close(m.id));
+  });
+
+  /* ─ Init ─ */
+  if (typeof Shell !== 'undefined' && Shell.setPage)
+    Shell.setPage('Hemşireler', 'Admin Paneli / Klinik / Hemşireler');
+
+  return { setView, setTab, filter, sort, openAdd, openSchedule, openProfile, openEdit, saveEdit, confirmDelete, execDelete, exportList, close };
+})();
+</script>
+
+</main>

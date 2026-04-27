@@ -1,0 +1,1024 @@
+﻿   <div id="main">
+        @await Component.InvokeAsync("_AdminLayoutTopbarComponentPartial")
+       
+        <!-- CONTENT -->
+        <main id="content">
+
+            <!-- ======== DASHBOARD PAGE ======== -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Gösterge Paneli</h1>
+                        <p class="page-subtitle">Günlük aktivite ve performans özeti — <span id="todayDate"></span></p>
+                    </div>
+                    <button class="btn-primary-custom" onclick="showToast('Rapor oluşturuluyor...','info','bi-download')">
+                        <i class="bi bi-download"></i> Rapor İndir
+                    </button>
+                </div>
+
+                <!-- Alert Banner -->
+                <div class="alert-banner info">
+                    <i class="bi bi-info-circle" style="font-size:16px;flex-shrink:0;"></i>
+                    <span>Bugün <strong>4 doktor</strong> nöbette. <strong>3 yeni randevu</strong> onay bekliyor.</span>
+                    <a href="#" style="margin-left:auto;font-size:12px;color:var(--primary);" onclick="navigate('randevular',null);return false;">İncele →</a>
+                </div>
+
+                <!-- Stat Cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-xl-3">
+                        <div class="stat-card">
+                            <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+                            <div>
+                                <div class="stat-val">1.284</div>
+                                <div class="stat-lbl">Toplam Hasta</div>
+                                <div class="stat-change up"><i class="bi bi-arrow-up-short"></i>+8,4% bu ay</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="stat-card">
+                            <div class="stat-icon green"><i class="bi bi-calendar-check"></i></div>
+                            <div>
+                                <div class="stat-val">347</div>
+                                <div class="stat-lbl">Aktif Randevu</div>
+                                <div class="stat-change up"><i class="bi bi-arrow-up-short"></i>+12% bu hafta</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="stat-card">
+                            <div class="stat-icon orange"><i class="bi bi-person-badge"></i></div>
+                            <div>
+                                <div class="stat-val">42</div>
+                                <div class="stat-lbl">Aktif Doktor</div>
+                                <div class="stat-change up"><i class="bi bi-arrow-up-short"></i>+3 yeni doktor</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-3">
+                        <div class="stat-card">
+                            <div class="stat-icon red"><i class="bi bi-currency-dollar"></i></div>
+                            <div>
+                                <div class="stat-val">₺284K</div>
+                                <div class="stat-lbl">Aylık Gelir</div>
+                                <div class="stat-change down"><i class="bi bi-arrow-down-short"></i>-2,1% geçen ay</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-lg-8">
+                        <div class="card-box">
+                            <div class="card-box-header">
+                                <span class="card-box-title">Haftalık Randevu Trendi</span>
+                                <div class="d-flex gap-2">
+                                    <span class="badge-pill info">Bu Hafta</span>
+                                </div>
+                            </div>
+                            <div class="card-box-body">
+                                <svg class="mini-chart" viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#3B82F6" stop-opacity=".18" />
+                                            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M0 90 C50 85, 100 60, 150 55 C200 50, 250 70, 300 45 C350 25, 400 35, 450 20 C500 10, 550 25, 600 18 L600 120 L0 120 Z" fill="url(#chartGrad)" />
+                                    <polyline points="0,90 150,55 300,45 450,20 600,18" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                                    <circle cx="0" cy="90" r="4" fill="#3B82F6" />
+                                    <circle cx="150" cy="55" r="4" fill="#3B82F6" />
+                                    <circle cx="300" cy="45" r="4" fill="#3B82F6" />
+                                    <circle cx="450" cy="20" r="4" fill="#3B82F6" />
+                                    <circle cx="600" cy="18" r="4" fill="#3B82F6" />
+                                    <text x="0" y="114" font-size="11" fill="#94A3B8" text-anchor="middle">Pzt</text>
+                                    <text x="150" y="114" font-size="11" fill="#94A3B8" text-anchor="middle">Sal</text>
+                                    <text x="300" y="114" font-size="11" fill="#94A3B8" text-anchor="middle">Çar</text>
+                                    <text x="450" y="114" font-size="11" fill="#94A3B8" text-anchor="middle">Per</text>
+                                    <text x="598" y="114" font-size="11" fill="#94A3B8" text-anchor="middle">Cum</text>
+                                </svg>
+                                <div class="d-flex gap-4 mt-2" style="font-size:12px;color:var(--text-muted);">
+                                    <span><i class="bi bi-circle-fill me-1" style="color:#3B82F6;font-size:8px;"></i>Randevu Sayısı</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card-box h-100">
+                            <div class="card-box-header">
+                                <span class="card-box-title">Branş Doluluk</span>
+                            </div>
+                            <div class="card-box-body">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1" style="font-size:12px;font-weight:600;">
+                                        <span>Kardiyoloji</span><span style="color:var(--primary)">87%</span>
+                                    </div>
+                                    <div class="prog-track"><div class="prog-fill" style="width:87%"></div></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1" style="font-size:12px;font-weight:600;">
+                                        <span>Ortopedi</span><span style="color:var(--success)">74%</span>
+                                    </div>
+                                    <div class="prog-track"><div class="prog-fill green" style="width:74%"></div></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1" style="font-size:12px;font-weight:600;">
+                                        <span>Dermatoloji</span><span style="color:var(--warning)">58%</span>
+                                    </div>
+                                    <div class="prog-track"><div class="prog-fill orange" style="width:58%"></div></div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1" style="font-size:12px;font-weight:600;">
+                                        <span>Nöroloji</span><span style="color:var(--danger)">42%</span>
+                                    </div>
+                                    <div class="prog-track"><div class="prog-fill red" style="width:42%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between mb-1" style="font-size:12px;font-weight:600;">
+                                        <span>Pediatri</span><span style="color:var(--primary)">65%</span>
+                                    </div>
+                                    <div class="prog-track"><div class="prog-fill" style="width:65%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Appointments Table -->
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-title">Son Randevular</span>
+                        <a href="#" style="font-size:13px;color:var(--primary);font-weight:600;text-decoration:none;" onclick="navigate('randevular',null);return false;">Tümünü Gör →</a>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="tbl">
+                            <thead>
+                                <tr>
+                                    <th>Hasta</th>
+                                    <th>Doktor</th>
+                                    <th>Branş</th>
+                                    <th>Tarih / Saat</th>
+                                    <th>Durum</th>
+                                    <th style="text-align:center">İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><div style="font-weight:600">Ayşe Kaya</div><div style="font-size:11px;color:var(--text-muted)">#H-1042</div></td>
+                                    <td>Dr. Mehmet Demir</td>
+                                    <td><span class="badge-pill info">Kardiyoloji</span></td>
+                                    <td>27 Nis 2026 · 10:00</td>
+                                    <td><span class="badge-pill success"><i class="bi bi-circle-fill" style="font-size:7px;"></i>Onaylandı</span></td>
+                                    <td style="text-align:center"><button class="btn-outline-custom" style="padding:5px 12px;font-size:12px;" onclick="showToast('Randevu detayları yükleniyor...','info','bi-calendar')">Detay</button></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="font-weight:600">Ali Çelik</div><div style="font-size:11px;color:var(--text-muted)">#H-1043</div></td>
+                                    <td>Dr. Selin Arslan</td>
+                                    <td><span class="badge-pill info">Dermatoloji</span></td>
+                                    <td>27 Nis 2026 · 11:30</td>
+                                    <td><span class="badge-pill warning"><i class="bi bi-circle-fill" style="font-size:7px;"></i>Beklemede</span></td>
+                                    <td style="text-align:center"><button class="btn-outline-custom" style="padding:5px 12px;font-size:12px;" onclick="showToast('Randevu detayları yükleniyor...','info','bi-calendar')">Detay</button></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="font-weight:600">Fatma Yıldız</div><div style="font-size:11px;color:var(--text-muted)">#H-1044</div></td>
+                                    <td>Dr. Can Öztürk</td>
+                                    <td><span class="badge-pill info">Ortopedi</span></td>
+                                    <td>27 Nis 2026 · 14:00</td>
+                                    <td><span class="badge-pill success"><i class="bi bi-circle-fill" style="font-size:7px;"></i>Onaylandı</span></td>
+                                    <td style="text-align:center"><button class="btn-outline-custom" style="padding:5px 12px;font-size:12px;" onclick="showToast('Randevu detayları yükleniyor...','info','bi-calendar')">Detay</button></td>
+                                </tr>
+                                <tr>
+                                    <td><div style="font-weight:600">Emre Şahin</div><div style="font-size:11px;color:var(--text-muted)">#H-1045</div></td>
+                                    <td>Dr. Zeynep Kara</td>
+                                    <td><span class="badge-pill info">Nöroloji</span></td>
+                                    <td>28 Nis 2026 · 09:15</td>
+                                    <td><span class="badge-pill danger"><i class="bi bi-circle-fill" style="font-size:7px;"></i>İptal</span></td>
+                                    <td style="text-align:center"><button class="btn-outline-custom" style="padding:5px 12px;font-size:12px;" onclick="showToast('Randevu detayları yükleniyor...','info','bi-calendar')">Detay</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div><!-- /dashboard -->
+            <!-- ======== BRANSLAR PAGE ======== -->
+            <div class="page" id="page-branslar">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Branş Yönetimi</h1>
+                        <p class="page-subtitle">Hastanedeki tüm tıbbi bölümleri buradan yönetin</p>
+                    </div>
+                    <button class="btn-primary-custom" onclick="openModal('addBranch')">
+                        <i class="bi bi-plus-lg"></i> Yeni Branş Ekle
+                    </button>
+                </div>
+
+                <div class="alert-banner success">
+                    <i class="bi bi-check-circle" style="font-size:16px;flex-shrink:0;"></i>
+                    <span>Toplam <strong>9 aktif branş</strong> sistemde kayıtlı. Son güncelleme: 27 Nisan 2026</span>
+                </div>
+
+                <!-- Filter Bar -->
+                <div class="d-flex gap-2 flex-wrap mb-4">
+                    <button class="btn-primary-custom" style="padding:8px 16px;font-size:12px;" onclick="filterBranch('all',this)">Tümü</button>
+                    <button class="btn-outline-custom" style="padding:7px 16px;font-size:12px;" onclick="filterBranch('cerrahi',this)">Cerrahi</button>
+                    <button class="btn-outline-custom" style="padding:7px 16px;font-size:12px;" onclick="filterBranch('dahili',this)">Dahili Tıp</button>
+                    <button class="btn-outline-custom" style="padding:7px 16px;font-size:12px;" onclick="filterBranch('tani',this)">Tanı</button>
+                </div>
+
+                <div class="row g-3" id="branchGrid">
+
+                    <!-- Card 1: Kardiyoloji -->
+                    <div class="col-md-6 col-xl-4 branch-item" data-cat="dahili">
+                        <div class="branch-card">
+                            <div class="branch-header">
+                                <div class="branch-icon-wrap blue">
+                                    <span style="font-size:28px">🫀</span>
+                                </div>
+                                <div>
+                                    <div class="branch-title">Kardiyoloji</div>
+                                    <div class="branch-desc">Kalp ve damar hastalıklarının kapsamlı teşhis, tedavi ve takip hizmetleri sunulmaktadır.</div>
+                                </div>
+                            </div>
+                            <div class="branch-meta">
+                                <div class="branch-stat"><i class="bi bi-person-badge"></i> 6 Doktor</div>
+                                <div class="branch-stat"><i class="bi bi-calendar3"></i> 87 Randevu/ay</div>
+                                <div class="branch-stat"><i class="bi bi-star-fill" style="color:#FBBF24;"></i> 4.8</div>
+                            </div>
+                            <div class="branch-footer">
+                                <button class="btn-outline-custom flex-fill justify-content-center" onclick="openModal('editBranch','Kardiyoloji')">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </button>
+                                <button class="btn-danger-custom flex-fill justify-content-center" onclick="confirmDelete('Kardiyoloji')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Dermatoloji -->
+                    <div class="col-md-6 col-xl-4 branch-item" data-cat="dahili">
+                        <div class="branch-card">
+                            <div class="branch-header">
+                                <div class="branch-icon-wrap green">
+                                    <span style="font-size:28px">🩺</span>
+                                </div>
+                                <div>
+                                    <div class="branch-title">Dermatoloji</div>
+                                    <div class="branch-desc">Cilt, saç ve tırnak hastalıklarının tanı ve tedavisi ile estetik dermatoloji uygulamaları.</div>
+                                </div>
+                            </div>
+                            <div class="branch-meta">
+                                <div class="branch-stat"><i class="bi bi-person-badge"></i> 4 Doktor</div>
+                                <div class="branch-stat"><i class="bi bi-calendar3"></i> 58 Randevu/ay</div>
+                                <div class="branch-stat"><i class="bi bi-star-fill" style="color:#FBBF24;"></i> 4.6</div>
+                            </div>
+                            <div class="branch-footer">
+                                <button class="btn-outline-custom flex-fill justify-content-center" onclick="openModal('editBranch','Dermatoloji')">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </button>
+                                <button class="btn-danger-custom flex-fill justify-content-center" onclick="confirmDelete('Dermatoloji')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Ortopedi -->
+                    <div class="col-md-6 col-xl-4 branch-item" data-cat="cerrahi">
+                        <div class="branch-card">
+                            <div class="branch-header">
+                                <div class="branch-icon-wrap orange">
+                                    <span style="font-size:28px">🦴</span>
+                                </div>
+                                <div>
+                                    <div class="branch-title">Ortopedi ve Travmatoloji</div>
+                                    <div class="branch-desc">Kemik, eklem ve kas-iskelet sistemi hastalıkları ile spor yaralanmalarının tedavisi.</div>
+                                </div>
+                            </div>
+                            <div class="branch-meta">
+                                <div class="branch-stat"><i class="bi bi-person-badge"></i> 5 Doktor</div>
+                                <div class="branch-stat"><i class="bi bi-calendar3"></i> 74 Randevu/ay</div>
+                                <div class="branch-stat"><i class="bi bi-star-fill" style="color:#FBBF24;"></i> 4.7</div>
+                            </div>
+                            <div class="branch-footer">
+                                <button class="btn-outline-custom flex-fill justify-content-center" onclick="openModal('editBranch','Ortopedi ve Travmatoloji')">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </button>
+                                <button class="btn-danger-custom flex-fill justify-content-center" onclick="confirmDelete('Ortopedi ve Travmatoloji')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Nöroloji -->
+                    <div class="col-md-6 col-xl-4 branch-item" data-cat="dahili">
+                        <div class="branch-card">
+                            <div class="branch-header">
+                                <div class="branch-icon-wrap purple">
+                                    <span style="font-size:28px">🧠</span>
+                                </div>
+                                <div>
+                                    <div class="branch-title">Nöroloji</div>
+                                    <div class="branch-desc">Beyin, omurilik ve sinir sistemi hastalıklarının ileri teşhis ve tedavi hizmetleri.</div>
+                                </div>
+                            </div>
+                            <div class="branch-meta">
+                                <div class="branch-stat"><i class="bi bi-person-badge"></i> 3 Doktor</div>
+                                <div class="branch-stat"><i class="bi bi-calendar3"></i> 42 Randevu/ay</div>
+                                <div class="branch-stat"><i class="bi bi-star-fill" style="color:#FBBF24;"></i> 4.9</div>
+                            </div>
+                            <div class="branch-footer">
+                                <button class="btn-outline-custom flex-fill justify-content-center" onclick="openModal('editBranch','Nöroloji')">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </button>
+                                <button class="btn-danger-custom flex-fill justify-content-center" onclick="confirmDelete('Nöroloji')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Pediatri -->
+                    <div class="col-md-6 col-xl-4 branch-item" data-cat="dahili">
+                        <div class="branch-card">
+                            <div class="branch-header">
+                                <div class="branch-icon-wrap green">
+                                    <span style="font-size:28px">👶</span>
+                                </div>
+                                <div>
+                                    <div class="branch-title">Pediatri (Çocuk Sağlığı)</div>
+                                    <div class="branch-desc">0–18 yaş arası çocukların büyüme, gelişme ve sağlık takipleri ile hastalık tedavileri.</div>
+                                </div>
+                            </div>
+                            <div class="branch-meta">
+                                <div class="branch-stat"><i class="bi bi-person-badge"></i> 4 Doktor</div>
+                                <div class="branch-stat"><i class="bi bi-calendar3"></i> 65 Randevu/ay</div>
+                                <div class="branch-stat"><i class="bi bi-star-fill" style="color:#FBBF24;"></i> 4.8</div>
+                            </div>
+                            <div class="branch-footer">
+                                <button class="btn-outline-custom flex-fill justify-content-center" onclick="openModal('editBranch','Pediatri')">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </button>
+                                <button class="btn-danger-custom flex-fill justify-content-center" onclick="confirmDelete('Pediatri')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 6: Radyoloji -->
+                    <div class="col-md-6 col-xl-4 branch-item" data-cat="tani">
+                        <div class="branch-card">
+                            <div class="branch-header">
+                                <div class="branch-icon-wrap blue">
+                                    <span style="font-size:28px">🔬</span>
+                                </div>
+                                <div>
+                                    <div class="branch-title">Radyoloji ve Görüntüleme</div>
+                                    <div class="branch-desc">MR, BT, ultrason ve dijital röntgen ile ileri düzey tanı görüntüleme hizmetleri.</div>
+                                </div>
+                            </div>
+                            <div class="branch-meta">
+                                <div class="branch-stat"><i class="bi bi-person-badge"></i> 3 Doktor</div>
+                                <div class="branch-stat"><i class="bi bi-calendar3"></i> 120 İşlem/ay</div>
+                                <div class="branch-stat"><i class="bi bi-star-fill" style="color:#FBBF24;"></i> 4.5</div>
+                            </div>
+                            <div class="branch-footer">
+                                <button class="btn-outline-custom flex-fill justify-content-center" onclick="openModal('editBranch','Radyoloji')">
+                                    <i class="bi bi-pencil"></i> Düzenle
+                                </button>
+                                <button class="btn-danger-custom flex-fill justify-content-center" onclick="confirmDelete('Radyoloji')">
+                                    <i class="bi bi-trash3"></i> Sil
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div><!-- /branslar -->
+            <!-- ======== DOKTORLAR PAGE ======== -->
+            <div class="page" id="page-doktorlar">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Doktor Yönetimi</h1>
+                        <p class="page-subtitle">Tüm doktorları ve uzmanları buradan yönetin</p>
+                    </div>
+                    <button class="btn-primary-custom" onclick="showToast('Yeni doktor ekleme formu açılıyor...','info','bi-person-plus')">
+                        <i class="bi bi-person-plus"></i> Doktor Ekle
+                    </button>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6 col-lg-4 col-xl-3">
+                        <div class="doc-card">
+                            <div class="doc-avatar" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">MD</div>
+                            <div>
+                                <div class="doc-name">Dr. Mehmet Demir</div>
+                                <div class="doc-spec">Kardiyoloji Uzmanı</div>
+                            </div>
+                            <div class="doc-stars">★★★★★ <span style="color:var(--text-muted)">4.9</span></div>
+                            <div style="font-size:12px;color:var(--text-muted)">87 Randevu · 12 yıl deneyim</div>
+                            <button class="btn-outline-custom w-100 justify-content-center" onclick="showToast('Dr. Mehmet Demir profili yükleniyor...','info','bi-person')">Profili Gör</button>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-4 col-xl-3">
+                        <div class="doc-card">
+                            <div class="doc-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">SA</div>
+                            <div>
+                                <div class="doc-name">Dr. Selin Arslan</div>
+                                <div class="doc-spec">Dermatoloji Uzmanı</div>
+                            </div>
+                            <div class="doc-stars">★★★★★ <span style="color:var(--text-muted)">4.8</span></div>
+                            <div style="font-size:12px;color:var(--text-muted)">58 Randevu · 8 yıl deneyim</div>
+                            <button class="btn-outline-custom w-100 justify-content-center" onclick="showToast('Dr. Selin Arslan profili yükleniyor...','info','bi-person')">Profili Gör</button>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-4 col-xl-3">
+                        <div class="doc-card">
+                            <div class="doc-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706)">CO</div>
+                            <div>
+                                <div class="doc-name">Dr. Can Öztürk</div>
+                                <div class="doc-spec">Ortopedi Uzmanı</div>
+                            </div>
+                            <div class="doc-stars">★★★★☆ <span style="color:var(--text-muted)">4.7</span></div>
+                            <div style="font-size:12px;color:var(--text-muted)">74 Randevu · 10 yıl deneyim</div>
+                            <button class="btn-outline-custom w-100 justify-content-center" onclick="showToast('Dr. Can Öztürk profili yükleniyor...','info','bi-person')">Profili Gör</button>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-4 col-xl-3">
+                        <div class="doc-card">
+                            <div class="doc-avatar" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9)">ZK</div>
+                            <div>
+                                <div class="doc-name">Dr. Zeynep Kara</div>
+                                <div class="doc-spec">Nöroloji Uzmanı</div>
+                            </div>
+                            <div class="doc-stars">★★★★★ <span style="color:var(--text-muted)">4.9</span></div>
+                            <div style="font-size:12px;color:var(--text-muted)">42 Randevu · 15 yıl deneyim</div>
+                            <button class="btn-outline-custom w-100 justify-content-center" onclick="showToast('Dr. Zeynep Kara profili yükleniyor...','info','bi-person')">Profili Gör</button>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-4 col-xl-3">
+                        <div class="doc-card">
+                            <div class="doc-avatar" style="background:linear-gradient(135deg,#EF4444,#DC2626)">AY</div>
+                            <div>
+                                <div class="doc-name">Dr. Ahmet Yılmaz</div>
+                                <div class="doc-spec">Pediatri Uzmanı</div>
+                            </div>
+                            <div class="doc-stars">★★★★★ <span style="color:var(--text-muted)">4.8</span></div>
+                            <div style="font-size:12px;color:var(--text-muted)">65 Randevu · 9 yıl deneyim</div>
+                            <button class="btn-outline-custom w-100 justify-content-center" onclick="showToast('Dr. Ahmet Yılmaz profili yükleniyor...','info','bi-person')">Profili Gör</button>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-4 col-xl-3">
+                        <div class="doc-card">
+                            <div class="doc-avatar" style="background:linear-gradient(135deg,#0EA5E9,#0284C7)">NB</div>
+                            <div>
+                                <div class="doc-name">Dr. Neslihan Baş</div>
+                                <div class="doc-spec">Radyoloji Uzmanı</div>
+                            </div>
+                            <div class="doc-stars">★★★★☆ <span style="color:var(--text-muted)">4.5</span></div>
+                            <div style="font-size:12px;color:var(--text-muted)">120 İşlem · 7 yıl deneyim</div>
+                            <button class="btn-outline-custom w-100 justify-content-center" onclick="showToast('Dr. Neslihan Baş profili yükleniyor...','info','bi-person')">Profili Gör</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /doktorlar -->
+            <!-- ======== RANDEVULAR PAGE ======== -->
+            <div class="page" id="page-randevular">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Randevu Yönetimi</h1>
+                        <p class="page-subtitle">Tüm hasta randevularını görüntüleyin ve yönetin</p>
+                    </div>
+                    <button class="btn-primary-custom" onclick="showToast('Yeni randevu oluşturuluyor...','info','bi-calendar-plus')">
+                        <i class="bi bi-calendar-plus"></i> Randevu Oluştur
+                    </button>
+                </div>
+
+                <!-- Time Slots -->
+                <div class="card-box mb-4">
+                    <div class="card-box-header">
+                        <span class="card-box-title">Bugünkü Müsait Saatler — 27 Nisan 2026</span>
+                        <span class="badge-pill success">Pazartesi</span>
+                    </div>
+                    <div class="card-box-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="slot-chip available" onclick="showToast('09:00 saati için randevu oluşturulabilir.','success','bi-calendar-check')">09:00</span>
+                            <span class="slot-chip booked">09:30</span>
+                            <span class="slot-chip booked">10:00</span>
+                            <span class="slot-chip available" onclick="showToast('10:30 saati için randevu oluşturulabilir.','success','bi-calendar-check')">10:30</span>
+                            <span class="slot-chip booked">11:00</span>
+                            <span class="slot-chip available" onclick="showToast('11:30 saati için randevu oluşturulabilir.','success','bi-calendar-check')">11:30</span>
+                            <span class="slot-chip available" onclick="showToast('13:00 saati için randevu oluşturulabilir.','success','bi-calendar-check')">13:00</span>
+                            <span class="slot-chip booked">13:30</span>
+                            <span class="slot-chip booked">14:00</span>
+                            <span class="slot-chip available" onclick="showToast('14:30 saati için randevu oluşturulabilir.','success','bi-calendar-check')">14:30</span>
+                            <span class="slot-chip booked">15:00</span>
+                            <span class="slot-chip available" onclick="showToast('15:30 saati için randevu oluşturulabilir.','success','bi-calendar-check')">15:30</span>
+                        </div>
+                        <div class="d-flex gap-3 mt-3" style="font-size:11px;">
+                            <span><span class="slot-chip available" style="padding:3px 10px;font-size:10px;">Müsait</span></span>
+                            <span><span class="slot-chip booked" style="padding:3px 10px;font-size:10px;">Dolu</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Table -->
+                <div class="card-box">
+                    <div class="card-box-header">
+                        <span class="card-box-title">Randevu Listesi</span>
+                        <div class="d-flex gap-2">
+                            <span class="badge-pill success">12 Aktif</span>
+                            <span class="badge-pill warning">3 Beklemede</span>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="tbl">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Hasta Adı</th>
+                                    <th>Doktor</th>
+                                    <th>Branş</th>
+                                    <th>Tarih</th>
+                                    <th>Saat</th>
+                                    <th>Durum</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="color:var(--text-muted);font-size:12px">#1042</td>
+                                    <td><b>Ayşe Kaya</b></td>
+                                    <td>Dr. M. Demir</td>
+                                    <td><span class="badge-pill info">Kardiyoloji</span></td>
+                                    <td>27 Nis 2026</td>
+                                    <td>10:00</td>
+                                    <td><span class="badge-pill success">Onaylandı</span></td>
+                                    <td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Randevu onaylandı.','success','bi-check-circle')">Gör</button></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--text-muted);font-size:12px">#1043</td>
+                                    <td><b>Ali Çelik</b></td>
+                                    <td>Dr. S. Arslan</td>
+                                    <td><span class="badge-pill info">Dermatoloji</span></td>
+                                    <td>27 Nis 2026</td>
+                                    <td>11:30</td>
+                                    <td><span class="badge-pill warning">Beklemede</span></td>
+                                    <td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Randevu onaylandı!','success','bi-check-circle')">Onayla</button></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--text-muted);font-size:12px">#1044</td>
+                                    <td><b>Fatma Yıldız</b></td>
+                                    <td>Dr. C. Öztürk</td>
+                                    <td><span class="badge-pill info">Ortopedi</span></td>
+                                    <td>27 Nis 2026</td>
+                                    <td>14:00</td>
+                                    <td><span class="badge-pill success">Onaylandı</span></td>
+                                    <td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Randevu detayları yükleniyor...','info','bi-info-circle')">Gör</button></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--text-muted);font-size:12px">#1045</td>
+                                    <td><b>Emre Şahin</b></td>
+                                    <td>Dr. Z. Kara</td>
+                                    <td><span class="badge-pill info">Nöroloji</span></td>
+                                    <td>28 Nis 2026</td>
+                                    <td>09:15</td>
+                                    <td><span class="badge-pill danger">İptal</span></td>
+                                    <td><button class="btn-danger-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Randevu silindi.','danger','bi-trash3')">Sil</button></td>
+                                </tr>
+                                <tr>
+                                    <td style="color:var(--text-muted);font-size:12px">#1046</td>
+                                    <td><b>Merve Doğan</b></td>
+                                    <td>Dr. A. Yılmaz</td>
+                                    <td><span class="badge-pill info">Pediatri</span></td>
+                                    <td>28 Nis 2026</td>
+                                    <td>10:00</td>
+                                    <td><span class="badge-pill warning">Beklemede</span></td>
+                                    <td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Randevu onaylandı!','success','bi-check-circle')">Onayla</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div><!-- /randevular -->
+            <!-- ======== GENERIC PLACEHOLDER PAGES ======== -->
+            <div class="page" id="page-receteler">
+                <div class="page-header">
+                    <div><h1 class="page-title">Reçete Yönetimi</h1><p class="page-subtitle">Hasta reçetelerini görüntüleyin ve düzenleyin</p></div>
+                    <button class="btn-primary-custom" onclick="showToast('Yeni reçete oluşturuluyor...','info','bi-file-medical')"><i class="bi bi-plus-lg"></i> Yeni Reçete</button>
+                </div>
+                <div class="card-box">
+                    <div class="card-box-header"><span class="card-box-title">Son Reçeteler</span></div>
+                    <div style="overflow-x:auto;">
+                        <table class="tbl">
+                            <thead><tr><th>#</th><th>Hasta</th><th>Doktor</th><th>İlaçlar</th><th>Tarih</th><th>Durum</th></tr></thead>
+                            <tbody>
+                                <tr><td style="color:var(--text-muted);font-size:12px">#R-001</td><td><b>Ayşe Kaya</b></td><td>Dr. M. Demir</td><td>Aspirin 100mg, Metoprolol 25mg</td><td>25 Nis 2026</td><td><span class="badge-pill success">Aktif</span></td></tr>
+                                <tr><td style="color:var(--text-muted);font-size:12px">#R-002</td><td><b>Ali Çelik</b></td><td>Dr. S. Arslan</td><td>Klorheksidin Krem, Cetirizin 10mg</td><td>24 Nis 2026</td><td><span class="badge-pill success">Aktif</span></td></tr>
+                                <tr><td style="color:var(--text-muted);font-size:12px">#R-003</td><td><b>Fatma Yıldız</b></td><td>Dr. C. Öztürk</td><td>İbuprofen 400mg, Kas Gevşetici</td><td>23 Nis 2026</td><td><span class="badge-pill warning">Süresi Yakın</span></td></tr>
+                                <tr><td style="color:var(--text-muted);font-size:12px">#R-004</td><td><b>Emre Şahin</b></td><td>Dr. Z. Kara</td><td>Gabapentin 300mg, Sertralin 50mg</td><td>20 Nis 2026</td><td><span class="badge-pill danger">Süresi Doldu</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page-yorumlar">
+                <div class="page-header">
+                    <div><h1 class="page-title">Hasta Yorumları</h1><p class="page-subtitle">Hasta memnuniyetini takip edin ve yönetin</p></div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4"><div class="stat-card"><div class="stat-icon green"><i class="bi bi-star-fill"></i></div><div><div class="stat-val">4.8</div><div class="stat-lbl">Ortalama Puan</div><div class="stat-change up">+0.2 bu ay</div></div></div></div>
+                    <div class="col-md-4"><div class="stat-card"><div class="stat-icon blue"><i class="bi bi-chat-dots"></i></div><div><div class="stat-val">284</div><div class="stat-lbl">Toplam Yorum</div><div class="stat-change up">+18 yeni</div></div></div></div>
+                    <div class="col-md-4"><div class="stat-card"><div class="stat-icon orange"><i class="bi bi-emoji-smile"></i></div><div><div class="stat-val">%94</div><div class="stat-lbl">Memnuniyet</div><div class="stat-change up">+2%</div></div></div></div>
+                </div>
+                <div class="card-box mt-3">
+                    <div class="card-box-header"><span class="card-box-title">Son Yorumlar</span></div>
+                    <div class="card-box-body">
+                        <div style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:16px;">
+                            <div class="d-flex align-items-center gap-10 mb-2" style="gap:10px;"><div class="user-avatar" style="width:36px;height:36px;font-size:12px;">AK</div><div><b style="font-size:14px;">Ayşe Kaya</b><span style="margin-left:8px;font-size:12px;color:#FBBF24;">★★★★★</span></div></div>
+                            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0">Dr. Mehmet Demir çok ilgili ve bilgili bir doktor. Teşhisini çok hızlı koydu, tedavi süreci mükemmeldi. Kliniğin temizliği ve personel güler yüzlülüğü de ayrıca takdir edilesi.</p>
+                        </div>
+                        <div style="border-bottom:1px solid var(--border);padding-bottom:16px;margin-bottom:16px;">
+                            <div class="d-flex align-items-center gap-10 mb-2" style="gap:10px;"><div class="user-avatar" style="width:36px;height:36px;font-size:12px;background:linear-gradient(135deg,#10B981,#059669)">FY</div><div><b style="font-size:14px;">Fatma Yıldız</b><span style="margin-left:8px;font-size:12px;color:#FBBF24;">★★★★☆</span></div></div>
+                            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0">Ortopedi kliniğinde çok iyi hizmet aldım. Dr. Can Öztürk ameliyat sonrası takibi çok titiz yapıyor. Randevu bekleme süreleri biraz uzun olsa da sonuç mükemmeldi.</p>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-10 mb-2" style="gap:10px;"><div class="user-avatar" style="width:36px;height:36px;font-size:12px;background:linear-gradient(135deg,#8B5CF6,#6D28D9)">ES</div><div><b style="font-size:14px;">Emre Şahin</b><span style="margin-left:8px;font-size:12px;color:#FBBF24;">★★★★★</span></div></div>
+                            <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin:0">Dr. Zeynep Kara'nın uzmanlığı ve hastaya yaklaşımı gerçekten örnek alınacak düzeyde. Nöroloji bölümünün teknolojik altyapısı da çok gelişmiş.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page-mesajlar">
+                <div class="page-header">
+                    <div><h1 class="page-title">Mesajlar</h1><p class="page-subtitle">Dahili mesajlaşma ve bildirimler</p></div>
+                    <button class="btn-primary-custom" onclick="showToast('Yeni mesaj oluşturuluyor...','info','bi-chat-dots')"><i class="bi bi-pencil-square"></i> Yeni Mesaj</button>
+                </div>
+                <div class="card-box">
+                    <div class="card-box-header"><span class="card-box-title">Gelen Kutusu</span><span class="badge-pill info">3 Okunmamış</span></div>
+                    <div style="overflow-x:auto;">
+                        <table class="tbl">
+                            <thead><tr><th>Gönderen</th><th>Konu</th><th>Tarih</th><th>Durum</th></tr></thead>
+                            <tbody>
+                                <tr style="font-weight:600"><td>Dr. Mehmet Demir</td><td>Kardiyoloji nöbet değişikliği hakkında</td><td>27 Nis, 09:14</td><td><span class="badge-pill warning">Okunmadı</span></td></tr>
+                                <tr style="font-weight:600"><td>Ayşe Kaya</td><td>Randevu iptal talebi — Cuma</td><td>27 Nis, 08:55</td><td><span class="badge-pill warning">Okunmadı</span></td></tr>
+                                <tr style="font-weight:600"><td>Sistem Bildirimi</td><td>Yedekleme tamamlandı</td><td>26 Nis, 23:00</td><td><span class="badge-pill warning">Okunmadı</span></td></tr>
+                                <tr><td>Dr. Selin Arslan</td><td>Dermatoloji staj programı</td><td>26 Nis, 14:22</td><td><span class="badge-pill success">Okundu</span></td></tr>
+                                <tr><td>Dr. Can Öztürk</td><td>Ameliyathane rezervasyonu</td><td>25 Nis, 11:05</td><td><span class="badge-pill success">Okundu</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page-kullanicilar">
+                <div class="page-header">
+                    <div><h1 class="page-title">Kullanıcı Yönetimi</h1><p class="page-subtitle">Sistem kullanıcıları ve erişim izinlerini yönetin</p></div>
+                    <button class="btn-primary-custom" onclick="showToast('Yeni kullanıcı ekleme formu açılıyor...','info','bi-person-plus')"><i class="bi bi-person-plus"></i> Kullanıcı Ekle</button>
+                </div>
+                <div class="card-box">
+                    <div class="card-box-header"><span class="card-box-title">Kullanıcı Listesi</span></div>
+                    <div style="overflow-x:auto;">
+                        <table class="tbl">
+                            <thead><tr><th>Ad Soyad</th><th>Rol</th><th>E-posta</th><th>Son Giriş</th><th>Durum</th><th>İşlem</th></tr></thead>
+                            <tbody>
+                                <tr><td><b>Admin Kullanıcı</b></td><td><span class="badge-pill info">Süper Admin</span></td><td>admin@medipanel.com</td><td>Şimdi</td><td><span class="badge-pill success">Aktif</span></td><td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Kullanıcı düzenleniyor...','info','bi-pencil')">Düzenle</button></td></tr>
+                                <tr><td><b>Dr. Mehmet Demir</b></td><td><span class="badge-pill success">Doktor</span></td><td>m.demir@medipanel.com</td><td>27 Nis 2026</td><td><span class="badge-pill success">Aktif</span></td><td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Kullanıcı düzenleniyor...','info','bi-pencil')">Düzenle</button></td></tr>
+                                <tr><td><b>Dr. Selin Arslan</b></td><td><span class="badge-pill success">Doktor</span></td><td>s.arslan@medipanel.com</td><td>26 Nis 2026</td><td><span class="badge-pill success">Aktif</span></td><td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Kullanıcı düzenleniyor...','info','bi-pencil')">Düzenle</button></td></tr>
+                                <tr><td><b>Hemşire Fatma</b></td><td><span class="badge-pill warning">Hemşire</span></td><td>f.yilmaz@medipanel.com</td><td>25 Nis 2026</td><td><span class="badge-pill success">Aktif</span></td><td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Kullanıcı düzenleniyor...','info','bi-pencil')">Düzenle</button></td></tr>
+                                <tr><td><b>Resepsiyon Ali</b></td><td><span class="badge-pill" style="background:#F1F5F9;color:var(--text-muted);">Personel</span></td><td>ali.c@medipanel.com</td><td>20 Nis 2026</td><td><span class="badge-pill danger">Pasif</span></td><td><button class="btn-outline-custom" style="padding:4px 12px;font-size:11px;" onclick="showToast('Kullanıcı düzenleniyor...','info','bi-pencil')">Düzenle</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page-ayarlar">
+                <div class="page-header">
+                    <div><h1 class="page-title">Sistem Ayarları</h1><p class="page-subtitle">Hastane bilgileri ve sistem konfigürasyonu</p></div>
+                    <button class="btn-primary-custom" onclick="showToast('Ayarlar kaydedildi!','success','bi-check-circle')"><i class="bi bi-floppy"></i> Kaydet</button>
+                </div>
+                <div class="row g-3">
+                    <div class="col-lg-8">
+                        <div class="card-box">
+                            <div class="card-box-header"><span class="card-box-title">Hastane Bilgileri</span></div>
+                            <div class="card-box-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Hastane Adı</label><input class="form-control" value="MediPanel Hastanesi"></div></div>
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Telefon</label><input class="form-control" value="+90 212 555 0100"></div></div>
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label">E-posta</label><input class="form-control" value="info@medipanel.com"></div></div>
+                                    <div class="col-md-6"><div class="form-group"><label class="form-label">Web Sitesi</label><input class="form-control" value="www.medipanel.com"></div></div>
+                                    <div class="col-12"><div class="form-group"><label class="form-label">Adres</label><textarea class="form-control" rows="2">Bağcılar Mahallesi, Hastane Caddesi No:42, İstanbul / Türkiye</textarea></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card-box">
+                            <div class="card-box-header"><span class="card-box-title">Bildirim Tercihleri</span></div>
+                            <div class="card-box-body">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div><div style="font-size:13px;font-weight:600">Yeni randevu bildirimi</div><div style="font-size:11px;color:var(--text-muted)">E-posta ile bildir</div></div>
+                                    <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" checked style="width:40px;height:20px;cursor:pointer;"></div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div><div style="font-size:13px;font-weight:600">İptal bildirimi</div><div style="font-size:11px;color:var(--text-muted)">Anlık bildirim gönder</div></div>
+                                    <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" checked style="width:40px;height:20px;cursor:pointer;"></div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div><div style="font-size:13px;font-weight:600">Günlük özet raporu</div><div style="font-size:11px;color:var(--text-muted)">Her gün 18:00'da</div></div>
+                                    <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" style="width:40px;height:20px;cursor:pointer;"></div>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div><div style="font-size:13px;font-weight:600">SMS bildirimi</div><div style="font-size:11px;color:var(--text-muted)">Hastalara SMS gönder</div></div>
+                                    <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" checked style="width:40px;height:20px;cursor:pointer;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </div><!-- /main -->
+    <!-- ======== EDIT MODAL ======== -->
+    <div class="modal-overlay" id="editModal" onclick="handleOverlayClick(event,'editModal')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title" id="modalTitle">Branşı Düzenle</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:2px;" id="modalSubtitle">Branş bilgilerini güncelleyin</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('editModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Branş Adı</label>
+                    <input class="form-control" id="modalBranchName" placeholder="Örn: Kardiyoloji">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Açıklama</label>
+                    <textarea class="form-control" id="modalBranchDesc" rows="3" placeholder="Branş hakkında kısa açıklama..."></textarea>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Doktor Sayısı</label>
+                            <input class="form-control" type="number" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Durum</label>
+                            <select class="form-control">
+                                <option>Aktif</option>
+                                <option>Pasif</option>
+                                <option>Bakımda</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-custom" onclick="closeModal('editModal')">İptal</button>
+                <button class="btn-primary-custom" onclick="saveModal()"><i class="bi bi-floppy"></i> Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD BRANCH MODAL -->
+    <div class="modal-overlay" id="addModal" onclick="handleOverlayClick(event,'addModal')">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Yeni Branş Ekle</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Yeni bir tıbbi branş oluşturun</div>
+                </div>
+                <button class="modal-close" onclick="closeModal('addModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Branş Adı</label>
+                    <input class="form-control" id="addBranchName" placeholder="Örn: Göğüs Hastalıkları">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Açıklama</label>
+                    <textarea class="form-control" id="addBranchDesc" rows="3" placeholder="Branş hakkında kısa açıklama yazın..."></textarea>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Hedef Doktor Sayısı</label>
+                            <input class="form-control" type="number" placeholder="0" min="1">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Kategori</label>
+                            <select class="form-control">
+                                <option>Dahili Tıp</option>
+                                <option>Cerrahi</option>
+                                <option>Tanı</option>
+                                <option>Diğer</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-custom" onclick="closeModal('addModal')">İptal</button>
+                <button class="btn-primary-custom" onclick="saveNewBranch()"><i class="bi bi-plus-lg"></i> Branş Ekle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DELETE CONFIRM MODAL -->
+    <div class="modal-overlay" id="deleteModal" onclick="handleOverlayClick(event,'deleteModal')">
+        <div class="modal-box" style="max-width:400px;">
+            <div class="modal-header">
+                <div class="modal-title" style="color:var(--danger)"><i class="bi bi-exclamation-triangle me-2"></i>Branşı Sil</div>
+                <button class="modal-close" onclick="closeModal('deleteModal')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:14px;color:var(--text);line-height:1.6;">
+                    <strong id="deleteBranchName"></strong> branşını silmek istediğinizden emin misiniz?
+                    Bu işlem geri alınamaz ve ilgili tüm veriler silinecektir.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline-custom" onclick="closeModal('deleteModal')">Vazgeç</button>
+                <button class="btn-danger-custom" style="background:var(--danger);color:#fff;border-color:var(--danger);" onclick="executDelete()">
+                    <i class="bi bi-trash3"></i> Evet, Sil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ─── INIT ───────────────────────────────────────────
+        document.getElementById('todayDate').textContent = new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+        // ─── SIDEBAR TOGGLE ──────────────────────────────────
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('backdrop');
+        let isMobile = () => window.innerWidth < 992;
+
+        function toggleSidebar() {
+          if (isMobile()) {
+            sidebar.classList.toggle('mobile-open');
+            backdrop.classList.toggle('show');
+          } else {
+            sidebar.classList.toggle('collapsed');
+          }
+        }
+        function closeSidebar() {
+          sidebar.classList.remove('mobile-open');
+          backdrop.classList.remove('show');
+        }
+        window.addEventListener('resize', () => {
+          if (!isMobile()) {
+            sidebar.classList.remove('mobile-open');
+            backdrop.classList.remove('show');
+          }
+        });
+
+        // ─── NAVIGATION ──────────────────────────────────────
+        const pageLabels = {
+          dashboard:'Gösterge Paneli', doktorlar:'Doktorlar', branslar:'Branş Yönetimi',
+          randevular:'Randevular', receteler:'Reçeteler', yorumlar:'Yorumlar',
+          mesajlar:'Mesajlar', kullanicilar:'Kullanıcılar', ayarlar:'Ayarlar'
+        };
+
+        function navigate(page, el) {
+          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+          const target = document.getElementById('page-' + page);
+          if (target) target.classList.add('active');
+
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          if (el) el.classList.add('active');
+          else {
+            document.querySelectorAll('.nav-item').forEach(i => {
+              if (i.getAttribute('onclick') && i.getAttribute('onclick').includes("'"+page+"'")) i.classList.add('active');
+            });
+          }
+
+          document.getElementById('breadcrumb').textContent = pageLabels[page] || page;
+          if (isMobile()) closeSidebar();
+        }
+
+        // ─── MODALS ──────────────────────────────────────────
+        function openModal(type, branchName) {
+          if (type === 'editBranch') {
+            document.getElementById('modalTitle').textContent = 'Branşı Düzenle';
+            document.getElementById('modalBranchName').value = branchName || '';
+            const descs = {
+              'Kardiyoloji': 'Kalp ve damar hastalıklarının kapsamlı teşhis, tedavi ve takip hizmetleri sunulmaktadır.',
+              'Dermatoloji': 'Cilt, saç ve tırnak hastalıklarının tanı ve tedavisi ile estetik dermatoloji uygulamaları.',
+              'Ortopedi ve Travmatoloji': 'Kemik, eklem ve kas-iskelet sistemi hastalıkları ile spor yaralanmalarının tedavisi.',
+              'Nöroloji': 'Beyin, omurilik ve sinir sistemi hastalıklarının ileri teşhis ve tedavi hizmetleri.',
+              'Pediatri': '0–18 yaş arası çocukların büyüme, gelişme ve sağlık takipleri ile hastalık tedavileri.',
+              'Radyoloji': 'MR, BT, ultrason ve dijital röntgen ile ileri düzey tanı görüntüleme hizmetleri.'
+            };
+            document.getElementById('modalBranchDesc').value = descs[branchName] || '';
+            showOverlay('editModal');
+          } else if (type === 'addBranch') {
+            document.getElementById('addBranchName').value = '';
+            document.getElementById('addBranchDesc').value = '';
+            showOverlay('addModal');
+          }
+        }
+
+        function showOverlay(id) {
+          document.getElementById(id).classList.add('show');
+          document.body.style.overflow = 'hidden';
+        }
+        function closeModal(id) {
+          document.getElementById(id).classList.remove('show');
+          document.body.style.overflow = '';
+        }
+        function handleOverlayClick(e, id) {
+          if (e.target === document.getElementById(id)) closeModal(id);
+        }
+        function saveModal() {
+          const name = document.getElementById('modalBranchName').value.trim();
+          if (!name) { showToast('Branş adı boş bırakılamaz!','danger','bi-exclamation-circle'); return; }
+          closeModal('editModal');
+          showToast(name + ' branşı başarıyla güncellendi!','success','bi-check-circle');
+        }
+        function saveNewBranch() {
+          const name = document.getElementById('addBranchName').value.trim();
+          if (!name) { showToast('Branş adı boş bırakılamaz!','danger','bi-exclamation-circle'); return; }
+          closeModal('addModal');
+          showToast(name + ' branşı başarıyla eklendi!','success','bi-plus-circle');
+        }
+
+        let deletingBranch = '';
+        function confirmDelete(name) {
+          deletingBranch = name;
+          document.getElementById('deleteBranchName').textContent = name;
+          showOverlay('deleteModal');
+        }
+        function executDelete() {
+          closeModal('deleteModal');
+          showToast(deletingBranch + ' branşı silindi.','danger','bi-trash3');
+        }
+
+        // ─── TOAST ───────────────────────────────────────────
+        function showToast(msg, type = 'success', icon = 'bi-check-circle') {
+          const c = document.getElementById('toastContainer');
+          const t = document.createElement('div');
+          t.className = `toast-item ${type}`;
+          t.innerHTML = `<i class="bi ${icon} ${type}"></i><span style="flex:1">${msg}</span><i class="bi bi-x" style="cursor:pointer;color:var(--text-muted);font-size:14px;" onclick="this.parentElement.remove()"></i>`;
+          c.appendChild(t);
+          setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(40px)'; t.style.transition='.3s ease'; setTimeout(()=>t.remove(),300); }, 3500);
+        }
+
+        // ─── BRANCH FILTER ───────────────────────────────────
+        function filterBranch(cat, btn) {
+          document.querySelectorAll('[onclick^="filterBranch"]').forEach(b => {
+            b.className = 'btn-outline-custom';
+            b.style.cssText = 'padding:7px 16px;font-size:12px;';
+          });
+          btn.className = 'btn-primary-custom';
+          btn.style.cssText = 'padding:8px 16px;font-size:12px;';
+
+          document.querySelectorAll('.branch-item').forEach(item => {
+            if (cat === 'all' || item.dataset.cat === cat) {
+              item.style.display = '';
+              item.style.animation = 'fadeUp .25s ease';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+          const visible = document.querySelectorAll('.branch-item:not([style*="display: none"])').length;
+          showToast(visible + ' branş görüntüleniyor.', 'info', 'bi-filter');
+        }
+
+        // ─── SEARCH ──────────────────────────────────────────
+        let searchTimeout;
+        function handleSearch(val) {
+          clearTimeout(searchTimeout);
+          if (!val.trim()) return;
+          searchTimeout = setTimeout(() => {
+            showToast('"' + val + '" için arama yapıldı.', 'info', 'bi-search');
+          }, 600);
+        }
+
+        // ─── KEYBOARD ────────────────────────────────────────
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape') {
+            ['editModal','addModal','deleteModal'].forEach(id => {
+              if (document.getElementById(id).classList.contains('show')) closeModal(id);
+            });
+          }
+        });
+    </script>

@@ -1,0 +1,99 @@
+﻿<div id="toast-host"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* ════════════════════════════════════════════════
+       Shell  —  Evrensel altyapı, asla değişmez.
+       Kullanım:
+         Shell.toast(msg, type, icon)
+         Shell.setPage(title, path)
+       ════════════════════════════════════════════════ */
+    const Shell = (() => {
+
+      /* ── Sidebar ── */
+      const sidebar  = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sb-backdrop');
+      const isMobile = () => window.innerWidth < 992;
+
+      function toggleSidebar() {
+        if (isMobile()) {
+          sidebar.classList.toggle('open');
+          backdrop.classList.toggle('show');
+        } else {
+          sidebar.classList.toggle('collapsed');
+        }
+      }
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('show');
+      }
+
+      document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+      backdrop.addEventListener('click', closeSidebar);
+      window.addEventListener('resize', () => { if (!isMobile()) closeSidebar(); });
+
+      /* Sidebar nav active */
+      document.querySelectorAll('.sb-item').forEach(el => {
+        el.addEventListener('click', () => {
+          document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+          el.classList.add('active');
+          if (isMobile()) closeSidebar();
+        });
+      });
+
+      /* ── Topbar: Tarih ── */
+      function updateDate() {
+        const el = document.getElementById('tb-date');
+        if (!el) return;
+        el.textContent = new Date().toLocaleDateString('tr-TR', {
+          weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+        });
+      }
+      updateDate();
+
+      /* ── Topbar: Başlık güncelle ── */
+      function setPage(title, path) {
+        const t = document.getElementById('tb-title');
+        const p = document.getElementById('tb-path');
+        if (t) t.textContent = title;
+        if (p) p.textContent = path;
+        document.title = `MediPanel – ${title}`;
+      }
+
+      /* ── Tam ekran ── */
+      document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.();
+        } else {
+          document.exitFullscreen?.();
+        }
+      });
+
+      /* ── Toast ── */
+      function toast(msg, type = 'info', icon = 'bi-info-circle') {
+        const host = document.getElementById('toast-host');
+        const el = document.createElement('div');
+        el.className = `toast-item ${type}`;
+        el.innerHTML = `
+          <i class="bi ${icon} t-icon ${type}" style="font-size:16px;flex-shrink:0"></i>
+          <span style="flex:1;line-height:1.4">${msg}</span>
+          <button class="t-close" onclick="this.closest('.toast-item').remove()">
+            <i class="bi bi-x"></i>
+          </button>`;
+        host.appendChild(el);
+        setTimeout(() => {
+          el.classList.add('out');
+          el.addEventListener('animationend', () => el.remove(), { once: true });
+        }, 3800);
+      }
+
+      /* ── ESC → açık dropdown'ları kapat ── */
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeSidebar();
+      });
+
+      return { toggleSidebar, closeSidebar, setPage, toast };
+
+    })();
+</script>

@@ -1,0 +1,1565 @@
+﻿
+@{
+    ViewData["Title"] = "PatientList";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+<main id="app-content">
+
+    <style>
+        /* ── Stat Strip ── */
+        .pt-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        @@media(max - width:900px) {
+            .pt-stat-grid
+
+        {
+            grid-template-columns: repeat(2,1fr)
+        }
+
+        }
+        @@media(max - width:480px) {
+            .pt-stat-grid
+
+        {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        }
+
+        .pt-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+        }
+
+            .pt-stat-card:hover {
+                box-shadow: 0 4px 20px rgba(59,130,246,.13);
+                transform: translateY(-2px);
+            }
+
+        .pt-si {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .pt-si-blue {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .pt-si-green {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .pt-si-orange {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .pt-si-purple {
+            background: #F3F0FF;
+            color: #7C3AED;
+        }
+
+        .pt-stat-val {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        .pt-stat-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .pt-stat-sub {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+            .pt-stat-sub.up {
+                color: var(--success);
+            }
+
+            .pt-stat-sub.down {
+                color: var(--danger);
+            }
+
+        /* ── Toolbar ── */
+        .pt-toolbar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .pt-search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 200px;
+            max-width: 340px;
+        }
+
+            .pt-search-wrap i {
+                position: absolute;
+                left: 11px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-muted);
+                font-size: 13px;
+                pointer-events: none;
+            }
+
+            .pt-search-wrap input {
+                width: 100%;
+                border: 1px solid var(--border);
+                border-radius: 20px;
+                padding: 9px 14px 9px 33px;
+                font-size: 13px;
+                font-family: inherit;
+                background: var(--bg);
+                color: var(--text);
+                outline: none;
+                transition: border-color var(--dur), box-shadow var(--dur);
+            }
+
+                .pt-search-wrap input:focus {
+                    border-color: var(--primary);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+                    background: #fff;
+                }
+
+                .pt-search-wrap input::placeholder {
+                    color: var(--text-muted);
+                }
+
+        .pt-select {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+            transition: border-color var(--dur);
+        }
+
+            .pt-select:focus {
+                border-color: var(--primary);
+            }
+
+        .pt-tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .pt-tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 7px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+            white-space: nowrap;
+        }
+
+            .pt-tab:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+                border-color: #C7D9F8;
+            }
+
+            .pt-tab.active {
+                background: var(--primary);
+                color: #fff;
+                border-color: var(--primary);
+            }
+
+        /* ── Table Card ── */
+        .pt-table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .pt-table-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pt-table-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .pt-table-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ── Table ── */
+        .pt-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+            .pt-tbl th {
+                padding: 10px 16px;
+                text-align: left;
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                background: var(--bg);
+                border-bottom: 1px solid var(--border);
+                white-space: nowrap;
+                user-select: none;
+            }
+
+                .pt-tbl th.sortable {
+                    cursor: pointer;
+                }
+
+                    .pt-tbl th.sortable:hover {
+                        color: var(--primary);
+                    }
+
+                .pt-tbl th i {
+                    font-size: 10px;
+                    margin-left: 3px;
+                    opacity: .5;
+                }
+
+            .pt-tbl td {
+                padding: 13px 16px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: middle;
+            }
+
+            .pt-tbl tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .pt-tbl tbody tr {
+                transition: background var(--dur);
+                cursor: pointer;
+            }
+
+                .pt-tbl tbody tr:hover {
+                    background: #F8FAFF;
+                }
+
+        /* Patient cell */
+        .pt-patient-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pt-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .pt-patient-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .pt-patient-id {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        /* Badges */
+        .pt-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+            .pt-badge.active {
+                background: var(--success-bg);
+                color: #065F46;
+            }
+
+            .pt-badge.check {
+                background: var(--primary-bg);
+                color: var(--primary-dk);
+            }
+
+            .pt-badge.critical {
+                background: var(--danger-bg);
+                color: #991B1B;
+            }
+
+            .pt-badge.discharged {
+                background: #F1F5F9;
+                color: #475569;
+            }
+
+            .pt-badge.new {
+                background: var(--warning-bg);
+                color: #92400E;
+            }
+
+        /* Action btn */
+        .pt-action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+            margin-right: 3px;
+        }
+
+            .pt-action-btn:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+                border-color: #C7D9F8;
+            }
+
+            .pt-action-btn.danger:hover {
+                background: var(--danger-bg);
+                color: var(--danger);
+                border-color: #FCA5A5;
+            }
+
+        /* ── Pagination ── */
+        .pt-pagination {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pt-page-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .pt-pages {
+            display: flex;
+            gap: 4px;
+        }
+
+        .pt-page-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+            .pt-page-btn:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+                border-color: #C7D9F8;
+            }
+
+            .pt-page-btn.active {
+                background: var(--primary);
+                color: #fff;
+                border-color: var(--primary);
+            }
+
+            .pt-page-btn:disabled {
+                opacity: .35;
+                cursor: not-allowed;
+            }
+
+        /* ── Empty ── */
+        .pt-empty {
+            padding: 64px 24px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+            .pt-empty i {
+                font-size: 46px;
+                opacity: .15;
+                display: block;
+                margin-bottom: 14px;
+            }
+
+        .pt-empty-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        /* ── Detail Modal ── */
+        .pt-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,.45);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+
+            .pt-overlay.show {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+        .pt-modal-box {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,.18);
+            width: 100%;
+            max-width: 560px;
+            transform: scale(.93) translateY(16px);
+            transition: transform .26s cubic-bezier(.34,1.56,.64,1);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pt-overlay.show .pt-modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Modal hero */
+        .pt-modal-hero {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg,#EFF6FF 0%,#F8FAFC 100%);
+            flex-shrink: 0;
+        }
+
+        .pt-modal-av {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 14px rgba(0,0,0,.12);
+        }
+
+        .pt-modal-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .pt-modal-id {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .pt-modal-close {
+            margin-left: auto;
+            align-self: flex-start;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--border);
+            background: transparent;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background var(--dur);
+        }
+
+            .pt-modal-close:hover {
+                background: rgba(0,0,0,.06);
+            }
+
+        /* Modal body */
+        .pt-modal-body {
+            padding: 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Info grid */
+        .pt-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pt-info-cell {
+            padding: 13px 22px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+            .pt-info-cell:nth-child(even) {
+                border-right: none;
+            }
+
+            .pt-info-cell:nth-last-child(-n+2) {
+                border-bottom: none;
+            }
+
+        .pt-info-lbl {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 4px;
+        }
+
+        .pt-info-val {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Section */
+        .pt-modal-section {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+            .pt-modal-section:last-child {
+                border-bottom: none;
+            }
+
+        .pt-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* Timeline items */
+        .pt-tl-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+            .pt-tl-item:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+        .pt-tl-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .pt-tl-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            min-width: 90px;
+        }
+
+        .pt-tl-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .pt-tl-doc {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        /* Prescription chips */
+        .pt-rx-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+            margin: 3px;
+        }
+
+            .pt-rx-chip i {
+                color: var(--primary);
+                font-size: 12px;
+            }
+
+        /* Modal footer */
+        .pt-modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* Global btn atoms */
+        .pt-btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+        }
+
+            .pt-btn-primary:hover {
+                background: var(--primary-dk);
+                box-shadow: 0 4px 12px rgba(59,130,246,.3);
+                transform: translateY(-1px);
+            }
+
+        .pt-btn-outline {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+            .pt-btn-outline:hover {
+                background: var(--bg);
+                color: var(--text);
+            }
+
+        .pt-page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .pt-page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .pt-page-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+    </style>
+
+
+    <!-- ── Page Header ── -->
+    <div class="pt-page-header">
+        <div>
+            <h1 class="pt-page-title">Hasta Yönetimi</h1>
+            <p class="pt-page-sub">Kayıtlı hastaları görüntüleyin, filtreleyin ve hasta detaylarına erişin</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="pt-btn-outline" onclick="PT.exportList()"><i class="bi bi-download"></i> Dışa Aktar</button>
+            <button class="pt-btn-primary" onclick="PT.openAdd()"><i class="bi bi-person-plus"></i> Yeni Hasta</button>
+        </div>
+    </div>
+
+    <!-- ── Stat Strip ── -->
+    <div class="pt-stat-grid">
+        <div class="pt-stat-card">
+            <div class="pt-si pt-si-blue"><i class="bi bi-people"></i></div>
+            <div>
+                <div class="pt-stat-val">1.284</div>
+                <div class="pt-stat-lbl">Toplam Hasta</div>
+                <div class="pt-stat-sub up"><i class="bi bi-arrow-up-short"></i>+38 bu ay</div>
+            </div>
+        </div>
+        <div class="pt-stat-card">
+            <div class="pt-si pt-si-green"><i class="bi bi-calendar-check"></i></div>
+            <div>
+                <div class="pt-stat-val">24</div>
+                <div class="pt-stat-lbl">Bugün Gelen</div>
+                <div class="pt-stat-sub up">Devam ediyor</div>
+            </div>
+        </div>
+        <div class="pt-stat-card">
+            <div class="pt-si pt-si-orange"><i class="bi bi-hospital"></i></div>
+            <div>
+                <div class="pt-stat-val">47</div>
+                <div class="pt-stat-lbl">Aktif Tedavi</div>
+                <div class="pt-stat-sub down"><i class="bi bi-arrow-down-short"></i>3 kritik</div>
+            </div>
+        </div>
+        <div class="pt-stat-card">
+            <div class="pt-si pt-si-purple"><i class="bi bi-box-arrow-right"></i></div>
+            <div>
+                <div class="pt-stat-val">12</div>
+                <div class="pt-stat-lbl">Bu Hafta Taburcu</div>
+                <div class="pt-stat-sub up"><i class="bi bi-arrow-up-short"></i>+4 geçen haftaya göre</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Toolbar ── -->
+    <div class="pt-toolbar">
+        <div class="pt-search-wrap">
+            <i class="bi bi-search"></i>
+            <input id="pt-search" placeholder="İsim, TC veya hasta ID ile ara..." oninput="PT.filter()">
+        </div>
+        <select class="pt-select" onchange="PT.filterBranch(this.value)">
+            <option value="">Tüm Branşlar</option>
+            <option>Kardiyoloji</option>
+            <option>Dermatoloji</option>
+            <option>Ortopedi</option>
+            <option>Nöroloji</option>
+            <option>Pediatri</option>
+            <option>Radyoloji</option>
+        </select>
+        <select class="pt-select" onchange="PT.filterDoctor(this.value)">
+            <option value="">Tüm Doktorlar</option>
+            <option>Dr. Mehmet Demir</option>
+            <option>Dr. Selin Arslan</option>
+            <option>Dr. Can Öztürk</option>
+            <option>Dr. Zeynep Kara</option>
+            <option>Dr. Ahmet Yılmaz</option>
+        </select>
+        <div class="pt-tabs">
+            <button class="pt-tab active" data-status="all" onclick="PT.setTab(this)">Tümü</button>
+            <button class="pt-tab" data-status="active" onclick="PT.setTab(this)">Aktif</button>
+            <button class="pt-tab" data-status="critical" onclick="PT.setTab(this)">Kritik</button>
+            <button class="pt-tab" data-status="new" onclick="PT.setTab(this)">Yeni</button>
+            <button class="pt-tab" data-status="discharged" onclick="PT.setTab(this)">Taburcu</button>
+        </div>
+        <div style="margin-left:auto;font-size:12px;color:var(--text-muted)" id="pt-result-info">13 hasta gösteriliyor</div>
+    </div>
+
+    <!-- ── Table Card ── -->
+    <div class="pt-table-card">
+        <div class="pt-table-header">
+            <div>
+                <div class="pt-table-title">Hasta Listesi</div>
+                <div class="pt-table-sub" id="pt-table-sub">Tüm kayıtlı hastalar</div>
+            </div>
+            <div style="display:flex;gap:6px">
+                <button class="pt-btn-outline" style="padding:7px 12px;font-size:12px" onclick="PT.exportList()">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
+                <button class="pt-btn-outline" style="padding:7px 12px;font-size:12px" onclick="PT.printList()">
+                    <i class="bi bi-printer"></i> Yazdır
+                </button>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto">
+            <table class="pt-tbl">
+                <thead>
+                    <tr>
+                        <th class="sortable" onclick="PT.sort('name')">Hasta <i class="bi bi-arrow-down-up"></i></th>
+                        <th>TC / ID</th>
+                        <th class="sortable" onclick="PT.sort('age')">Yaş <i class="bi bi-arrow-down-up"></i></th>
+                        <th>Branş</th>
+                        <th>Sorumlu Doktor</th>
+                        <th class="sortable" onclick="PT.sort('date')">Son Ziyaret <i class="bi bi-arrow-down-up"></i></th>
+                        <th>Durum</th>
+                        <th style="text-align:center">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="pt-tbody">
+
+                    <tr class="pt-row" data-status="active" data-search="ayşe kaya kardiyoloji mehmet demir" onclick="PT.openDetail('P01')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">AK</div>
+                                <div><div class="pt-patient-name">Ayşe Kaya</div><div class="pt-patient-id">Kadın · 52 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>45***456789</div><div style="margin-top:2px">#H-0284</div></td>
+                        <td style="font-weight:600">52</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--primary-bg);color:var(--primary)">Kardiyoloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#1D4ED8);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">MD</div>
+                                Dr. Mehmet Demir
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">27 Nis 2026</div><div style="color:var(--text-muted)">09:00</div></td>
+                        <td><span class="pt-badge active"><i class="bi bi-circle-fill" style="font-size:6px"></i>Aktif Tedavi</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P01')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Ayşe Kaya')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Ayşe Kaya',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="critical" data-search="emre şahin nöroloji zeynep kara" onclick="PT.openDetail('P02')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#EF4444,#DC2626)">EŞ</div>
+                                <div><div class="pt-patient-name">Emre Şahin</div><div class="pt-patient-id">Erkek · 38 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>38***112233</div><div style="margin-top:2px">#H-0401</div></td>
+                        <td style="font-weight:600">38</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#F3F0FF;color:#7C3AED">Nöroloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">ZK</div>
+                                Dr. Zeynep Kara
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">27 Nis 2026</div><div style="color:var(--text-muted)">14:00</div></td>
+                        <td><span class="pt-badge critical"><i class="bi bi-circle-fill" style="font-size:6px"></i>Kritik</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P02')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Emre Şahin')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Emre Şahin',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="active" data-search="fatma yıldız ortopedi can öztürk" onclick="PT.openDetail('P03')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706)">FY</div>
+                                <div><div class="pt-patient-name">Fatma Yıldız</div><div class="pt-patient-id">Kadın · 45 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>45***789012</div><div style="margin-top:2px">#H-0198</div></td>
+                        <td style="font-weight:600">45</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#FFFBEB;color:var(--warning)">Ortopedi</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">CO</div>
+                                Dr. Can Öztürk
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">27 Nis 2026</div><div style="color:var(--text-muted)">11:00</div></td>
+                        <td><span class="pt-badge active"><i class="bi bi-circle-fill" style="font-size:6px"></i>Aktif Tedavi</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P03')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Fatma Yıldız')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Fatma Yıldız',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="new" data-search="ali çelik dermatoloji selin arslan" onclick="PT.openDetail('P04')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">AÇ</div>
+                                <div><div class="pt-patient-name">Ali Çelik</div><div class="pt-patient-id">Erkek · 29 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>29***334455</div><div style="margin-top:2px">#H-0312</div></td>
+                        <td style="font-weight:600">29</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--success-bg);color:var(--success)">Dermatoloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">SA</div>
+                                Dr. Selin Arslan
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">27 Nis 2026</div><div style="color:var(--text-muted)">10:30</div></td>
+                        <td><span class="pt-badge new"><i class="bi bi-circle-fill" style="font-size:6px"></i>Yeni Kayıt</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P04')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Ali Çelik')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Ali Çelik',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="active" data-search="merve doğan pediatri ahmet yılmaz" onclick="PT.openDetail('P05')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">MD</div>
+                                <div><div class="pt-patient-name">Merve Doğan</div><div class="pt-patient-id">Kadın · 7 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>——</div><div style="margin-top:2px">#H-0522</div></td>
+                        <td style="font-weight:600">7</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#ECFEFF;color:#06B6D4">Pediatri</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#06B6D4,#0891B2);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">AY</div>
+                                Dr. Ahmet Yılmaz
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">27 Nis 2026</div><div style="color:var(--text-muted)">15:30</div></td>
+                        <td><span class="pt-badge active"><i class="bi bi-circle-fill" style="font-size:6px"></i>Aktif Tedavi</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P05')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Merve Doğan')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Merve Doğan',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="discharged" data-search="kemal arslan radyoloji neslihan baş" onclick="PT.openDetail('P06')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#6366F1,#4F46E5)">KA</div>
+                                <div><div class="pt-patient-name">Kemal Arslan</div><div class="pt-patient-id">Erkek · 61 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>61***556677</div><div style="margin-top:2px">#H-0611</div></td>
+                        <td style="font-weight:600">61</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EEF2FF;color:#6366F1">Radyoloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#4F46E5);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">NB</div>
+                                Dr. Neslihan Baş
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">22 Nis 2026</div><div style="color:var(--text-muted)">09:00</div></td>
+                        <td><span class="pt-badge discharged"><i class="bi bi-circle-fill" style="font-size:6px"></i>Taburcu</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P06')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Kemal Arslan')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Kemal Arslan',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="critical" data-search="sevgi koç kardiyoloji mehmet demir" onclick="PT.openDetail('P07')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#EC4899,#DB2777)">SK</div>
+                                <div><div class="pt-patient-name">Sevgi Koç</div><div class="pt-patient-id">Kadın · 67 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>67***778899</div><div style="margin-top:2px">#H-0734</div></td>
+                        <td style="font-weight:600">67</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--primary-bg);color:var(--primary)">Kardiyoloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#3B82F6,#1D4ED8);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">MD</div>
+                                Dr. Mehmet Demir
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">28 Nis 2026</div><div style="color:var(--text-muted)">11:00</div></td>
+                        <td><span class="pt-badge critical"><i class="bi bi-circle-fill" style="font-size:6px"></i>Kritik</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P07')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Sevgi Koç')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Sevgi Koç',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="discharged" data-search="bülent yıldız ortopedi can öztürk" onclick="PT.openDetail('P08')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#64748B,#475569)">BY</div>
+                                <div><div class="pt-patient-name">Bülent Yıldız</div><div class="pt-patient-id">Erkek · 44 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>44***990011</div><div style="margin-top:2px">#H-0812</div></td>
+                        <td style="font-weight:600">44</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#FFFBEB;color:var(--warning)">Ortopedi</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#D97706);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">CO</div>
+                                Dr. Can Öztürk
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">18 Nis 2026</div><div style="color:var(--text-muted)">13:00</div></td>
+                        <td><span class="pt-badge discharged"><i class="bi bi-circle-fill" style="font-size:6px"></i>Taburcu</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P08')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Bülent Yıldız')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Bülent Yıldız',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="active" data-search="nilüfer çetin dermatoloji selin arslan" onclick="PT.openDetail('P09')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#A855F7,#9333EA)">NÇ</div>
+                                <div><div class="pt-patient-name">Nilüfer Çetin</div><div class="pt-patient-id">Kadın · 33 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>33***223344</div><div style="margin-top:2px">#H-0934</div></td>
+                        <td style="font-weight:600">33</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:var(--success-bg);color:var(--success)">Dermatoloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#10B981,#059669);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">SA</div>
+                                Dr. Selin Arslan
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">25 Nis 2026</div><div style="color:var(--text-muted)">10:00</div></td>
+                        <td><span class="pt-badge active"><i class="bi bi-circle-fill" style="font-size:6px"></i>Aktif Tedavi</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P09')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Nilüfer Çetin')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Nilüfer Çetin',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                    <tr class="pt-row" data-status="new" data-search="tarık demir nöroloji zeynep kara" onclick="PT.openDetail('P10')">
+                        <td>
+                            <div class="pt-patient-cell">
+                                <div class="pt-avatar" style="background:linear-gradient(135deg,#0EA5E9,#0284C7)">TD</div>
+                                <div><div class="pt-patient-name">Tarık Demir</div><div class="pt-patient-id">Erkek · 55 yaş</div></div>
+                            </div>
+                        </td>
+                        <td style="font-size:12px;font-weight:600;color:var(--text-muted)"><div>55***445566</div><div style="margin-top:2px">#H-1021</div></td>
+                        <td style="font-weight:600">55</td>
+                        <td><span style="font-size:12px;font-weight:600;padding:3px 9px;border-radius:20px;background:#F3F0FF;color:#7C3AED">Nöroloji</span></td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:7px">
+                                <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">ZK</div>
+                                Dr. Zeynep Kara
+                            </div>
+                        </td>
+                        <td style="font-size:12px"><div style="font-weight:600">27 Nis 2026</div><div style="color:var(--text-muted)">Yeni Kayıt</div></td>
+                        <td><span class="pt-badge new"><i class="bi bi-circle-fill" style="font-size:6px"></i>Yeni Kayıt</span></td>
+                        <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                            <button class="pt-action-btn" title="Detay" onclick="PT.openDetail('P10')"><i class="bi bi-eye"></i></button>
+                            <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('Tarık Demir')"><i class="bi bi-calendar-plus"></i></button>
+                            <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete('Tarık Demir',this)"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pt-pagination">
+            <div class="pt-page-info" id="pt-page-info">1 – 10 / 1.284 hasta gösteriliyor</div>
+            <div class="pt-pages">
+                <button class="pt-page-btn" title="Önceki" disabled><i class="bi bi-chevron-left"></i></button>
+                <button class="pt-page-btn active">1</button>
+                <button class="pt-page-btn" onclick="PT.changePage(2)">2</button>
+                <button class="pt-page-btn" onclick="PT.changePage(3)">3</button>
+                <span style="display:flex;align-items:center;color:var(--text-muted);font-size:12px;padding:0 4px">...</span>
+                <button class="pt-page-btn" onclick="PT.changePage(129)">129</button>
+                <button class="pt-page-btn" title="Sonraki" onclick="PT.changePage(2)"><i class="bi bi-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════ HASTA DETAY MODALİ ════ -->
+    <div class="pt-overlay" id="pt-m-detail" onclick="if(event.target===this)PT.close('pt-m-detail')">
+        <div class="pt-modal-box" style="max-width:560px">
+
+            <div class="pt-modal-hero">
+                <div class="pt-modal-av" id="pt-d-av">AK</div>
+                <div>
+                    <div class="pt-modal-name" id="pt-d-name">Ayşe Kaya</div>
+                    <div class="pt-modal-id" id="pt-d-meta">Kadın · 52 yaş · #H-0284</div>
+                    <div style="margin-top:8px" id="pt-d-badge"></div>
+                </div>
+                <button class="pt-modal-close" onclick="PT.close('pt-m-detail')"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="pt-modal-body">
+                <!-- Temel Bilgiler -->
+                <div class="pt-info-grid">
+                    <div class="pt-info-cell"><div class="pt-info-lbl">Branş</div><div class="pt-info-val" id="pt-d-branch"></div></div>
+                    <div class="pt-info-cell"><div class="pt-info-lbl">Sorumlu Doktor</div><div class="pt-info-val" id="pt-d-doctor"></div></div>
+                    <div class="pt-info-cell"><div class="pt-info-lbl">Kan Grubu</div><div class="pt-info-val" id="pt-d-blood"></div></div>
+                    <div class="pt-info-cell"><div class="pt-info-lbl">Son Ziyaret</div><div class="pt-info-val" id="pt-d-lastvisit"></div></div>
+                    <div class="pt-info-cell"><div class="pt-info-lbl">Telefon</div><div class="pt-info-val" id="pt-d-phone"></div></div>
+                    <div class="pt-info-cell"><div class="pt-info-lbl">Sigorta</div><div class="pt-info-val" id="pt-d-insurance"></div></div>
+                </div>
+
+                <!-- Tanı -->
+                <div class="pt-modal-section">
+                    <div class="pt-section-title">Mevcut Tanı</div>
+                    <div id="pt-d-diagnosis" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+                </div>
+
+                <!-- Ziyaret Geçmişi -->
+                <div class="pt-modal-section">
+                    <div class="pt-section-title">Son Ziyaretler</div>
+                    <div id="pt-d-history"></div>
+                </div>
+
+                <!-- Aktif Reçeteler -->
+                <div class="pt-modal-section">
+                    <div class="pt-section-title">Aktif Reçeteler</div>
+                    <div id="pt-d-rx"></div>
+                </div>
+            </div>
+
+            <div class="pt-modal-footer">
+                <button class="pt-btn-outline" onclick="PT.close('pt-m-detail')">Kapat</button>
+                <button class="pt-btn-outline" onclick="PT.close('pt-m-detail');PT.bookApptFromDetail()" style="color:var(--success);border-color:#A7F3D0;background:var(--success-bg)">
+                    <i class="bi bi-calendar-plus"></i> Randevu Al
+                </button>
+                <button class="pt-btn-primary" onclick="PT.close('pt-m-detail');Shell.toast('Hasta dosyası açılıyor...','info','bi-folder2-open')">
+                    <i class="bi bi-folder2-open"></i> Tam Dosya
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sil onay -->
+    <div class="pt-overlay" id="pt-m-delete" onclick="if(event.target===this)PT.close('pt-m-delete')">
+        <div class="pt-modal-box" style="max-width:400px">
+            <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:15px;font-weight:700;color:var(--danger)"><i class="bi bi-exclamation-triangle-fill me-2"></i>Hastayı Sil</div>
+                <button class="pt-modal-close" onclick="PT.close('pt-m-delete')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div style="padding:20px 22px">
+                <p style="font-size:14px;line-height:1.7;color:var(--text)">
+                    <strong id="pt-del-name" style="color:var(--danger)"></strong> adlı hastanın kaydı kalıcı olarak silinecek. Onaylıyor musunuz?
+                </p>
+                <div style="background:var(--danger-bg);border:1px solid #FCA5A5;border-radius:var(--radius-sm);padding:11px 13px;font-size:12px;color:#991B1B;margin-top:12px;display:flex;gap:8px">
+                    <i class="bi bi-info-circle-fill" style="flex-shrink:0;margin-top:1px"></i>
+                    Tüm randevu ve reçete geçmişi arşive taşınır.
+                </div>
+            </div>
+            <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+                <button class="pt-btn-outline" onclick="PT.close('pt-m-delete')">Vazgeç</button>
+                <button class="pt-btn-primary" style="background:var(--danger)" onclick="PT.execDelete()">
+                    <i class="bi bi-trash3"></i> Evet, Sil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yeni Hasta (placeholder) -->
+    <div class="pt-overlay" id="pt-m-add" onclick="if(event.target===this)PT.close('pt-m-add')">
+        <div class="pt-modal-box" style="max-width:420px">
+            <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:15px;font-weight:700"><i class="bi bi-person-plus me-2" style="color:var(--primary)"></i>Yeni Hasta Kaydı</div>
+                <button class="pt-modal-close" onclick="PT.close('pt-m-add')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div style="padding:36px 24px;text-align:center">
+                <i class="bi bi-person-vcard" style="font-size:44px;color:var(--primary);opacity:.2;display:block;margin-bottom:14px"></i>
+                <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sayfa henüz bağlanmadı</div>
+                <p style="font-size:13px;color:var(--text-muted);line-height:1.7">Yeni hasta kayıt formunuzu oluşturup<br>bu modalı kendi sayfanızla değiştirin.</p>
+            </div>
+            <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+                <button class="pt-btn-outline" onclick="PT.close('pt-m-add')">Kapat</button>
+                <button class="pt-btn-primary" onclick="PT.close('pt-m-add');Shell.toast('Kayıt sayfasına yönlendiriliyor...','info','bi-arrow-right-circle')">
+                    <i class="bi bi-box-arrow-up-right"></i> Sayfaya Git
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ── PAGE JS ── -->
+    <script>
+        const PT = (() => {
+
+          /* ─ Hasta verisi ─ */
+          const DATA = {
+            P01: {
+              av:'AK', avBg:'linear-gradient(135deg,#3B82F6,#1D4ED8)',
+              name:'Ayşe Kaya', meta:'Kadın · 52 yaş · #H-0284',
+              branch:'Kardiyoloji', doctor:'Dr. Mehmet Demir',
+              blood:'A Rh+', lastvisit:'27 Nis 2026 · 09:00',
+              phone:'0532 *** 44 78', insurance:'SGK',
+              status:'active',
+              diagnosis:'Koroner arter hastalığı (KAH). Efor angina semptomu mevcut. Medikal tedavi devam etmekte, 6 ayda bir kontrol planlandı.',
+              history:[
+                {date:'27 Nis 2026', text:'Rutin kardiyoloji kontrolü', doctor:'Dr. M. Demir', color:'var(--success)'},
+                {date:'15 Şub 2026', text:'EKG ve efor testi', doctor:'Dr. M. Demir', color:'var(--primary)'},
+                {date:'10 Kas 2025', text:'İlk başvuru — göğüs ağrısı şikayeti', doctor:'Dr. M. Demir', color:'var(--warning)'},
+              ],
+              rx:['Aspirin 100mg', 'Metoprolol 25mg', 'Atorvastatin 40mg'],
+            },
+            P02: {
+              av:'EŞ', avBg:'linear-gradient(135deg,#EF4444,#DC2626)',
+              name:'Emre Şahin', meta:'Erkek · 38 yaş · #H-0401',
+              branch:'Nöroloji', doctor:'Dr. Zeynep Kara',
+              blood:'0 Rh-', lastvisit:'27 Nis 2026 · 14:00',
+              phone:'0541 *** 88 21', insurance:'Özel Sigorta',
+              status:'critical',
+              diagnosis:'Migren ile komplike nörolojik tablo. Son 2 haftada atak sıklığı arttı. Profilaktik tedavi başlandı, yakın takip gerekiyor.',
+              history:[
+                {date:'27 Nis 2026', text:'Acil nöroloji değerlendirmesi', doctor:'Dr. Z. Kara', color:'var(--danger)'},
+                {date:'20 Nis 2026', text:'Kontrol randevusu', doctor:'Dr. Z. Kara', color:'var(--warning)'},
+                {date:'5 Mar 2026',  text:'İlk nöroloji polikliniği', doctor:'Dr. Z. Kara', color:'var(--primary)'},
+              ],
+              rx:['Topiramat 50mg', 'Rizatriptan 10mg (gerektiğinde)', 'B2 vitamini 400mg'],
+            },
+            P03: {
+              av:'FY', avBg:'linear-gradient(135deg,#F59E0B,#D97706)',
+              name:'Fatma Yıldız', meta:'Kadın · 45 yaş · #H-0198',
+              branch:'Ortopedi', doctor:'Dr. Can Öztürk',
+              blood:'B Rh+', lastvisit:'27 Nis 2026 · 11:00',
+              phone:'0555 *** 22 60', insurance:'SGK',
+              status:'active',
+              diagnosis:'Sol diz medial menisküs yırtığı. Artroskopik cerrahi planlandı. Operasyon öncesi fizik tedavi devam ediyor.',
+              history:[
+                {date:'27 Nis 2026', text:'Ameliyat öncesi değerlendirme', doctor:'Dr. C. Öztürk', color:'var(--warning)'},
+                {date:'10 Nis 2026', text:'MR sonucu değerlendirmesi', doctor:'Dr. C. Öztürk', color:'var(--primary)'},
+                {date:'1 Nis 2026',  text:'Travma sonrası ilk muayene', doctor:'Dr. C. Öztürk', color:'var(--success)'},
+              ],
+              rx:['İbuprofen 400mg', 'Kas Gevşetici (Tizanidin 2mg)', 'Kondroitin Sülfat'],
+            },
+            P04: {
+              av:'AÇ', avBg:'linear-gradient(135deg,#10B981,#059669)',
+              name:'Ali Çelik', meta:'Erkek · 29 yaş · #H-0312',
+              branch:'Dermatoloji', doctor:'Dr. Selin Arslan',
+              blood:'A Rh-', lastvisit:'27 Nis 2026 · 10:30',
+              phone:'0506 *** 77 35', insurance:'SGK',
+              status:'new',
+              diagnosis:'Kronik ürtiker — ilk başvuru. Alerji testleri için lab istemi yapıldı. Antihistaminik tedavi başlandı.',
+              history:[
+                {date:'27 Nis 2026', text:'İlk dermatoloji muayenesi', doctor:'Dr. S. Arslan', color:'var(--success)'},
+              ],
+              rx:['Cetirizin 10mg', 'Klorheksidin losyon (lokal)'],
+            },
+            P05: {
+              av:'MD', avBg:'linear-gradient(135deg,#06B6D4,#0891B2)',
+              name:'Merve Doğan', meta:'Kız · 7 yaş · #H-0522',
+              branch:'Pediatri', doctor:'Dr. Ahmet Yılmaz',
+              blood:'AB Rh+', lastvisit:'27 Nis 2026 · 15:30',
+              phone:'(Veli) 0532 *** 11 98', insurance:'SGK',
+              status:'active',
+              diagnosis:'Rutin büyüme-gelişme takibi. Boy ve kilo değerleri yaşa uygun. Aşı takvimi tamamlandı.',
+              history:[
+                {date:'27 Nis 2026', text:'Rutin kontrol + aşı uygulaması', doctor:'Dr. A. Yılmaz', color:'var(--success)'},
+                {date:'15 Oca 2026', text:'Üst solunum yolu enfeksiyonu', doctor:'Dr. A. Yılmaz', color:'var(--warning)'},
+              ],
+              rx:['Vitamin D 400 IU', 'Demir Şurubu (gerektiğinde)'],
+            },
+            P06: {
+              av:'KA', avBg:'linear-gradient(135deg,#6366F1,#4F46E5)',
+              name:'Kemal Arslan', meta:'Erkek · 61 yaş · #H-0611',
+              branch:'Radyoloji', doctor:'Dr. Neslihan Baş',
+              blood:'0 Rh+', lastvisit:'22 Nis 2026 · 09:00',
+              phone:'0543 *** 66 12', insurance:'Emekli Sandığı',
+              status:'discharged',
+              diagnosis:'Toraks BT ile pulmoner emboli dışlandı. Bulgular normal sınırlarda. Kontrol gerekmemekte.',
+              history:[
+                {date:'22 Nis 2026', text:'Toraks BT çekimi ve raporu', doctor:'Dr. N. Baş', color:'var(--success)'},
+                {date:'20 Nis 2026', text:'Radyoloji polikliniği sevki', doctor:'Dr. N. Baş', color:'var(--primary)'},
+              ],
+              rx:[],
+            },
+            P07: {
+              av:'SK', avBg:'linear-gradient(135deg,#EC4899,#DB2777)',
+              name:'Sevgi Koç', meta:'Kadın · 67 yaş · #H-0734',
+              branch:'Kardiyoloji', doctor:'Dr. Mehmet Demir',
+              blood:'B Rh-', lastvisit:'28 Nis 2026 · 11:00',
+              phone:'0551 *** 33 47', insurance:'SGK',
+              status:'critical',
+              diagnosis:'Akut koroner sendrom şüphesi. Acil kardiyoloji servisinde monitörize izlemde. Kateterizasyon planlanıyor.',
+              history:[
+                {date:'28 Nis 2026', text:'Acil kardiyoloji başvurusu', doctor:'Dr. M. Demir', color:'var(--danger)'},
+                {date:'10 Mar 2026', text:'Hipertansiyon kontrolü', doctor:'Dr. M. Demir', color:'var(--warning)'},
+              ],
+              rx:['Heparin infüzyon', 'Aspirin 300mg yükleme', 'Klopidogrel 75mg', 'Nitrogliserin (gerektiğinde)'],
+            },
+            P08: {
+              av:'BY', avBg:'linear-gradient(135deg,#64748B,#475569)',
+              name:'Bülent Yıldız', meta:'Erkek · 44 yaş · #H-0812',
+              branch:'Ortopedi', doctor:'Dr. Can Öztürk',
+              blood:'A Rh+', lastvisit:'18 Nis 2026 · 13:00',
+              phone:'0537 *** 99 54', insurance:'Özel Sigorta',
+              status:'discharged',
+              diagnosis:'Sağ el bilek kırığı. Alçı tedavisi tamamlandı, taburcu edildi. 1 ay sonra kontrol önerildi.',
+              history:[
+                {date:'18 Nis 2026', text:'Taburcu kontrolü — iyileşme tam', doctor:'Dr. C. Öztürk', color:'var(--success)'},
+                {date:'1 Nis 2026',  text:'Alçı uygulaması', doctor:'Dr. C. Öztürk', color:'var(--primary)'},
+                {date:'30 Mar 2026', text:'Acil — bilek travması', doctor:'Dr. C. Öztürk', color:'var(--danger)'},
+              ],
+              rx:[],
+            },
+            P09: {
+              av:'NÇ', avBg:'linear-gradient(135deg,#A855F7,#9333EA)',
+              name:'Nilüfer Çetin', meta:'Kadın · 33 yaş · #H-0934',
+              branch:'Dermatoloji', doctor:'Dr. Selin Arslan',
+              blood:'AB Rh-', lastvisit:'25 Nis 2026 · 10:00',
+              phone:'0544 *** 55 89', insurance:'SGK',
+              status:'active',
+              diagnosis:'Psöriazis plak tip. Topikal kortikosteroid tedavisi ve nemlendiriciye yanıt iyi. Takip devam ediyor.',
+              history:[
+                {date:'25 Nis 2026', text:'Dermatoloji kontrol', doctor:'Dr. S. Arslan', color:'var(--success)'},
+                {date:'11 Mar 2026', text:'İlk başvuru — cilt döküntüsü', doctor:'Dr. S. Arslan', color:'var(--primary)'},
+              ],
+              rx:['Betametazon %0.1 krem', 'Urea %10 losyon', 'D vitamini analogu krem'],
+            },
+            P10: {
+              av:'TD', avBg:'linear-gradient(135deg,#0EA5E9,#0284C7)',
+              name:'Tarık Demir', meta:'Erkek · 55 yaş · #H-1021',
+              branch:'Nöroloji', doctor:'Dr. Zeynep Kara',
+              blood:'0 Rh+', lastvisit:'27 Nis 2026 · Yeni Kayıt',
+              phone:'0538 *** 77 03', insurance:'SGK',
+              status:'new',
+              diagnosis:'İlk başvuru — sağ elde uyuşma ve titreme şikayeti. Nörolojik muayene tamamlandı, EMG istemi yapıldı.',
+              history:[
+                {date:'27 Nis 2026', text:'İlk nöroloji muayenesi', doctor:'Dr. Z. Kara', color:'var(--success)'},
+              ],
+              rx:['Vitamin B12 1000mcg (enjeksiyon)'],
+            },
+          };
+
+          let _statusFilter = 'all';
+          let _delName = '';
+          let _delRow  = null;
+          let _currentPatient = '';
+
+          /* ─ Tab ─ */
+          function setTab(el) {
+            document.querySelectorAll('.pt-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            _statusFilter = el.dataset.status;
+            filter();
+          }
+
+          /* ─ Filter ─ */
+          function filter() {
+            const q = (document.getElementById('pt-search').value || '').toLowerCase().trim();
+            let n = 0;
+            document.querySelectorAll('.pt-row').forEach(row => {
+              const statusOk = _statusFilter === 'all' || row.dataset.status === _statusFilter;
+              const searchOk = row.dataset.search.includes(q);
+              const show = statusOk && searchOk;
+              row.style.display = show ? '' : 'none';
+              if (show) n++;
+            });
+            const info = document.getElementById('pt-result-info');
+            const sub  = document.getElementById('pt-table-sub');
+            if (info) info.textContent = n + ' hasta gösteriliyor';
+            if (sub)  sub.textContent  = n + ' kayıt listeleniyor';
+
+            let empty = document.getElementById('pt-tbl-empty');
+            const tbody = document.getElementById('pt-tbody');
+            if (n === 0 && !empty) {
+              empty = document.createElement('tr'); empty.id = 'pt-tbl-empty';
+              empty.innerHTML = `<td colspan="8"><div class="pt-empty"><i class="bi bi-person-x"></i><div class="pt-empty-title">Hasta bulunamadı</div><div style="font-size:13px">Farklı arama terimi veya filtre deneyin.</div></div></td>`;
+              tbody.appendChild(empty);
+            } else if (n > 0 && empty) { empty.remove(); }
+          }
+
+          /* ─ Branch / Doctor filter (dummy) ─ */
+          function filterBranch(v) {
+            Shell.toast(v ? `${v} branşı filtrelendi.` : 'Tüm branşlar gösteriliyor.', 'info', 'bi-funnel');
+          }
+          function filterDoctor(v) {
+            Shell.toast(v ? `${v} hastaları filtrelendi.` : 'Tüm doktorlar gösteriliyor.', 'info', 'bi-funnel');
+          }
+
+          /* ─ Sort ─ */
+          function sort(by) {
+            Shell.toast(`Tablo ${by === 'name' ? 'hasta adına' : by === 'age' ? 'yaşa' : 'son ziyarete'} göre sıralandı.`, 'info', 'bi-sort-down');
+          }
+
+          /* ─ Pagination ─ */
+          function changePage(n) {
+            document.querySelectorAll('.pt-page-btn').forEach(b => b.classList.remove('active'));
+            Shell.toast(`Sayfa ${n} yükleniyor...`, 'info', 'bi-arrow-right');
+          }
+
+          /* ─ Modal helpers ─ */
+          function open(id)  { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; }
+          function close(id) { document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; }
+
+          /* ─ Detail ─ */
+          function openDetail(id) {
+            const d = DATA[id]; if (!d) return;
+            _currentPatient = d.name;
+
+            document.getElementById('pt-d-av').textContent    = d.av;
+            document.getElementById('pt-d-av').style.background = d.avBg;
+            document.getElementById('pt-d-name').textContent  = d.name;
+            document.getElementById('pt-d-meta').textContent  = d.meta;
+            document.getElementById('pt-d-branch').textContent    = d.branch;
+            document.getElementById('pt-d-doctor').textContent    = d.doctor;
+            document.getElementById('pt-d-blood').textContent     = d.blood;
+            document.getElementById('pt-d-lastvisit').textContent = d.lastvisit;
+            document.getElementById('pt-d-phone').textContent     = d.phone;
+            document.getElementById('pt-d-insurance').textContent = d.insurance;
+            document.getElementById('pt-d-diagnosis').textContent = d.diagnosis;
+
+            // Status badge
+            const statusMap = {
+              active: ['active','Aktif Tedavi'],
+              critical: ['critical','Kritik'],
+              new: ['new','Yeni Kayıt'],
+              discharged: ['discharged','Taburcu'],
+            };
+            const [cls, label] = statusMap[d.status] || ['discharged','—'];
+            document.getElementById('pt-d-badge').innerHTML =
+              `<span class="pt-badge ${cls}"><i class="bi bi-circle-fill" style="font-size:6px"></i>${label}</span>`;
+
+            // History
+            const histEl = document.getElementById('pt-d-history');
+            histEl.innerHTML = d.history.map(h => `
+              <div class="pt-tl-item">
+                <div class="pt-tl-dot" style="background:${h.color}"></div>
+                <div class="pt-tl-date">${h.date}</div>
+                <div class="pt-tl-text">${h.text}</div>
+                <div class="pt-tl-doc">${h.doctor}</div>
+              </div>`).join('');
+
+            // Prescriptions
+            const rxEl = document.getElementById('pt-d-rx');
+            if (d.rx.length === 0) {
+              rxEl.innerHTML = '<span style="font-size:13px;color:var(--text-muted)">Aktif reçete bulunmuyor.</span>';
+            } else {
+              rxEl.innerHTML = d.rx.map(r =>
+                `<span class="pt-rx-chip"><i class="bi bi-capsule"></i>${r}</span>`
+              ).join('');
+            }
+
+            open('pt-m-detail');
+          }
+
+          /* ─ Book appointment ─ */
+          function bookAppt(name) {
+            Shell.toast(`${name} için randevu oluşturuluyor...`, 'success', 'bi-calendar-plus');
+          }
+          function bookApptFromDetail() {
+            Shell.toast(`${_currentPatient} için randevu oluşturuluyor...`, 'success', 'bi-calendar-plus');
+          }
+
+          /* ─ Add ─ */
+          function openAdd() { open('pt-m-add'); }
+
+          /* ─ Delete ─ */
+          function confirmDelete(name, btn) {
+            _delName = name;
+            _delRow  = btn.closest('.pt-row');
+            document.getElementById('pt-del-name').textContent = name;
+            open('pt-m-delete');
+          }
+          function execDelete() {
+            close('pt-m-delete');
+            if (_delRow) {
+              _delRow.style.transition = 'opacity .3s ease';
+              _delRow.style.opacity = '0';
+              setTimeout(() => { _delRow?.remove(); _delRow = null; filter(); }, 320);
+            }
+            Shell.toast(`${_delName} kaydı silindi.`, 'danger', 'bi-trash3');
+          }
+
+          /* ─ Export / Print ─ */
+          function exportList() { Shell.toast('Hasta listesi Excel olarak hazırlanıyor...', 'info', 'bi-file-earmark-spreadsheet'); }
+          function printList()  { Shell.toast('Yazdırma hazırlanıyor...', 'info', 'bi-printer'); }
+
+          /* ─ ESC ─ */
+          document.addEventListener('keydown', e => {
+            if (e.key === 'Escape')
+              document.querySelectorAll('.pt-overlay.show').forEach(m => close(m.id));
+          });
+
+          /* ─ Init ─ */
+          if (typeof Shell !== 'undefined' && Shell.setPage)
+            Shell.setPage('Hastalar', 'Admin Paneli / Klinik / Hastalar');
+
+          return { setTab, filter, filterBranch, filterDoctor, sort, changePage, openDetail, bookAppt, bookApptFromDetail, openAdd, confirmDelete, execDelete, exportList, printList, close };
+        })();
+    </script>
+
+</main>
+
+

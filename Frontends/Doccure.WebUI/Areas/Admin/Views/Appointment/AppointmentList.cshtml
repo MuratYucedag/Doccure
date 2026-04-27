@@ -1,0 +1,1894 @@
+﻿
+@{
+    ViewData["Title"] = "AppointmentList";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+<main id="app-content">
+
+    <style>
+        /* ── Stat Grid ── */
+        .rv-stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        @@media(max - width:900px) {
+            .rv-stat-grid
+
+        {
+            grid-template-columns: repeat(2,1fr)
+        }
+
+        }
+        @@media(max - width:480px) {
+            .rv-stat-grid
+
+        {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        }
+
+        .rv-stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+        }
+
+            .rv-stat-card:hover {
+                box-shadow: 0 4px 20px rgba(59,130,246,.13);
+                transform: translateY(-2px);
+            }
+
+        .rv-si {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .rv-si-blue {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .rv-si-green {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .rv-si-orange {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .rv-si-red {
+            background: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .rv-stat-val {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.1;
+        }
+
+        .rv-stat-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .rv-stat-sub {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+            .rv-stat-sub.up {
+                color: var(--success);
+            }
+
+            .rv-stat-sub.down {
+                color: var(--danger);
+            }
+
+        /* ── Layout ── */
+        .rv-layout {
+            display: grid;
+            grid-template-columns: 272px 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+        @@media(max - width:960px) {
+            .rv-layout
+
+        {
+            grid-template-columns: 1fr
+        }
+
+        }
+
+        /* ── LEFT ── */
+        .rv-left {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: sticky;
+            top: calc(var(--topbar-h) + 16px);
+        }
+
+        .rv-cal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .rv-cal-head {
+            background: linear-gradient(135deg,var(--primary),var(--primary-dk));
+            padding: 15px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rv-cal-month {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .rv-cal-nav {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.3);
+            background: rgba(255,255,255,.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: #fff;
+            cursor: pointer;
+            transition: background var(--dur);
+        }
+
+            .rv-cal-nav:hover {
+                background: rgba(255,255,255,.28);
+            }
+
+        .rv-cal-body {
+            padding: 12px 14px 14px;
+        }
+
+        .rv-cal-dow {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            margin-bottom: 4px;
+        }
+
+            .rv-cal-dow span {
+                text-align: center;
+                font-size: 10px;
+                font-weight: 700;
+                color: var(--text-muted);
+                letter-spacing: .04em;
+                padding: 4px 0;
+            }
+
+        .rv-cal-days {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            gap: 2px;
+        }
+
+        .rv-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text);
+            position: relative;
+            transition: background var(--dur), color var(--dur);
+        }
+
+            .rv-day:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+            }
+
+            .rv-day.other {
+                color: var(--text-muted);
+                opacity: .35;
+                cursor: default;
+            }
+
+                .rv-day.other:hover {
+                    background: transparent;
+                    color: var(--text-muted);
+                }
+
+            .rv-day.today {
+                font-weight: 700;
+                color: var(--primary);
+            }
+
+            .rv-day.selected {
+                background: var(--primary);
+                color: #fff !important;
+                font-weight: 700;
+            }
+
+                .rv-day.selected:hover {
+                    background: var(--primary-dk);
+                }
+
+            .rv-day.has-dot::after {
+                content: '';
+                position: absolute;
+                bottom: 2px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 4px;
+                height: 4px;
+                border-radius: 50%;
+            }
+
+            .rv-day.c-ok::after {
+                background: var(--success);
+            }
+
+            .rv-day.c-pend::after {
+                background: var(--warning);
+            }
+
+            .rv-day.c-busy::after {
+                background: var(--danger);
+            }
+
+            .rv-day.selected.has-dot::after {
+                background: #fff;
+            }
+
+        .rv-cal-legend {
+            border-top: 1px solid var(--border);
+            padding: 11px 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+        }
+
+        .rv-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .rv-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* Today list */
+        .rv-today-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .rv-today-head {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .rv-today-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rv-today-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .rv-today-body {
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .rv-slot {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+            .rv-slot:hover {
+                border-color: #C7D9F8;
+                background: var(--primary-bg);
+            }
+
+        .rv-slot-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .rv-slot-time {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+            white-space: nowrap;
+            min-width: 36px;
+        }
+
+        .rv-slot-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .rv-slot-doc {
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .rv-slot-mark {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 20px;
+            flex-shrink: 0;
+        }
+
+        /* ── RIGHT ── */
+        .rv-right {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Toolbar */
+        .rv-toolbar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 13px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rv-search {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+            max-width: 280px;
+        }
+
+            .rv-search i {
+                position: absolute;
+                left: 11px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--text-muted);
+                font-size: 13px;
+                pointer-events: none;
+            }
+
+            .rv-search input {
+                width: 100%;
+                border: 1px solid var(--border);
+                border-radius: 20px;
+                padding: 8px 14px 8px 32px;
+                font-size: 13px;
+                font-family: inherit;
+                background: var(--bg);
+                color: var(--text);
+                outline: none;
+                transition: border-color var(--dur), box-shadow var(--dur);
+            }
+
+                .rv-search input:focus {
+                    border-color: var(--primary);
+                    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+                    background: #fff;
+                }
+
+                .rv-search input::placeholder {
+                    color: var(--text-muted);
+                }
+
+        .rv-select {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .rv-tabs {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .rv-tab {
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 6px 13px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .rv-tab:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+                border-color: #C7D9F8;
+            }
+
+            .rv-tab.active {
+                background: var(--primary);
+                color: #fff;
+                border-color: var(--primary);
+            }
+
+        .rv-tab-n {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        .rv-tab.active .rv-tab-n {
+            background: rgba(255,255,255,.25);
+        }
+
+        .rv-tab:not(.active) .rv-tab-n {
+            background: var(--bg);
+            color: var(--text-muted);
+        }
+
+        .rv-view-toggle {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .rv-vbtn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+            .rv-vbtn.active {
+                background: var(--primary-bg);
+                color: var(--primary);
+            }
+
+        /* Table */
+        .rv-table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .rv-table-head {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .rv-table-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rv-table-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .rv-tbl {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+            .rv-tbl th {
+                padding: 10px 16px;
+                text-align: left;
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: .07em;
+                text-transform: uppercase;
+                color: var(--text-muted);
+                background: var(--bg);
+                border-bottom: 1px solid var(--border);
+                white-space: nowrap;
+            }
+
+            .rv-tbl td {
+                padding: 13px 16px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: middle;
+            }
+
+            .rv-tbl tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .rv-tbl tbody tr {
+                transition: background var(--dur);
+                cursor: pointer;
+            }
+
+                .rv-tbl tbody tr:hover {
+                    background: #F8FAFF;
+                }
+
+        .rv-patient-cell {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .rv-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .rv-patient-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .rv-patient-id {
+            font-size: 10.5px;
+            color: var(--text-muted);
+        }
+
+        .rv-doc-cell {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+        }
+
+        .rv-doc-av {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .rv-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+            .rv-badge i {
+                font-size: 6px;
+            }
+
+            .rv-badge.confirmed {
+                background: var(--success-bg);
+                color: #065F46;
+            }
+
+            .rv-badge.pending {
+                background: var(--warning-bg);
+                color: #92400E;
+            }
+
+            .rv-badge.cancelled {
+                background: var(--danger-bg);
+                color: #991B1B;
+            }
+
+            .rv-badge.completed {
+                background: #F1F5F9;
+                color: #475569;
+            }
+
+        .rv-priority {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+            .rv-priority.high {
+                background: var(--danger-bg);
+                color: #991B1B;
+            }
+
+            .rv-priority.normal {
+                background: var(--primary-bg);
+                color: var(--primary-dk);
+            }
+
+            .rv-priority.low {
+                background: var(--success-bg);
+                color: #065F46;
+            }
+
+        .rv-action-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+            margin-right: 3px;
+        }
+
+            .rv-action-btn:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+                border-color: #C7D9F8;
+            }
+
+            .rv-action-btn.success:hover {
+                background: var(--success-bg);
+                color: var(--success);
+                border-color: #A7F3D0;
+            }
+
+            .rv-action-btn.danger:hover {
+                background: var(--danger-bg);
+                color: var(--danger);
+                border-color: #FCA5A5;
+            }
+
+        /* Card view */
+        #rv-card-view {
+            display: none;
+            grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+            gap: 16px;
+        }
+
+            #rv-card-view.active {
+                display: grid;
+            }
+
+        .rv-appt-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur);
+            cursor: pointer;
+            animation: rvUp .28s var(--ease) both;
+        }
+
+            .rv-appt-card:hover {
+                box-shadow: 0 4px 20px rgba(59,130,246,.13);
+                transform: translateY(-2px);
+                border-color: #C7D9F8;
+            }
+        @@keyframes rvUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(12px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        }
+
+        .rv-card-accent {
+            height: 4px;
+        }
+
+        .rv-card-body {
+            padding: 16px 18px;
+            flex: 1;
+        }
+
+        .rv-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .rv-card-id {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        .rv-card-date {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            background: var(--primary-bg);
+            padding: 3px 9px;
+            border-radius: 20px;
+        }
+
+        .rv-card-patient {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .rv-card-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .rv-card-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 10px 0;
+        }
+
+        .rv-card-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+            .rv-card-row:last-child {
+                margin-bottom: 0;
+            }
+
+            .rv-card-row i {
+                font-size: 13px;
+                color: var(--primary);
+                flex-shrink: 0;
+                width: 16px;
+            }
+
+        .rv-card-footer {
+            padding: 10px 14px;
+            border-top: 1px solid var(--border);
+            background: #FAFBFE;
+            display: flex;
+            gap: 5px;
+        }
+
+        .rv-cbtn {
+            flex: 1;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all var(--dur);
+        }
+
+            .rv-cbtn.primary {
+                color: var(--primary);
+                border-color: #C7D9F8;
+                background: var(--primary-bg);
+            }
+
+                .rv-cbtn.primary:hover {
+                    background: var(--primary);
+                    color: #fff;
+                }
+
+            .rv-cbtn.success {
+                color: var(--success);
+                border-color: #A7F3D0;
+                background: var(--success-bg);
+            }
+
+                .rv-cbtn.success:hover {
+                    background: var(--success);
+                    color: #fff;
+                }
+
+            .rv-cbtn.danger:hover {
+                background: var(--danger-bg);
+                border-color: #FCA5A5;
+                color: var(--danger);
+            }
+
+            .rv-cbtn:hover {
+                background: var(--bg);
+                color: var(--text);
+            }
+
+        /* Pagination */
+        .rv-pagination {
+            padding: 13px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .rv-page-info {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .rv-pages {
+            display: flex;
+            gap: 4px;
+        }
+
+        .rv-page-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+            .rv-page-btn:hover {
+                background: var(--primary-bg);
+                color: var(--primary);
+                border-color: #C7D9F8;
+            }
+
+            .rv-page-btn.active {
+                background: var(--primary);
+                color: #fff;
+                border-color: var(--primary);
+            }
+
+        /* Empty */
+        .rv-empty {
+            padding: 56px 24px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+            .rv-empty i {
+                font-size: 46px;
+                opacity: .15;
+                display: block;
+                margin-bottom: 12px;
+            }
+
+        .rv-empty-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 5px;
+        }
+
+        /* Modal */
+        .rv-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,.45);
+            z-index: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+
+            .rv-overlay.show {
+                opacity: 1;
+                pointer-events: all;
+            }
+
+        .rv-modal-box {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,.18);
+            width: 100%;
+            max-width: 520px;
+            transform: scale(.93) translateY(16px);
+            transition: transform .26s cubic-bezier(.34,1.56,.64,1);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rv-overlay.show .rv-modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .rv-modal-header {
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .rv-modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rv-modal-subtitle {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .rv-modal-close {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--border);
+            background: transparent;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background var(--dur);
+        }
+
+            .rv-modal-close:hover {
+                background: var(--bg);
+            }
+
+        .rv-modal-body {
+            padding: 20px 22px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .rv-modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .rv-form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .rv-form-control {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur);
+        }
+
+            .rv-form-control:focus {
+                border-color: var(--primary);
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+            }
+
+        .rv-form-group {
+            margin-bottom: 14px;
+        }
+
+        .rv-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .rv-detail-cell {
+            padding: 11px 14px;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+            .rv-detail-cell:nth-child(even) {
+                border-right: none;
+            }
+
+            .rv-detail-cell:nth-last-child(-n+2) {
+                border-bottom: none;
+            }
+
+        .rv-detail-lbl {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: 4px;
+        }
+
+        .rv-detail-val {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .rv-danger-note {
+            background: var(--danger-bg);
+            border: 1px solid #FCA5A5;
+            border-radius: var(--radius-sm);
+            padding: 11px 13px;
+            font-size: 12px;
+            color: #991B1B;
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+            .rv-danger-note i {
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
+
+        /* Global btns */
+        .rv-btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+        }
+
+            .rv-btn-primary:hover {
+                background: var(--primary-dk);
+                box-shadow: 0 4px 12px rgba(59,130,246,.3);
+                transform: translateY(-1px);
+            }
+
+        .rv-btn-success {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background var(--dur), box-shadow var(--dur);
+        }
+
+            .rv-btn-success:hover {
+                background: #059669;
+                box-shadow: 0 4px 12px rgba(16,185,129,.3);
+            }
+
+        .rv-btn-outline {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+            .rv-btn-outline:hover {
+                background: var(--bg);
+                color: var(--text);
+            }
+
+        .rv-page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .rv-page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .rv-page-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+    </style>
+
+
+    <!-- Page Header -->
+    <div class="rv-page-header">
+        <div>
+            <h1 class="rv-page-title">Randevu Listesi</h1>
+            <p class="rv-page-sub">Tüm randevuları görüntüleyin, onaylayın ve yönetin</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="rv-btn-outline" onclick="RV.exportList()"><i class="bi bi-download"></i> Dışa Aktar</button>
+            <button class="rv-btn-primary" onclick="RV.openNew()"><i class="bi bi-calendar-plus"></i> Yeni Randevu</button>
+        </div>
+    </div>
+
+    <!-- Stat Strip -->
+    <div class="rv-stat-grid">
+        <div class="rv-stat-card">
+            <div class="rv-si rv-si-blue"><i class="bi bi-calendar3"></i></div>
+            <div><div class="rv-stat-val">347</div><div class="rv-stat-lbl">Bu Ayki Toplam</div><div class="rv-stat-sub up"><i class="bi bi-arrow-up-short"></i>+12% geçen ay</div></div>
+        </div>
+        <div class="rv-stat-card">
+            <div class="rv-si rv-si-green"><i class="bi bi-calendar-check"></i></div>
+            <div><div class="rv-stat-val" id="rv-c-confirmed">8</div><div class="rv-stat-lbl">Onaylandı</div><div class="rv-stat-sub up">%76 onay oranı</div></div>
+        </div>
+        <div class="rv-stat-card">
+            <div class="rv-si rv-si-orange"><i class="bi bi-hourglass-split"></i></div>
+            <div><div class="rv-stat-val" id="rv-c-pending">3</div><div class="rv-stat-lbl">Onay Bekliyor</div><div class="rv-stat-sub down">İşlem gerekiyor</div></div>
+        </div>
+        <div class="rv-stat-card">
+            <div class="rv-si rv-si-red"><i class="bi bi-calendar-x"></i></div>
+            <div><div class="rv-stat-val">2</div><div class="rv-stat-lbl">İptal Edildi</div><div class="rv-stat-sub down">%8 iptal oranı</div></div>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="rv-layout">
+
+        <!-- LEFT -->
+        <div class="rv-left">
+            <div class="rv-cal">
+                <div class="rv-cal-head">
+                    <button class="rv-cal-nav" onclick="RV.calPrev()"><i class="bi bi-chevron-left"></i></button>
+                    <div class="rv-cal-month" id="rv-cal-label">Nisan 2026</div>
+                    <button class="rv-cal-nav" onclick="RV.calNext()"><i class="bi bi-chevron-right"></i></button>
+                </div>
+                <div class="rv-cal-body">
+                    <div class="rv-cal-dow"><span>Pt</span><span>Sa</span><span>Ça</span><span>Pe</span><span>Cu</span><span>Ct</span><span>Pz</span></div>
+                    <div class="rv-cal-days" id="rv-cal-days"></div>
+                </div>
+                <div class="rv-cal-legend">
+                    <div class="rv-legend-item"><div class="rv-legend-dot" style="background:var(--success)"></div>Onaylı gün</div>
+                    <div class="rv-legend-item"><div class="rv-legend-dot" style="background:var(--warning)"></div>Bekleyen</div>
+                    <div class="rv-legend-item"><div class="rv-legend-dot" style="background:var(--danger)"></div>Yoğun gün</div>
+                    <div class="rv-legend-item"><div class="rv-legend-dot" style="background:var(--primary)"></div>Bugün</div>
+                </div>
+            </div>
+
+            <div class="rv-today-card">
+                <div class="rv-today-head">
+                    <div class="rv-today-title"><i class="bi bi-clock me-1" style="color:var(--primary)"></i>Bugün</div>
+                    <div class="rv-today-date" id="rv-today-lbl"></div>
+                </div>
+                <div class="rv-today-body">
+                    <div class="rv-slot" onclick="RV.openDetail('A01')">
+                        <div class="rv-slot-dot" style="background:var(--success)"></div>
+                        <div class="rv-slot-time">09:00</div>
+                        <div class="rv-slot-name">Ayşe Kaya</div>
+                        <div class="rv-slot-doc">Dr. M. Demir</div>
+                        <div class="rv-slot-mark" style="background:var(--success-bg);color:#065F46">✓</div>
+                    </div>
+                    <div class="rv-slot" onclick="RV.openDetail('A02')">
+                        <div class="rv-slot-dot" style="background:var(--warning)"></div>
+                        <div class="rv-slot-time">10:30</div>
+                        <div class="rv-slot-name">Ali Çelik</div>
+                        <div class="rv-slot-doc">Dr. S. Arslan</div>
+                        <div class="rv-slot-mark" style="background:var(--warning-bg);color:#92400E">?</div>
+                    </div>
+                    <div class="rv-slot" onclick="RV.openDetail('A03')">
+                        <div class="rv-slot-dot" style="background:var(--success)"></div>
+                        <div class="rv-slot-time">11:00</div>
+                        <div class="rv-slot-name">Fatma Yıldız</div>
+                        <div class="rv-slot-doc">Dr. C. Öztürk</div>
+                        <div class="rv-slot-mark" style="background:var(--success-bg);color:#065F46">✓</div>
+                    </div>
+                    <div class="rv-slot" onclick="RV.openDetail('A04')">
+                        <div class="rv-slot-dot" style="background:var(--primary)"></div>
+                        <div class="rv-slot-time">14:00</div>
+                        <div class="rv-slot-name">Emre Şahin</div>
+                        <div class="rv-slot-doc">Dr. Z. Kara</div>
+                        <div class="rv-slot-mark" style="background:var(--primary-bg);color:var(--primary)">→</div>
+                    </div>
+                    <div class="rv-slot" onclick="RV.openDetail('A05')">
+                        <div class="rv-slot-dot" style="background:var(--success)"></div>
+                        <div class="rv-slot-time">15:30</div>
+                        <div class="rv-slot-name">Merve Doğan</div>
+                        <div class="rv-slot-doc">Dr. A. Yılmaz</div>
+                        <div class="rv-slot-mark" style="background:var(--success-bg);color:#065F46">✓</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="rv-right">
+
+            <!-- Toolbar -->
+            <div class="rv-toolbar">
+                <div class="rv-search">
+                    <i class="bi bi-search"></i>
+                    <input id="rv-search" placeholder="Hasta veya doktor ara..." oninput="RV.filter()">
+                </div>
+                <select class="rv-select" onchange="RV.filterBranch(this.value)">
+                    <option value="">Tüm Branşlar</option>
+                    <option>Kardiyoloji</option>
+                    <option>Dermatoloji</option>
+                    <option>Ortopedi</option>
+                    <option>Nöroloji</option>
+                    <option>Pediatri</option>
+                    <option>Radyoloji</option>
+                </select>
+                <div class="rv-tabs">
+                    <button class="rv-tab active" data-s="all" onclick="RV.setTab(this)">Tümü <span class="rv-tab-n" id="rv-n-all">10</span></button>
+                    <button class="rv-tab" data-s="confirmed" onclick="RV.setTab(this)">Onaylı <span class="rv-tab-n" id="rv-n-confirmed">6</span></button>
+                    <button class="rv-tab" data-s="pending" onclick="RV.setTab(this)">Bekliyor <span class="rv-tab-n" id="rv-n-pending">2</span></button>
+                    <button class="rv-tab" data-s="cancelled" onclick="RV.setTab(this)">İptal <span class="rv-tab-n" id="rv-n-cancelled">2</span></button>
+                </div>
+                <div class="rv-view-toggle" style="margin-left:auto">
+                    <button class="rv-vbtn active" id="rv-vtbl" title="Tablo" onclick="RV.setView('table')"><i class="bi bi-list-ul"></i></button>
+                    <button class="rv-vbtn" id="rv-vcrd" title="Kart" onclick="RV.setView('card')"><i class="bi bi-grid-1x2"></i></button>
+                </div>
+            </div>
+
+            <!-- TABLE VIEW -->
+            <div class="rv-table-card" id="rv-table-view">
+                <div class="rv-table-head">
+                    <div>
+                        <div class="rv-table-title">Randevu Listesi</div>
+                        <div class="rv-table-sub" id="rv-sub">10 randevu listeleniyor</div>
+                    </div>
+                    <div style="display:flex;gap:6px">
+                        <button class="rv-btn-outline" style="padding:7px 12px;font-size:12px" onclick="RV.exportList()"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+                        <select class="rv-select" style="font-size:12px;padding:7px 10px" onchange="RV.sortBy(this.value)">
+                            <option value="date">Tarihe göre</option>
+                            <option value="patient">Hastaya göre</option>
+                            <option value="doctor">Doktora göre</option>
+                            <option value="priority">Önceliğe göre</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="overflow-x:auto">
+                    <table class="rv-tbl">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Hasta</th>
+                                <th>Doktor</th>
+                                <th>Branş</th>
+                                <th>Tarih &amp; Saat</th>
+                                <th>Öncelik</th>
+                                <th>Durum</th>
+                                <th style="text-align:center">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rv-tbody">
+
+                            <tr class="rv-row" data-s="confirmed" data-q="ayşe kaya mehmet demir kardiyoloji" onclick="RV.openDetail('A01')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1042</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">AK</div><div><div class="rv-patient-name">Ayşe Kaya</div><div class="rv-patient-id">#H-0284</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">MD</div>Dr. M. Demir</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--primary-bg);color:var(--primary)">Kardiyoloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600">27 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">09:00 – 09:30</div></td>
+                                <td><span class="rv-priority high">Acil</span></td>
+                                <td><span class="rv-badge confirmed"><i class="bi bi-circle-fill"></i>Onaylandı</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Tamamlandı" onclick="RV.complete('Ayşe Kaya')"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A01')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Ayşe Kaya',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="pending" data-q="ali çelik selin arslan dermatoloji" onclick="RV.openDetail('A02')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1043</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#10B981,#059669)">AÇ</div><div><div class="rv-patient-name">Ali Çelik</div><div class="rv-patient-id">#H-0312</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#10B981,#059669)">SA</div>Dr. S. Arslan</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--success-bg);color:var(--success)">Dermatoloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600">27 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">10:30 – 11:00</div></td>
+                                <td><span class="rv-priority normal">Normal</span></td>
+                                <td><span class="rv-badge pending"><i class="bi bi-circle-fill"></i>Beklemede</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Onayla" onclick="RV.approve('Ali Çelik',this)"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A02')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Ali Çelik',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="confirmed" data-q="fatma yıldız can öztürk ortopedi" onclick="RV.openDetail('A03')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1044</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706)">FY</div><div><div class="rv-patient-name">Fatma Yıldız</div><div class="rv-patient-id">#H-0198</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#F59E0B,#D97706)">CO</div>Dr. C. Öztürk</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#FFFBEB;color:var(--warning)">Ortopedi</span></td>
+                                <td><div style="font-size:13px;font-weight:600">27 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">11:00 – 11:30</div></td>
+                                <td><span class="rv-priority low">Düşük</span></td>
+                                <td><span class="rv-badge confirmed"><i class="bi bi-circle-fill"></i>Onaylandı</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Tamamlandı" onclick="RV.complete('Fatma Yıldız')"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A03')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Fatma Yıldız',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="confirmed" data-q="emre şahin zeynep kara nöroloji" onclick="RV.openDetail('A04')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1045</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">EŞ</div><div><div class="rv-patient-name">Emre Şahin</div><div class="rv-patient-id">#H-0401</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#7C3AED,#6D28D9)">ZK</div>Dr. Z. Kara</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#F3F0FF;color:#7C3AED">Nöroloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600">27 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">14:00 – 14:30</div></td>
+                                <td><span class="rv-priority high">Acil</span></td>
+                                <td><span class="rv-badge confirmed"><i class="bi bi-circle-fill"></i>Onaylandı</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Tamamlandı" onclick="RV.complete('Emre Şahin')"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A04')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Emre Şahin',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="confirmed" data-q="merve doğan ahmet yılmaz pediatri" onclick="RV.openDetail('A05')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1046</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">MD</div><div><div class="rv-patient-name">Merve Doğan</div><div class="rv-patient-id">#H-0522</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#06B6D4,#0891B2)">AY</div>Dr. A. Yılmaz</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#ECFEFF;color:#06B6D4">Pediatri</span></td>
+                                <td><div style="font-size:13px;font-weight:600">27 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">15:30 – 16:00</div></td>
+                                <td><span class="rv-priority normal">Normal</span></td>
+                                <td><span class="rv-badge confirmed"><i class="bi bi-circle-fill"></i>Onaylandı</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Tamamlandı" onclick="RV.complete('Merve Doğan')"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A05')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Merve Doğan',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="pending" data-q="kemal arslan neslihan baş radyoloji" onclick="RV.openDetail('A06')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1047</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#6366F1,#4F46E5)">KA</div><div><div class="rv-patient-name">Kemal Arslan</div><div class="rv-patient-id">#H-0611</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#6366F1,#4F46E5)">NB</div>Dr. N. Baş</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#EEF2FF;color:#6366F1">Radyoloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600">28 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">09:00 – 09:30</div></td>
+                                <td><span class="rv-priority normal">Normal</span></td>
+                                <td><span class="rv-badge pending"><i class="bi bi-circle-fill"></i>Beklemede</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Onayla" onclick="RV.approve('Kemal Arslan',this)"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A06')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Kemal Arslan',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="confirmed" data-q="nilüfer çetin selin arslan dermatoloji" onclick="RV.openDetail('A07')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1050</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#A855F7,#9333EA)">NÇ</div><div><div class="rv-patient-name">Nilüfer Çetin</div><div class="rv-patient-id">#H-0934</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#10B981,#059669)">SA</div>Dr. S. Arslan</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--success-bg);color:var(--success)">Dermatoloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600">29 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">10:00 – 10:30</div></td>
+                                <td><span class="rv-priority normal">Normal</span></td>
+                                <td><span class="rv-badge confirmed"><i class="bi bi-circle-fill"></i>Onaylandı</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Tamamlandı" onclick="RV.complete('Nilüfer Çetin')"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A07')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Nilüfer Çetin',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="confirmed" data-q="sevgi koç mehmet demir kardiyoloji" onclick="RV.openDetail('A08')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1052</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:linear-gradient(135deg,#EC4899,#DB2777)">SK</div><div><div class="rv-patient-name">Sevgi Koç</div><div class="rv-patient-id">#H-0734</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8)">MD</div>Dr. M. Demir</div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--primary-bg);color:var(--primary)">Kardiyoloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600">30 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">11:00 – 11:30</div></td>
+                                <td><span class="rv-priority high">Acil</span></td>
+                                <td><span class="rv-badge confirmed"><i class="bi bi-circle-fill"></i>Onaylandı</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn success" title="Tamamlandı" onclick="RV.complete('Sevgi Koç')"><i class="bi bi-check-lg"></i></button>
+                                    <button class="rv-action-btn" title="Düzenle" onclick="RV.openEdit('A08')"><i class="bi bi-pencil"></i></button>
+                                    <button class="rv-action-btn danger" title="İptal" onclick="RV.confirmCancel('Sevgi Koç',this)"><i class="bi bi-x-lg"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="cancelled" data-q="bülent yıldız can öztürk ortopedi" onclick="RV.openDetail('A09')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1049</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:#94A3B8">BY</div><div><div class="rv-patient-name" style="color:var(--text-muted)">Bülent Yıldız</div><div class="rv-patient-id">#H-0812</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:#94A3B8">CO</div><span style="color:var(--text-muted)">Dr. C. Öztürk</span></div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#FFFBEB;color:var(--warning)">Ortopedi</span></td>
+                                <td><div style="font-size:13px;font-weight:600;color:var(--text-muted)">28 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">13:00 – 13:30</div></td>
+                                <td><span class="rv-priority low">Düşük</span></td>
+                                <td><span class="rv-badge cancelled"><i class="bi bi-circle-fill"></i>İptal</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn" title="Yeniden Planla" onclick="RV.openNew()"><i class="bi bi-arrow-clockwise"></i></button>
+                                    <button class="rv-action-btn danger" title="Sil" onclick="RV.confirmCancel('Bülent Yıldız',this)"><i class="bi bi-trash3"></i></button>
+                                </td>
+                            </tr>
+
+                            <tr class="rv-row" data-s="cancelled" data-q="tarık demir zeynep kara nöroloji" onclick="RV.openDetail('A10')">
+                                <td style="color:var(--text-muted);font-size:11px;font-weight:600">#R-1051</td>
+                                <td><div class="rv-patient-cell"><div class="rv-avatar" style="background:#94A3B8">TD</div><div><div class="rv-patient-name" style="color:var(--text-muted)">Tarık Demir</div><div class="rv-patient-id">#H-1021</div></div></div></td>
+                                <td><div class="rv-doc-cell"><div class="rv-doc-av" style="background:#94A3B8">ZK</div><span style="color:var(--text-muted)">Dr. Z. Kara</span></div></td>
+                                <td><span style="font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:#F3F0FF;color:#7C3AED">Nöroloji</span></td>
+                                <td><div style="font-size:13px;font-weight:600;color:var(--text-muted)">30 Nis 2026</div><div style="font-size:11px;color:var(--text-muted)">09:30 – 10:00</div></td>
+                                <td><span class="rv-priority normal">Normal</span></td>
+                                <td><span class="rv-badge cancelled"><i class="bi bi-circle-fill"></i>İptal</span></td>
+                                <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                    <button class="rv-action-btn" title="Yeniden Planla" onclick="RV.openNew()"><i class="bi bi-arrow-clockwise"></i></button>
+                                    <button class="rv-action-btn danger" title="Sil" onclick="RV.confirmCancel('Tarık Demir',this)"><i class="bi bi-trash3"></i></button>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="rv-pagination">
+                    <div class="rv-page-info">1 – 10 / 347 randevu</div>
+                    <div class="rv-pages">
+                        <button class="rv-page-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                        <button class="rv-page-btn active">1</button>
+                        <button class="rv-page-btn" onclick="RV.changePage(2)">2</button>
+                        <button class="rv-page-btn" onclick="RV.changePage(3)">3</button>
+                        <span style="display:flex;align-items:center;color:var(--text-muted);font-size:12px;padding:0 4px">...</span>
+                        <button class="rv-page-btn" onclick="RV.changePage(35)">35</button>
+                        <button class="rv-page-btn" onclick="RV.changePage(2)"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD VIEW -->
+            <div id="rv-card-view"></div>
+
+        </div>
+    </div>
+
+
+    <!-- ════ MODALLER ════ -->
+    <!-- Detay -->
+    <div class="rv-overlay" id="rv-m-detail" onclick="if(event.target===this)RV.close('rv-m-detail')">
+        <div class="rv-modal-box" style="max-width:500px">
+            <div class="rv-modal-header">
+                <div>
+                    <div class="rv-modal-title"><i class="bi bi-calendar3 me-2" style="color:var(--primary)"></i>Randevu Detayı</div>
+                    <div class="rv-modal-subtitle" id="rv-d-id"></div>
+                </div>
+                <button class="rv-modal-close" onclick="RV.close('rv-m-detail')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="rv-modal-body">
+                <div style="margin-bottom:14px" id="rv-d-sbadge"></div>
+                <div class="rv-detail-grid">
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Hasta</div><div class="rv-detail-val" id="rv-d-patient"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Hasta ID</div><div class="rv-detail-val" id="rv-d-patid"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Doktor</div><div class="rv-detail-val" id="rv-d-doctor"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Branş</div><div class="rv-detail-val" id="rv-d-branch"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Tarih</div><div class="rv-detail-val" id="rv-d-date"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Saat</div><div class="rv-detail-val" id="rv-d-time"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Öncelik</div><div class="rv-detail-val" id="rv-d-priority"></div></div>
+                    <div class="rv-detail-cell"><div class="rv-detail-lbl">Süre</div><div class="rv-detail-val">30 dakika</div></div>
+                </div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px">Not</div>
+                <div id="rv-d-note" style="font-size:13px;color:var(--text);line-height:1.7;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px"></div>
+            </div>
+            <div class="rv-modal-footer">
+                <button class="rv-btn-outline" onclick="RV.close('rv-m-detail')">Kapat</button>
+                <button class="rv-btn-success" onclick="RV.close('rv-m-detail');Shell.toast('Randevu onaylandı!','success','bi-check-circle')"><i class="bi bi-check-lg"></i> Onayla</button>
+                <button class="rv-btn-primary" onclick="RV.close('rv-m-detail');RV.openEdit('current')"><i class="bi bi-pencil"></i> Düzenle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yeni / Düzenle -->
+    <div class="rv-overlay" id="rv-m-edit" onclick="if(event.target===this)RV.close('rv-m-edit')">
+        <div class="rv-modal-box" style="max-width:520px">
+            <div class="rv-modal-header">
+                <div>
+                    <div class="rv-modal-title" id="rv-e-title"><i class="bi bi-calendar-plus me-2" style="color:var(--primary)"></i>Yeni Randevu</div>
+                    <div class="rv-modal-subtitle" id="rv-e-sub">Randevu bilgilerini doldurun</div>
+                </div>
+                <button class="rv-modal-close" onclick="RV.close('rv-m-edit')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="rv-modal-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="rv-form-group"><label class="rv-form-label">Hasta Adı</label><input class="rv-form-control" id="rv-e-patient" placeholder="Ad Soyad"></div>
+                    <div class="rv-form-group"><label class="rv-form-label">Hasta ID</label><input class="rv-form-control" id="rv-e-patid" placeholder="#H-0000"></div>
+                    <div class="rv-form-group">
+                        <label class="rv-form-label">Doktor</label>
+                        <select class="rv-form-control"><option>Dr. Mehmet Demir</option><option>Dr. Selin Arslan</option><option>Dr. Can Öztürk</option><option>Dr. Zeynep Kara</option><option>Dr. Ahmet Yılmaz</option><option>Dr. Neslihan Baş</option></select>
+                    </div>
+                    <div class="rv-form-group">
+                        <label class="rv-form-label">Branş</label>
+                        <select class="rv-form-control"><option>Kardiyoloji</option><option>Dermatoloji</option><option>Ortopedi</option><option>Nöroloji</option><option>Pediatri</option><option>Radyoloji</option></select>
+                    </div>
+                    <div class="rv-form-group"><label class="rv-form-label">Tarih</label><input class="rv-form-control" type="date" id="rv-e-date"></div>
+                    <div class="rv-form-group">
+                        <label class="rv-form-label">Saat</label>
+                        <select class="rv-form-control"><option>09:00</option><option>09:30</option><option>10:00</option><option>10:30</option><option>11:00</option><option>11:30</option><option>13:00</option><option>13:30</option><option>14:00</option><option>14:30</option><option>15:00</option><option>15:30</option></select>
+                    </div>
+                    <div class="rv-form-group">
+                        <label class="rv-form-label">Öncelik</label>
+                        <select class="rv-form-control"><option>Normal</option><option>Acil</option><option>Düşük</option></select>
+                    </div>
+                    <div class="rv-form-group">
+                        <label class="rv-form-label">Durum</label>
+                        <select class="rv-form-control"><option>Beklemede</option><option>Onaylandı</option></select>
+                    </div>
+                </div>
+                <div class="rv-form-group mb-0"><label class="rv-form-label">Not</label><textarea class="rv-form-control" rows="2" placeholder="Hasta notu veya özel istek..."></textarea></div>
+            </div>
+            <div class="rv-modal-footer">
+                <button class="rv-btn-outline" onclick="RV.close('rv-m-edit')">İptal</button>
+                <button class="rv-btn-primary" onclick="RV.saveEdit()"><i class="bi bi-floppy"></i> Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- İptal -->
+    <div class="rv-overlay" id="rv-m-cancel" onclick="if(event.target===this)RV.close('rv-m-cancel')">
+        <div class="rv-modal-box" style="max-width:420px">
+            <div class="rv-modal-header">
+                <div class="rv-modal-title" style="color:var(--danger)"><i class="bi bi-calendar-x me-2"></i>Randevuyu İptal Et</div>
+                <button class="rv-modal-close" onclick="RV.close('rv-m-cancel')"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="rv-modal-body">
+                <p style="font-size:14px;line-height:1.7;color:var(--text)"><strong id="rv-cancel-name" style="color:var(--danger)"></strong> adlı hastanın randevusunu iptal etmek istiyor musunuz?</p>
+                <div class="rv-form-group mt-3 mb-0">
+                    <label class="rv-form-label">İptal Sebebi</label>
+                    <select class="rv-form-control"><option>Hasta talebi</option><option>Doktor müsait değil</option><option>Acil durum</option><option>Teknik sorun</option><option>Diğer</option></select>
+                </div>
+                <div class="rv-danger-note mt-3"><i class="bi bi-info-circle-fill"></i>Hasta SMS/e-posta ile bilgilendirilecektir.</div>
+            </div>
+            <div class="rv-modal-footer">
+                <button class="rv-btn-outline" onclick="RV.close('rv-m-cancel')">Vazgeç</button>
+                <button class="rv-btn-primary" style="background:var(--danger)" onclick="RV.execCancel()"><i class="bi bi-calendar-x"></i> İptal Et</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const RV = (() => {
+
+          const DATA = {
+            A01:{id:'#R-1042',patient:'Ayşe Kaya',patid:'#H-0284',doctor:'Dr. Mehmet Demir',branch:'Kardiyoloji',date:'27 Nisan 2026',time:'09:00 – 09:30',priority:'Acil',status:'confirmed',note:'Efor testi sonrası rutin kontrol. Kan basıncı takibi yapılacak.'},
+            A02:{id:'#R-1043',patient:'Ali Çelik',patid:'#H-0312',doctor:'Dr. Selin Arslan',branch:'Dermatoloji',date:'27 Nisan 2026',time:'10:30 – 11:00',priority:'Normal',status:'pending',note:'İlk muayene. Alerji test sonuçları getirilecek.'},
+            A03:{id:'#R-1044',patient:'Fatma Yıldız',patid:'#H-0198',doctor:'Dr. Can Öztürk',branch:'Ortopedi',date:'27 Nisan 2026',time:'11:00 – 11:30',priority:'Düşük',status:'confirmed',note:'Diz artroskopi öncesi son muayene.'},
+            A04:{id:'#R-1045',patient:'Emre Şahin',patid:'#H-0401',doctor:'Dr. Zeynep Kara',branch:'Nöroloji',date:'27 Nisan 2026',time:'14:00 – 14:30',priority:'Acil',status:'confirmed',note:'Migren atakları şiddetlendi. Profilaktik tedavi değerlendirme.'},
+            A05:{id:'#R-1046',patient:'Merve Doğan',patid:'#H-0522',doctor:'Dr. Ahmet Yılmaz',branch:'Pediatri',date:'27 Nisan 2026',time:'15:30 – 16:00',priority:'Normal',status:'confirmed',note:'Rutin aşı takvimi kontrolü.'},
+            A06:{id:'#R-1047',patient:'Kemal Arslan',patid:'#H-0611',doctor:'Dr. Neslihan Baş',branch:'Radyoloji',date:'28 Nisan 2026',time:'09:00 – 09:30',priority:'Normal',status:'pending',note:'Toraks BT çekimi planlandı.'},
+            A07:{id:'#R-1050',patient:'Nilüfer Çetin',patid:'#H-0934',doctor:'Dr. Selin Arslan',branch:'Dermatoloji',date:'29 Nisan 2026',time:'10:00 – 10:30',priority:'Normal',status:'confirmed',note:'Psöriazis takip randevusu.'},
+            A08:{id:'#R-1052',patient:'Sevgi Koç',patid:'#H-0734',doctor:'Dr. Mehmet Demir',branch:'Kardiyoloji',date:'30 Nisan 2026',time:'11:00 – 11:30',priority:'Acil',status:'confirmed',note:'Akut koroner şüphesi — acil kardiyoloji değerlendirme.'},
+            A09:{id:'#R-1049',patient:'Bülent Yıldız',patid:'#H-0812',doctor:'Dr. Can Öztürk',branch:'Ortopedi',date:'28 Nisan 2026',time:'13:00 – 13:30',priority:'Düşük',status:'cancelled',note:'Hasta kendi isteğiyle iptal etti.'},
+            A10:{id:'#R-1051',patient:'Tarık Demir',patid:'#H-1021',doctor:'Dr. Zeynep Kara',branch:'Nöroloji',date:'30 Nisan 2026',time:'09:30 – 10:00',priority:'Normal',status:'cancelled',note:'Doktor program değişikliği nedeniyle iptal edildi.'},
+          };
+
+          const SL = {confirmed:'Onaylandı',pending:'Beklemede',cancelled:'İptal',completed:'Tamamlandı'};
+          const SC = {confirmed:'confirmed',pending:'pending',cancelled:'cancelled',completed:'completed'};
+          const ACCENTS = {confirmed:'linear-gradient(90deg,var(--success),#34D399)',pending:'linear-gradient(90deg,var(--warning),#FCD34D)',cancelled:'linear-gradient(90deg,#94A3B8,#CBD5E1)',completed:'linear-gradient(90deg,var(--primary),#60A5FA)'};
+
+          let _filter='all', _cancelName='', _cancelRow=null;
+          let _calYear=2026, _calMonth=3, _selDay=27;
+
+          /* Calendar */
+          const MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+          const COK=[3,7,10,12,14,17,20,21,24,27,29];
+          const CPEND=[5,13,19,28];
+          const CBUSY=[7,14,21];
+
+          function renderCal(){
+            document.getElementById('rv-cal-label').textContent=MONTHS[_calMonth]+' '+_calYear;
+            const c=document.getElementById('rv-cal-days'); c.innerHTML='';
+            const first=new Date(_calYear,_calMonth,1).getDay();
+            const off=first===0?6:first-1;
+            const days=new Date(_calYear,_calMonth+1,0).getDate();
+            const today=new Date();
+            for(let i=0;i<off;i++){const d=document.createElement('div');d.className='rv-day other';d.textContent=new Date(_calYear,_calMonth,0).getDate()-off+1+i;c.appendChild(d);}
+            for(let day=1;day<=days;day++){
+              const d=document.createElement('div');
+              let cls='rv-day';
+              if(_calYear===today.getFullYear()&&_calMonth===today.getMonth()&&day===today.getDate()) cls+=' today';
+              if(day===_selDay) cls+=' selected';
+              if(CBUSY.includes(day))       cls+=' has-dot c-busy';
+              else if(CPEND.includes(day))  cls+=' has-dot c-pend';
+              else if(COK.includes(day))    cls+=' has-dot c-ok';
+              d.className=cls; d.textContent=day;
+              d.onclick=()=>{_selDay=day;renderCal();Shell.toast(`${day} ${MONTHS[_calMonth]} randevuları gösteriliyor.`,'info','bi-calendar3');};
+              c.appendChild(d);
+            }
+            for(let i=1;i<=42-off-days;i++){const d=document.createElement('div');d.className='rv-day other';d.textContent=i;c.appendChild(d);}
+          }
+          function calPrev(){if(_calMonth===0){_calMonth=11;_calYear--;}else _calMonth--;renderCal();}
+          function calNext(){if(_calMonth===11){_calMonth=0;_calYear++;}else _calMonth++;renderCal();}
+
+          /* View */
+          function setView(v){
+            const tbl=document.getElementById('rv-table-view');
+            const crd=document.getElementById('rv-card-view');
+            document.getElementById('rv-vtbl').classList.toggle('active',v==='table');
+            document.getElementById('rv-vcrd').classList.toggle('active',v==='card');
+            if(v==='table'){tbl.style.display='';crd.style.display='none';}
+            else{tbl.style.display='none';crd.style.display='grid';renderCards();}
+          }
+
+          function renderCards(){
+            const crd=document.getElementById('rv-card-view');
+            const q=(document.getElementById('rv-search').value||'').toLowerCase().trim();
+            const items=Object.entries(DATA).filter(([,d])=>(_filter==='all'||d.status===_filter)&&(d.patient+' '+d.doctor+' '+d.branch).toLowerCase().includes(q));
+            if(!items.length){
+              crd.innerHTML=`<div class="rv-empty" style="grid-column:1/-1"><i class="bi bi-calendar-x"></i><div class="rv-empty-title">Randevu bulunamadı</div></div>`;
+              return;
+            }
+            crd.innerHTML=items.map(([id,d],i)=>`
+              <div class="rv-appt-card" style="animation-delay:${i*.05}s" onclick="RV.openDetail('${id}')">
+                <div class="rv-card-accent" style="background:${ACCENTS[d.status]||ACCENTS.completed}"></div>
+                <div class="rv-card-body">
+                  <div class="rv-card-top">
+                    <div class="rv-card-id">${d.id}</div>
+                    <div class="rv-card-date">${d.date.split(' ').slice(0,2).join(' ')}</div>
+                  </div>
+                  <div class="rv-card-patient">${d.patient}</div>
+                  <div class="rv-card-meta">${d.patid} · ${d.time}</div>
+                  <div class="rv-card-divider"></div>
+                  <div class="rv-card-row"><i class="bi bi-person-badge"></i>${d.doctor}</div>
+                  <div class="rv-card-row"><i class="bi bi-diagram-3"></i>${d.branch}</div>
+                  <div class="rv-card-row"><i class="bi bi-flag"></i>
+                    <span class="rv-priority ${d.priority==='Acil'?'high':d.priority==='Düşük'?'low':'normal'}">${d.priority}</span>
+                    <span class="rv-badge ${SC[d.status]||''}" style="margin-left:auto;font-size:10px"><i class="bi bi-circle-fill" style="font-size:5px"></i>${SL[d.status]||''}</span>
+                  </div>
+                </div>
+                <div class="rv-card-footer" onclick="event.stopPropagation()">
+                  <button class="rv-cbtn primary" onclick="RV.openDetail('${id}')"><i class="bi bi-eye"></i> Detay</button>
+                  <button class="rv-cbtn success" onclick="RV.approve('${d.patient}',null)"><i class="bi bi-check-lg"></i> Onayla</button>
+                  <button class="rv-cbtn danger"  onclick="RV.confirmCancel('${d.patient}',null)"><i class="bi bi-x-lg"></i></button>
+                </div>
+              </div>`).join('');
+          }
+
+          /* Tab / Filter */
+          function setTab(el){
+            document.querySelectorAll('.rv-tab').forEach(t=>t.classList.remove('active'));
+            el.classList.add('active'); _filter=el.dataset.s; filter();
+          }
+          function filter(){
+            const q=(document.getElementById('rv-search').value||'').toLowerCase().trim();
+            let n=0;
+            document.querySelectorAll('.rv-row').forEach(row=>{
+              const show=(_filter==='all'||row.dataset.s===_filter)&&row.dataset.q.includes(q);
+              row.style.display=show?'':'none'; if(show)n++;
+            });
+            const sub=document.getElementById('rv-sub');
+            if(sub) sub.textContent=n+' randevu listeleniyor';
+            let empty=document.getElementById('rv-tbl-empty');
+            const tbody=document.getElementById('rv-tbody');
+            if(n===0&&!empty){empty=document.createElement('tr');empty.id='rv-tbl-empty';empty.innerHTML=`<td colspan="8"><div class="rv-empty"><i class="bi bi-calendar-x"></i><div class="rv-empty-title">Randevu bulunamadı</div></div></td>`;tbody.appendChild(empty);}
+            else if(n>0&&empty) empty.remove();
+            if(document.getElementById('rv-card-view').style.display==='grid') renderCards();
+          }
+          function filterBranch(v){Shell.toast(v?`${v} branşı filtrelendi.`:'Tüm branşlar.','info','bi-funnel');}
+          function sortBy(v){Shell.toast(`${v==='date'?'Tarihe':v==='patient'?'Hastaya':v==='doctor'?'Doktora':'Önceliğe'} göre sıralandı.`,'info','bi-sort-down');}
+          function changePage(n){Shell.toast(`Sayfa ${n} yükleniyor...`,'info','bi-arrow-right');}
+
+          /* Modal */
+          function open(id){document.getElementById(id).classList.add('show');document.body.style.overflow='hidden';}
+          function close(id){document.getElementById(id).classList.remove('show');document.body.style.overflow='';}
+
+          /* Detail */
+          function openDetail(id){
+            const d=DATA[id]; if(!d) return;
+            document.getElementById('rv-d-id').textContent=d.id;
+            document.getElementById('rv-d-patient').textContent=d.patient;
+            document.getElementById('rv-d-patid').textContent=d.patid;
+            document.getElementById('rv-d-doctor').textContent=d.doctor;
+            document.getElementById('rv-d-branch').textContent=d.branch;
+            document.getElementById('rv-d-date').textContent=d.date;
+            document.getElementById('rv-d-time').textContent=d.time;
+            document.getElementById('rv-d-priority').textContent=d.priority;
+            document.getElementById('rv-d-note').textContent=d.note;
+            document.getElementById('rv-d-sbadge').innerHTML=`<span class="rv-badge ${SC[d.status]||''}"><i class="bi bi-circle-fill" style="font-size:7px"></i>${SL[d.status]||''}</span>`;
+            open('rv-m-detail');
+          }
+
+          /* New/Edit */
+          function openNew(){
+            document.getElementById('rv-e-title').innerHTML='<i class="bi bi-calendar-plus me-2" style="color:var(--primary)"></i>Yeni Randevu';
+            document.getElementById('rv-e-sub').textContent='Randevu bilgilerini doldurun';
+            document.getElementById('rv-e-patient').value='';
+            document.getElementById('rv-e-patid').value='';
+            document.getElementById('rv-e-date').value='2026-04-27';
+            open('rv-m-edit');
+          }
+          function openEdit(id){
+            const d=DATA[id];
+            if(d){document.getElementById('rv-e-title').innerHTML='<i class="bi bi-pencil me-2" style="color:var(--primary)"></i>Randevuyu Düzenle';document.getElementById('rv-e-sub').textContent=d.id+' · '+d.patient;document.getElementById('rv-e-patient').value=d.patient;document.getElementById('rv-e-patid').value=d.patid;}
+            open('rv-m-edit');
+          }
+          function saveEdit(){
+            const p=document.getElementById('rv-e-patient').value.trim();
+            if(!p){Shell.toast('Hasta adı boş olamaz!','danger','bi-exclamation-circle');return;}
+            close('rv-m-edit'); Shell.toast(`${p} randevusu kaydedildi.`,'success','bi-calendar-check');
+          }
+
+          /* Approve / Complete */
+          function approve(name,btn){
+            if(btn){const row=btn.closest('.rv-row');const b=row?.querySelector('.rv-badge');if(b){b.className='rv-badge confirmed';b.innerHTML='<i class="bi bi-circle-fill" style="font-size:6px"></i>Onaylandı';}}
+            Shell.toast(`${name} randevusu onaylandı.`,'success','bi-check-circle');
+          }
+          function complete(name){Shell.toast(`${name} randevusu tamamlandı olarak işaretlendi.`,'success','bi-clipboard-check');}
+
+          /* Cancel */
+          function confirmCancel(name,btn){_cancelName=name;_cancelRow=btn?.closest('.rv-row')||null;document.getElementById('rv-cancel-name').textContent=name;open('rv-m-cancel');}
+          function execCancel(){
+            close('rv-m-cancel');
+            if(_cancelRow){_cancelRow.style.transition='opacity .3s ease';_cancelRow.style.opacity='0';setTimeout(()=>{_cancelRow?.remove();_cancelRow=null;filter();},320);}
+            Shell.toast(`${_cancelName} randevusu iptal edildi.`,'danger','bi-calendar-x');
+          }
+
+          /* Export */
+          function exportList(){Shell.toast('Randevu listesi Excel olarak hazırlanıyor...','info','bi-file-earmark-spreadsheet');}
+
+          /* ESC */
+          document.addEventListener('keydown',e=>{if(e.key==='Escape') document.querySelectorAll('.rv-overlay.show').forEach(m=>close(m.id));});
+
+          /* Init */
+          renderCal();
+          document.getElementById('rv-today-lbl').textContent=new Date().toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});
+          if(typeof Shell!=='undefined'&&Shell.setPage) Shell.setPage('Randevular','Admin Paneli / İşlemler / Randevular');
+
+          return {calPrev,calNext,setView,setTab,filter,filterBranch,sortBy,changePage,openDetail,openNew,openEdit,saveEdit,approve,complete,confirmCancel,execCancel,exportList,close};
+        })();
+    </script>
+
+</main>

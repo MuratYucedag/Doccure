@@ -1,0 +1,823 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediPanel – Hastane Yönetim Sistemi</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOKENS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --primary:        #3B82F6;
+  --primary-dk:     #1D4ED8;
+  --primary-bg:     #EFF6FF;
+  --success:        #10B981;
+  --success-bg:     #ECFDF5;
+  --warning:        #F59E0B;
+  --danger:         #EF4444;
+  --danger-bg:      #FEF2F2;
+
+  --surface:        #FFFFFF;
+  --bg:             #F1F5FB;
+  --text:           #0F172A;
+  --text-muted:     #64748B;
+  --border:         #E2E8F0;
+
+  --sidebar-w:      264px;
+  --sidebar-col:    68px;
+  --topbar-h:       64px;
+  --radius:         12px;
+  --radius-sm:      8px;
+  --shadow:         0 1px 3px rgba(0,0,0,.05), 0 2px 10px rgba(0,0,0,.04);
+  --ease:           cubic-bezier(.4,0,.2,1);
+  --dur:            .2s;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESET
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button { font-family: inherit; cursor: pointer; }
+a { text-decoration: none; color: inherit; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LAYOUT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.layout { display: flex; min-height: 100vh; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SIDEBAR
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 300;
+  transition: width var(--dur) var(--ease), transform var(--dur) var(--ease);
+  overflow: hidden;
+}
+#sidebar.collapsed { width: var(--sidebar-col); }
+
+/* Logo */
+.sb-logo {
+  height: var(--topbar-h);
+  display: flex; align-items: center; gap: 11px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  white-space: nowrap; overflow: hidden;
+}
+.sb-logo-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px;
+  box-shadow: 0 3px 10px rgba(59,130,246,.3);
+}
+.sb-logo-name { font-size: 15.5px; font-weight: 700; line-height: 1.2; }
+.sb-logo-name span { color: var(--primary); }
+.sb-logo-sub  { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 1px; white-space: nowrap; }
+.sb-logo-text { overflow: hidden; transition: opacity var(--dur); }
+#sidebar.collapsed .sb-logo-text { opacity: 0; }
+
+/* Nav */
+.sb-nav { flex: 1; overflow-y: auto; padding: 10px 8px; scrollbar-width: none; }
+.sb-nav::-webkit-scrollbar { display: none; }
+
+.sb-group-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted);
+  padding: 14px 10px 5px;
+  white-space: nowrap; overflow: hidden;
+  transition: opacity var(--dur);
+}
+#sidebar.collapsed .sb-group-label { opacity: 0; }
+
+.sb-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 11px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px; font-weight: 500;
+  white-space: nowrap; overflow: hidden;
+  margin-bottom: 1px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: background var(--dur), color var(--dur);
+}
+.sb-item:hover  { background: var(--primary-bg); color: var(--primary); }
+.sb-item.active {
+  background: var(--primary-bg); color: var(--primary); font-weight: 600;
+}
+.sb-item.active::before {
+  content: '';
+  position: absolute; left: 0; top: 20%; bottom: 20%;
+  width: 3px; background: var(--primary);
+  border-radius: 0 3px 3px 0;
+}
+.sb-item-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
+.sb-item-label { flex: 1; transition: opacity var(--dur); }
+#sidebar.collapsed .sb-item-label { opacity: 0; }
+
+.sb-badge {
+  font-size: 10px; font-weight: 700;
+  background: var(--primary); color: #fff;
+  border-radius: 20px; padding: 2px 7px;
+  transition: opacity var(--dur);
+}
+#sidebar.collapsed .sb-badge { opacity: 0; }
+
+.sb-badge.danger { background: var(--danger); }
+
+/* Tooltip on collapsed */
+#sidebar.collapsed .sb-item { position: relative; }
+#sidebar.collapsed .sb-item:hover::after {
+  content: attr(data-label);
+  position: absolute; left: calc(var(--sidebar-col) - 4px); top: 50%;
+  transform: translateY(-50%);
+  background: var(--text); color: #fff;
+  font-size: 12px; font-weight: 500;
+  padding: 5px 12px; border-radius: var(--radius-sm);
+  white-space: nowrap; pointer-events: none;
+  z-index: 400;
+  box-shadow: var(--shadow);
+}
+
+/* Footer */
+.sb-footer {
+  padding: 10px 8px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sb-user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 11px; border-radius: var(--radius-sm);
+  cursor: pointer; white-space: nowrap; overflow: hidden;
+  transition: background var(--dur);
+}
+.sb-user:hover { background: var(--bg); }
+.sb-user-av {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), #7C3AED);
+  color: #fff; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.sb-user-info { flex: 1; min-width: 0; transition: opacity var(--dur); }
+.sb-user-name { font-size: 12.5px; font-weight: 600; }
+.sb-user-role { font-size: 10.5px; color: var(--text-muted); }
+#sidebar.collapsed .sb-user-info { opacity: 0; }
+.sb-user-menu-btn {
+  color: var(--text-muted); font-size: 14px; flex-shrink: 0;
+  transition: opacity var(--dur);
+}
+#sidebar.collapsed .sb-user-menu-btn { opacity: 0; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MAIN
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#main {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left var(--dur) var(--ease);
+}
+#sidebar.collapsed ~ #main { margin-left: var(--sidebar-col); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOPBAR
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#topbar {
+  position: sticky; top: 0;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 20px;
+  z-index: 200;
+  flex-shrink: 0;
+}
+
+/* Toggle */
+.tb-toggle {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border: 1px solid var(--border); background: transparent;
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-muted);
+  transition: background var(--dur), color var(--dur);
+}
+.tb-toggle:hover { background: var(--bg); color: var(--text); }
+
+/* Breadcrumb */
+.tb-breadcrumb { flex: 1; min-width: 0; padding: 0 6px; }
+.tb-page-title { font-size: 14.5px; font-weight: 700; color: var(--text); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-page-path  { font-size: 11px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Divider */
+.tb-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+
+/* Search */
+.tb-search-wrap { position: relative; flex-shrink: 0; }
+.tb-search-wrap i {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; color: var(--text-muted); pointer-events: none;
+}
+.tb-search {
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 7px 14px 7px 31px;
+  font-size: 12.5px; font-family: inherit;
+  width: 200px; background: var(--bg); color: var(--text); outline: none;
+  transition: border-color var(--dur), width var(--dur), box-shadow var(--dur);
+}
+.tb-search:focus {
+  border-color: var(--primary); width: 240px;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.1); background: #fff;
+}
+.tb-search::placeholder { color: var(--text-muted); }
+
+/* Quick actions */
+.tb-actions { display: flex; align-items: center; gap: 4px; }
+
+.tb-icon-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--border); background: transparent;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text-muted); position: relative;
+  transition: background var(--dur), color var(--dur);
+  flex-shrink: 0;
+}
+.tb-icon-btn:hover { background: var(--bg); color: var(--text); }
+.tb-icon-btn .dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 7px; height: 7px; border-radius: 50%;
+  border: 2px solid #fff;
+}
+.tb-icon-btn .dot.red    { background: var(--danger); }
+.tb-icon-btn .dot.green  { background: var(--success); }
+.tb-icon-btn .dot.orange { background: var(--warning); }
+
+/* Status chip */
+.tb-status-chip {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 5px 12px; background: var(--bg);
+  font-size: 11.5px; font-weight: 600; color: var(--text-muted);
+  white-space: nowrap; flex-shrink: 0;
+  cursor: default;
+}
+.tb-status-chip .live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 2px rgba(16,185,129,.2);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(16,185,129,.2); }
+  50%       { box-shadow: 0 0 0 5px rgba(16,185,129,.08); }
+}
+
+/* Emergency btn */
+.tb-emergency-btn {
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid #FCA5A5; border-radius: 20px;
+  padding: 5px 13px; background: var(--danger-bg);
+  font-size: 11.5px; font-weight: 700; color: var(--danger);
+  white-space: nowrap; flex-shrink: 0;
+  transition: all var(--dur);
+}
+.tb-emergency-btn:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+
+/* Date chip */
+.tb-date {
+  font-size: 11.5px; color: var(--text-muted); font-weight: 500;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Profile dropdown */
+.tb-profile-wrap { flex-shrink: 0; }
+.tb-profile-btn {
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); border-radius: 22px;
+  padding: 4px 11px 4px 5px; background: transparent;
+  transition: background var(--dur);
+}
+.tb-profile-btn:hover { background: var(--bg); }
+.tb-profile-av {
+  width: 27px; height: 27px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #7C3AED);
+  color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.tb-profile-name { font-size: 12.5px; font-weight: 600; color: var(--text); }
+.tb-profile-role { font-size: 10px; color: var(--text-muted); line-height: 1; margin-top: 1px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DROPDOWN
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.dropdown-menu {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  box-shadow: 0 4px 20px rgba(0,0,0,.1); font-size: 13px;
+  padding: 6px;
+}
+.dropdown-item { padding: 8px 12px; border-radius: 6px; color: var(--text); }
+.dropdown-item:hover { background: var(--primary-bg); color: var(--primary); }
+.dropdown-item.text-danger:hover { background: var(--danger-bg); color: var(--danger); }
+.dropdown-divider { margin: 4px 0; border-color: var(--border); }
+.dropdown-header { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); padding: 6px 12px 4px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONTENT
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#app-content {
+  flex: 1;
+  padding: 28px;
+  min-height: 0;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOAST
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#toast-host {
+  position: fixed; bottom: 20px; right: 20px;
+  z-index: 1000; display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+.toast-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 15px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+  min-width: 260px; max-width: 320px;
+  font-size: 13px; font-weight: 500; color: var(--text);
+  pointer-events: all;
+  animation: toastIn .25s var(--ease) both;
+}
+.toast-item.out { animation: toastOut .22s var(--ease) both; }
+@keyframes toastIn  { from { opacity:0; transform:translateX(28px); } to { opacity:1; transform:translateX(0); } }
+@keyframes toastOut { from { opacity:1; transform:translateX(0);    } to { opacity:0; transform:translateX(28px); } }
+.toast-item.success { border-left: 3px solid var(--success); }
+.toast-item.danger  { border-left: 3px solid var(--danger); }
+.toast-item.info    { border-left: 3px solid var(--primary); }
+.toast-item.warning { border-left: 3px solid var(--warning); }
+.t-icon.success { color: var(--success); }
+.t-icon.danger  { color: var(--danger); }
+.t-icon.info    { color: var(--primary); }
+.t-icon.warning { color: var(--warning); }
+.t-close { margin-left: auto; background: none; border: none; color: var(--text-muted); font-size: 14px; line-height: 1; padding: 2px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BACKDROP (mobile)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+#sb-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.3); z-index: 299;
+}
+#sb-backdrop.show { display: block; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 991px) {
+  #sidebar { transform: translateX(-100%); width: var(--sidebar-w) !important; }
+  #sidebar.open { transform: translateX(0); }
+  #main { margin-left: 0 !important; }
+  #app-content { padding: 18px 14px; }
+  .tb-search-wrap { display: none; }
+  .tb-status-chip { display: none; }
+  .tb-date { display: none; }
+}
+@media (max-width: 575px) {
+  .tb-emergency-btn { display: none; }
+  .tb-profile-name, .tb-profile-role { display: none; }
+  #topbar { padding: 0 12px; gap: 6px; }
+}
+
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══════════════════════════════
+     SIDEBAR
+     ══════════════════════════════ -->
+<aside id="sidebar">
+
+  <div class="sb-logo">
+    <div class="sb-logo-icon"><i class="bi bi-hospital"></i></div>
+    <div class="sb-logo-text">
+      <div class="sb-logo-name">Medi<span>Panel</span></div>
+      <div class="sb-logo-sub">Hastane Yönetim Sistemi</div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+
+    <div class="sb-group-label">Genel</div>
+
+    <div class="sb-item" data-label="Gösterge Paneli">
+      <i class="bi bi-grid-1x2 sb-item-icon"></i>
+      <span class="sb-item-label">Gösterge Paneli</span>
+    </div>
+
+    <div class="sb-group-label">Klinik</div>
+
+    <div class="sb-item active" data-label="Branşlar">
+      <i class="bi bi-diagram-3 sb-item-icon"></i>
+      <span class="sb-item-label">Branşlar</span>
+    </div>
+
+    <div class="sb-item" data-label="Doktorlar">
+      <i class="bi bi-person-badge sb-item-icon"></i>
+      <span class="sb-item-label">Doktorlar</span>
+    </div>
+
+    <div class="sb-item" data-label="Hastalar">
+      <i class="bi bi-people sb-item-icon"></i>
+      <span class="sb-item-label">Hastalar</span>
+    </div>
+
+    <div class="sb-item" data-label="Hemşireler">
+      <i class="bi bi-heart-pulse sb-item-icon"></i>
+      <span class="sb-item-label">Hemşireler</span>
+    </div>
+
+    <div class="sb-group-label">İşlemler</div>
+
+    <div class="sb-item" data-label="Randevular">
+      <i class="bi bi-calendar3 sb-item-icon"></i>
+      <span class="sb-item-label">Randevular</span>
+      <span class="sb-badge">12</span>
+    </div>
+
+    <div class="sb-item" data-label="Reçeteler">
+      <i class="bi bi-file-medical sb-item-icon"></i>
+      <span class="sb-item-label">Reçeteler</span>
+    </div>
+
+    <div class="sb-item" data-label="Ameliyatlar">
+      <i class="bi bi-scissors sb-item-icon"></i>
+      <span class="sb-item-label">Ameliyatlar</span>
+    </div>
+
+    <div class="sb-item" data-label="Laboratuvar">
+      <i class="bi bi-eyedropper sb-item-icon"></i>
+      <span class="sb-item-label">Laboratuvar</span>
+      <span class="sb-badge">3</span>
+    </div>
+
+    <div class="sb-item" data-label="Eczane">
+      <i class="bi bi-capsule sb-item-icon"></i>
+      <span class="sb-item-label">Eczane</span>
+    </div>
+
+    <div class="sb-group-label">Finans &amp; Raporlar</div>
+
+    <div class="sb-item" data-label="Faturalar">
+      <i class="bi bi-receipt sb-item-icon"></i>
+      <span class="sb-item-label">Faturalar</span>
+    </div>
+
+    <div class="sb-item" data-label="Raporlar">
+      <i class="bi bi-bar-chart-line sb-item-icon"></i>
+      <span class="sb-item-label">Raporlar</span>
+    </div>
+
+    <div class="sb-group-label">İletişim</div>
+
+    <div class="sb-item" data-label="Mesajlar">
+      <i class="bi bi-chat-dots sb-item-icon"></i>
+      <span class="sb-item-label">Mesajlar</span>
+      <span class="sb-badge">5</span>
+    </div>
+
+    <div class="sb-item" data-label="Yorumlar">
+      <i class="bi bi-star-half sb-item-icon"></i>
+      <span class="sb-item-label">Yorumlar</span>
+    </div>
+
+    <div class="sb-group-label">Sistem</div>
+
+    <div class="sb-item" data-label="Kullanıcılar">
+      <i class="bi bi-shield-person sb-item-icon"></i>
+      <span class="sb-item-label">Kullanıcılar</span>
+    </div>
+
+    <div class="sb-item" data-label="Ayarlar">
+      <i class="bi bi-sliders sb-item-icon"></i>
+      <span class="sb-item-label">Ayarlar</span>
+    </div>
+
+  </nav>
+
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-user-av">AD</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name">Admin Kullanıcı</div>
+        <div class="sb-user-role">Sistem Yöneticisi</div>
+      </div>
+      <i class="bi bi-three-dots-vertical sb-user-menu-btn"></i>
+    </div>
+  </div>
+
+</aside>
+
+<div id="sb-backdrop"></div>
+
+<!-- ══════════════════════════════
+     MAIN
+     ══════════════════════════════ -->
+<div id="main">
+
+  <!-- ══════════════════════════════
+       TOPBAR
+       ══════════════════════════════ -->
+  <header id="topbar">
+
+    <!-- Sidebar toggle -->
+    <button class="tb-toggle" id="sidebar-toggle" title="Menüyü Aç/Kapat">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Breadcrumb -->
+    <div class="tb-breadcrumb">
+      <div class="tb-page-title" id="tb-title">Branşlar</div>
+      <div class="tb-page-path" id="tb-path">Admin Paneli / Klinik / Branşlar</div>
+    </div>
+
+    <div class="tb-divider d-none d-md-block"></div>
+
+    <!-- Arama -->
+    <div class="tb-search-wrap">
+      <i class="bi bi-search"></i>
+      <input class="tb-search" id="tb-search" placeholder="Hasta, doktor, randevu ara...">
+    </div>
+
+    <!-- Sistem durumu -->
+    <div class="tb-status-chip d-none d-lg-flex" title="Sistem çevrimiçi">
+      <span class="live-dot"></span>
+      Sistem Aktif
+    </div>
+
+    <!-- Tarih -->
+    <div class="tb-date d-none d-xl-block" id="tb-date"></div>
+
+    <div class="tb-divider d-none d-lg-block"></div>
+
+    <!-- Acil çağrı -->
+    <button class="tb-emergency-btn" onclick="Shell.toast('Acil çağrı merkezi ile bağlantı kuruluyor...','danger','bi-telephone-fill')">
+      <i class="bi bi-telephone-fill"></i>
+      Acil Çağrı
+    </button>
+
+    <!-- Hızlı işlem butonları -->
+    <div class="tb-actions">
+
+      <!-- Yeni randevu -->
+      <button class="tb-icon-btn" title="Yeni Randevu Oluştur" onclick="Shell.toast('Yeni randevu formu açılıyor...','info','bi-calendar-plus')">
+        <i class="bi bi-calendar-plus"></i>
+      </button>
+
+      <!-- Bildirimler -->
+      <div class="dropdown">
+        <button class="tb-icon-btn dropdown-toggle" title="Bildirimler" data-bs-toggle="dropdown">
+          <i class="bi bi-bell"></i>
+          <span class="dot red"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" style="min-width:280px">
+          <li><h6 class="dropdown-header">Bildirimler</h6></li>
+          <li>
+            <a class="dropdown-item" href="#">
+              <div style="font-size:12.5px;font-weight:600">2 Yeni randevu talebi</div>
+              <div style="font-size:11px;color:var(--text-muted)">Kardiyoloji · 5 dakika önce</div>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">
+              <div style="font-size:12.5px;font-weight:600">Lab sonuçları hazır</div>
+              <div style="font-size:11px;color:var(--text-muted)">Hasta #H-1042 · 12 dakika önce</div>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">
+              <div style="font-size:12.5px;font-weight:600">Nöbet değişikliği onayı</div>
+              <div style="font-size:11px;color:var(--text-muted)">Dr. Mehmet Demir · 1 saat önce</div>
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-center" href="#" style="font-size:12px;color:var(--primary)">Tüm bildirimleri gör</a></li>
+        </ul>
+      </div>
+
+      <!-- Mesajlar -->
+      <button class="tb-icon-btn" title="Mesajlar" onclick="Shell.toast('Mesajlar açılıyor...','info','bi-chat-dots')">
+        <i class="bi bi-chat-dots"></i>
+        <span class="dot orange"></span>
+      </button>
+
+      <!-- Tam ekran -->
+      <button class="tb-icon-btn d-none d-md-flex" title="Tam Ekran" id="fullscreen-btn">
+        <i class="bi bi-arrows-fullscreen"></i>
+      </button>
+
+    </div>
+
+    <div class="tb-divider"></div>
+
+    <!-- Profil -->
+    <div class="tb-profile-wrap dropdown">
+      <button class="tb-profile-btn dropdown-toggle" data-bs-toggle="dropdown">
+        <div class="tb-profile-av">AD</div>
+        <div>
+          <div class="tb-profile-name">Admin Kullanıcı</div>
+          <div class="tb-profile-role">Yönetici</div>
+        </div>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end" style="min-width:200px">
+        <li><h6 class="dropdown-header">Hesabım</h6></li>
+        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profilim</a></li>
+        <li><a class="dropdown-item" href="#"><i class="bi bi-shield-check me-2"></i>Güvenlik</a></li>
+        <li><a class="dropdown-item" href="#"><i class="bi bi-sliders me-2"></i>Ayarlar</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#"><i class="bi bi-moon me-2"></i>Koyu Tema</a></li>
+        <li><a class="dropdown-item" href="#"><i class="bi bi-translate me-2"></i>Dil: Türkçe</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <a class="dropdown-item text-danger" href="#"
+             onclick="Shell.toast('Çıkış yapıldı.','danger','bi-box-arrow-right');return false">
+            <i class="bi bi-box-arrow-right me-2"></i>Çıkış Yap
+          </a>
+        </li>
+      </ul>
+    </div>
+
+  </header>
+  <!-- / TOPBAR -->
+
+  <!-- ══════════════════════════════
+       CONTENT — Burası değişecek
+       ══════════════════════════════ -->
+  <main id="app-content">
+
+    <!-- ─────────────────────────────────────────────
+         YENİ SAYFA EKLERKEN:
+         Bu <main id="app-content"> bloğunun içini
+         kendi sayfa HTML'inle değiştir.
+         Sidebar, Topbar ve Shell JS'e dokunma.
+         ───────────────────────────────────────────── -->
+
+    <div style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--topbar-h) - 56px);
+      gap: 16px;
+      color: var(--text-muted);
+      text-align: center;
+      user-select: none;
+    ">
+      <i class="bi bi-layout-text-sidebar" style="font-size: 52px; opacity: .15;"></i>
+      <div>
+        <div style="font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px;">
+          Buraya content gelecek
+        </div>
+        <div style="font-size: 13px; line-height: 1.7;">
+          <code style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:12px;">#app-content</code>
+          içini kendi sayfa bileşeninle değiştir.
+        </div>
+      </div>
+    </div>
+
+  </main>
+  <!-- / CONTENT -->
+
+</div>
+<!-- / #main -->
+
+</div>
+<!-- / .layout -->
+
+<!-- Toast container -->
+<div id="toast-host"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════
+   Shell  —  Evrensel altyapı, asla değişmez.
+   Kullanım:
+     Shell.toast(msg, type, icon)
+     Shell.setPage(title, path)
+   ════════════════════════════════════════════════ */
+const Shell = (() => {
+
+  /* ── Sidebar ── */
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('sb-backdrop');
+  const isMobile = () => window.innerWidth < 992;
+
+  function toggleSidebar() {
+    if (isMobile()) {
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    } else {
+      sidebar.classList.toggle('collapsed');
+    }
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('show');
+  }
+
+  document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+  window.addEventListener('resize', () => { if (!isMobile()) closeSidebar(); });
+
+  /* Sidebar nav active */
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      if (isMobile()) closeSidebar();
+    });
+  });
+
+  /* ── Topbar: Tarih ── */
+  function updateDate() {
+    const el = document.getElementById('tb-date');
+    if (!el) return;
+    el.textContent = new Date().toLocaleDateString('tr-TR', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+  }
+  updateDate();
+
+  /* ── Topbar: Başlık güncelle ── */
+  function setPage(title, path) {
+    const t = document.getElementById('tb-title');
+    const p = document.getElementById('tb-path');
+    if (t) t.textContent = title;
+    if (p) p.textContent = path;
+    document.title = `MediPanel – ${title}`;
+  }
+
+  /* ── Tam ekran ── */
+  document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  });
+
+  /* ── Toast ── */
+  function toast(msg, type = 'info', icon = 'bi-info-circle') {
+    const host = document.getElementById('toast-host');
+    const el = document.createElement('div');
+    el.className = `toast-item ${type}`;
+    el.innerHTML = `
+      <i class="bi ${icon} t-icon ${type}" style="font-size:16px;flex-shrink:0"></i>
+      <span style="flex:1;line-height:1.4">${msg}</span>
+      <button class="t-close" onclick="this.closest('.toast-item').remove()">
+        <i class="bi bi-x"></i>
+      </button>`;
+    host.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('out');
+      el.addEventListener('animationend', () => el.remove(), { once: true });
+    }, 3800);
+  }
+
+  /* ── ESC → açık dropdown'ları kapat ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeSidebar();
+  });
+
+  return { toggleSidebar, closeSidebar, setPage, toast };
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,957 @@
+﻿<main id="app-content">
+
+  <style>
+    /* ── Stat Grid ── */
+    .bc-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media(max-width:900px){ .bc-stat-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:480px){ .bc-stat-grid { grid-template-columns: 1fr 1fr; gap:10px; } }
+
+    .bc-stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+      transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .bc-stat-card:hover { box-shadow: 0 4px 20px rgba(59,130,246,.13); transform: translateY(-2px); }
+    .bc-stat-icon {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .bc-si-blue   { background: var(--primary-bg); color: var(--primary); }
+    .bc-si-green  { background: var(--success-bg); color: var(--success); }
+    .bc-si-orange { background: var(--warning-bg); color: var(--warning); }
+    .bc-si-purple { background: #F3F0FF; color: #7C3AED; }
+    .bc-stat-val  { font-size: 22px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .bc-stat-lbl  { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+    /* ── Toolbar ── */
+    .bc-toolbar {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .bc-local-search { position: relative; flex: 1; min-width: 160px; max-width: 280px; }
+    .bc-local-search i {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 13px; pointer-events: none;
+    }
+    .bc-local-search input {
+      width: 100%; border: 1px solid var(--border); border-radius: 20px;
+      padding: 8px 14px 8px 32px;
+      font-size: 13px; font-family: inherit;
+      background: var(--surface); color: var(--text); outline: none;
+      transition: border-color var(--dur), box-shadow var(--dur);
+    }
+    .bc-local-search input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+    }
+    .bc-local-search input::placeholder { color: var(--text-muted); }
+
+    .bc-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+    .bc-tab {
+      border: 1px solid var(--border); background: var(--surface);
+      border-radius: 20px; padding: 7px 15px;
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all var(--dur) var(--ease); white-space: nowrap;
+    }
+    .bc-tab:hover  { background: var(--primary-bg); color: var(--primary); border-color: #C7D9F8; }
+    .bc-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    .bc-view-toggle {
+      display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      overflow: hidden; flex-shrink: 0;
+    }
+    .bc-vbtn {
+      width: 34px; height: 34px; border: none; background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-muted); cursor: pointer;
+      transition: all var(--dur);
+    }
+    .bc-vbtn.active { background: var(--primary-bg); color: var(--primary); }
+
+    /* ── Card Grid ── */
+    #bc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+    #bc-grid.list-mode { grid-template-columns: 1fr; }
+
+    /* Entry animation */
+    .bc-card { animation: bcFadeUp .3s var(--ease) both; }
+    .bc-card:nth-child(1){animation-delay:.04s}.bc-card:nth-child(2){animation-delay:.08s}
+    .bc-card:nth-child(3){animation-delay:.12s}.bc-card:nth-child(4){animation-delay:.16s}
+    .bc-card:nth-child(5){animation-delay:.20s}.bc-card:nth-child(6){animation-delay:.24s}
+    @keyframes bcFadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Card base */
+    .bc-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease), border-color var(--dur);
+    }
+    .bc-card:hover { box-shadow: 0 4px 24px rgba(59,130,246,.13); transform: translateY(-3px); border-color: #C7D9F8; }
+
+    .bc-card-accent { height: 4px; width: 100%; flex-shrink: 0; }
+
+    .bc-card-body { padding: 18px 20px 14px; flex: 1; }
+
+    .bc-card-head { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 12px; }
+    .bc-card-icon {
+      width: 50px; height: 50px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .bc-card-info { flex: 1; min-width: 0; }
+    .bc-card-name {
+      font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .bc-card-code {
+      font-family: monospace; font-size: 10px; font-weight: 600;
+      background: var(--bg); color: var(--text-muted);
+      padding: 2px 7px; border-radius: 4px; display: inline-block; margin-right: 5px;
+    }
+    .bc-status-dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      vertical-align: middle; margin-right: 4px;
+    }
+    .bc-status-dot.on  { background: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,.18); }
+    .bc-status-dot.off { background: #94A3B8; }
+    .bc-status-lbl { font-size: 11px; color: var(--text-muted); vertical-align: middle; }
+
+    .bc-card-desc {
+      font-size: 13px; color: var(--text-muted); line-height: 1.65; margin-bottom: 14px;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+
+    /* Mini stats */
+    .bc-mini-stats {
+      display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      overflow: hidden; margin-bottom: 13px;
+    }
+    .bc-ms-cell {
+      flex: 1; text-align: center; padding: 9px 4px;
+      border-right: 1px solid var(--border);
+      background: var(--bg); transition: background var(--dur);
+    }
+    .bc-ms-cell:last-child { border-right: none; }
+    .bc-ms-cell:hover { background: var(--primary-bg); }
+    .bc-ms-val { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .bc-ms-lbl { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+    /* Occupancy */
+    .bc-occ-row { display: flex; align-items: center; gap: 8px; margin-bottom: 13px; }
+    .bc-occ-lbl { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+    .bc-prog-track { flex: 1; height: 5px; background: var(--border); border-radius: 10px; overflow: hidden; }
+    .bc-prog-fill  { height: 100%; border-radius: 10px; transition: width .6s var(--ease); }
+    .bc-occ-pct    { font-size: 11px; font-weight: 700; white-space: nowrap; min-width: 30px; text-align: right; }
+
+    /* Doctor avatars */
+    .bc-docs-row { display: flex; align-items: center; }
+    .bc-av {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid var(--surface);
+      color: #fff; font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-right: -9px; flex-shrink: 0;
+    }
+    .bc-av-more {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2px solid var(--surface); background: var(--bg);
+      color: var(--text-muted); font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-right: -9px;
+    }
+    .bc-docs-lbl  { font-size: 11px; color: var(--text-muted); margin-left: 18px; }
+    .bc-rating    { display: flex; align-items: center; gap: 3px; margin-left: auto; font-size: 12px; font-weight: 700; color: var(--text); }
+    .bc-rating i  { color: #FBBF24; font-size: 11px; }
+
+    /* Expand panel */
+    .bc-expand {
+      display: none;
+      border-top: 1px solid var(--border);
+      background: #F8FAFC;
+      padding: 14px 20px;
+    }
+    .bc-expand.open { display: block; animation: bcFadeUp .2s var(--ease); }
+    .bc-expand-title {
+      font-size: 10.5px; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+    }
+    .bc-doc-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0; border-bottom: 1px dashed var(--border);
+    }
+    .bc-doc-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .bc-doc-av {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff;
+    }
+    .bc-doc-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+    .bc-doc-spec  { font-size: 11px; color: var(--text-muted); }
+    .bc-doc-badge {
+      font-size: 10px; font-weight: 600; padding: 3px 9px;
+      border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+    }
+    .bc-doc-badge.on  { background: var(--success-bg); color: #065F46; }
+    .bc-doc-badge.off { background: var(--warning-bg); color: #92400E; }
+    .bc-appt-btn {
+      margin-left: auto; flex-shrink: 0;
+      background: var(--primary-bg); color: var(--primary);
+      border: 1px solid #C7D9F8; border-radius: 20px;
+      padding: 5px 13px; font-size: 11px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+      transition: all var(--dur) var(--ease);
+    }
+    .bc-appt-btn:hover { background: var(--primary); color: #fff; box-shadow: 0 3px 8px rgba(59,130,246,.25); }
+    .bc-appt-btn:disabled { opacity: .42; cursor: not-allowed; }
+    .bc-appt-btn:disabled:hover { background: var(--primary-bg); color: var(--primary); box-shadow: none; }
+
+    /* Card footer */
+    .bc-card-footer {
+      padding: 11px 14px; border-top: 1px solid var(--border);
+      background: #FAFBFE; display: flex; gap: 6px;
+    }
+    .bc-btn {
+      flex: 1; border: 1px solid var(--border); background: var(--surface);
+      border-radius: var(--radius-sm); padding: 7px 8px;
+      font-size: 12px; font-weight: 600; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; transition: all var(--dur) var(--ease); color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .bc-btn.primary { color: var(--primary); border-color: #C7D9F8; background: var(--primary-bg); }
+    .bc-btn.primary:hover { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 3px 10px rgba(59,130,246,.25); }
+    .bc-btn.danger:hover  { background: var(--danger-bg); border-color: #FCA5A5; color: var(--danger); }
+    .bc-btn:hover { background: var(--bg); color: var(--text); }
+
+    /* List mode */
+    #bc-grid.list-mode .bc-card       { flex-direction: row; }
+    #bc-grid.list-mode .bc-card-accent { width: 4px; height: auto; }
+    #bc-grid.list-mode .bc-card-body  { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 18px; }
+    #bc-grid.list-mode .bc-card-head  { margin-bottom: 0; flex-shrink: 0; }
+    #bc-grid.list-mode .bc-card-info  { min-width: 130px; }
+    #bc-grid.list-mode .bc-card-desc  { display: none; }
+    #bc-grid.list-mode .bc-mini-stats { margin-bottom: 0; flex-shrink: 0; min-width: 196px; }
+    #bc-grid.list-mode .bc-occ-row   { display: none; }
+    #bc-grid.list-mode .bc-docs-row  { flex-shrink: 0; }
+    #bc-grid.list-mode .bc-card-footer{ flex-direction: column; border-top: none; border-left: 1px solid var(--border); padding: 11px 11px; min-width: 116px; gap: 5px; justify-content: center; }
+    #bc-grid.list-mode .bc-btn       { flex: unset; width: 100%; }
+    #bc-grid.list-mode .bc-expand    { display: none !important; }
+
+    /* Empty state */
+    .bc-empty {
+      grid-column: 1/-1; text-align: center;
+      padding: 72px 24px; color: var(--text-muted);
+    }
+    .bc-empty i { font-size: 48px; opacity: .15; display: block; margin-bottom: 14px; }
+    .bc-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+
+    /* Modal extras */
+    .bc-modal-danger-note {
+      background: var(--danger-bg); border: 1px solid #FCA5A5;
+      border-radius: var(--radius-sm); padding: 11px 13px;
+      font-size: 12px; color: #991B1B; margin-top: 12px;
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .bc-modal-danger-note i { flex-shrink: 0; margin-top: 1px; }
+
+    /* Global atom re-declares (token uyumlu) */
+    .bc-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+    .bc-page-title  { font-size: 22px; font-weight: 700; color: var(--text); }
+    .bc-page-sub    { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+
+    .bc-btn-primary {
+      background: var(--primary); color: #fff; border: none;
+      border-radius: var(--radius-sm); padding: 10px 18px;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+      transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+    }
+    .bc-btn-primary:hover { background: var(--primary-dk); box-shadow: 0 4px 12px rgba(59,130,246,.3); transform: translateY(-1px); }
+    .bc-btn-primary:active { transform: scale(.98); }
+
+    .bc-btn-outline {
+      background: transparent; color: var(--text-muted);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 9px 16px; font-size: 13px; font-weight: 500; font-family: inherit;
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+      transition: all var(--dur);
+    }
+    .bc-btn-outline:hover { background: var(--bg); color: var(--text); }
+
+    /* Modal overlay */
+    .bc-overlay {
+      position: fixed; inset: 0;
+      background: rgba(15,23,42,.45); z-index: 500;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+      opacity: 0; pointer-events: none; transition: opacity .2s ease;
+    }
+    .bc-overlay.show { opacity: 1; pointer-events: all; }
+    .bc-modal-box {
+      background: var(--surface); border-radius: var(--radius);
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      width: 100%; max-width: 500px;
+      transform: scale(.93) translateY(16px);
+      transition: transform .26s cubic-bezier(.34,1.56,.64,1);
+    }
+    .bc-overlay.show .bc-modal-box { transform: scale(1) translateY(0); }
+    .bc-modal-header {
+      padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .bc-modal-title    { font-size: 15px; font-weight: 700; color: var(--text); }
+    .bc-modal-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .bc-modal-close {
+      width: 30px; height: 30px; border: 1px solid var(--border); background: transparent;
+      border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: var(--text-muted); cursor: pointer; flex-shrink: 0;
+      transition: background var(--dur);
+    }
+    .bc-modal-close:hover { background: var(--bg); }
+    .bc-modal-body   { padding: 20px 22px; }
+    .bc-modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+    .bc-form-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+    .bc-form-control {
+      width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 9px 12px; font-size: 13px; font-family: inherit;
+      color: var(--text); background: var(--bg); outline: none;
+      transition: border-color var(--dur), box-shadow var(--dur);
+    }
+    .bc-form-control:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+    .bc-form-group { margin-bottom: 16px; }
+  </style>
+
+  <!-- ── Page Header ── -->
+  <div class="bc-page-header">
+    <div>
+      <h1 class="bc-page-title">Branş Yönetimi</h1>
+      <p class="bc-page-sub">Tüm tıbbi branşları yönetin, doktorları görüntüleyin ve randevu alın</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="bc-btn-outline" onclick="BC.exportList()">
+        <i class="bi bi-download"></i> Dışa Aktar
+      </button>
+      <button class="bc-btn-primary" onclick="BC.openAdd()">
+        <i class="bi bi-plus-lg"></i> Yeni Branş
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Stat Cards ── -->
+  <div class="bc-stat-grid">
+    <div class="bc-stat-card">
+      <div class="bc-stat-icon bc-si-blue"><i class="bi bi-diagram-3"></i></div>
+      <div><div class="bc-stat-val" id="bc-count">6</div><div class="bc-stat-lbl">Toplam Branş</div></div>
+    </div>
+    <div class="bc-stat-card">
+      <div class="bc-stat-icon bc-si-green"><i class="bi bi-person-badge"></i></div>
+      <div><div class="bc-stat-val">42</div><div class="bc-stat-lbl">Aktif Doktor</div></div>
+    </div>
+    <div class="bc-stat-card">
+      <div class="bc-stat-icon bc-si-orange"><i class="bi bi-calendar3"></i></div>
+      <div><div class="bc-stat-val">347</div><div class="bc-stat-lbl">Aylık Randevu</div></div>
+    </div>
+    <div class="bc-stat-card">
+      <div class="bc-stat-icon bc-si-purple"><i class="bi bi-star-fill"></i></div>
+      <div><div class="bc-stat-val">4.8</div><div class="bc-stat-lbl">Ort. Memnuniyet</div></div>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ── -->
+  <div class="bc-toolbar">
+    <div class="bc-local-search">
+      <i class="bi bi-search"></i>
+      <input id="bc-search" placeholder="Branş ara..." oninput="BC.filter()">
+    </div>
+    <div class="bc-tabs">
+      <button class="bc-tab active" data-cat="all"     onclick="BC.setTab(this)">Tümü</button>
+      <button class="bc-tab"        data-cat="dahili"  onclick="BC.setTab(this)">Dahili Tıp</button>
+      <button class="bc-tab"        data-cat="cerrahi" onclick="BC.setTab(this)">Cerrahi</button>
+      <button class="bc-tab"        data-cat="tani"    onclick="BC.setTab(this)">Tanı</button>
+    </div>
+    <div class="bc-view-toggle" style="margin-left:auto">
+      <button class="bc-vbtn active" id="bc-vg" title="Kart" onclick="BC.setView('grid')"><i class="bi bi-grid-1x2"></i></button>
+      <button class="bc-vbtn"        id="bc-vl" title="Liste" onclick="BC.setView('list')"><i class="bi bi-list-ul"></i></button>
+    </div>
+  </div>
+
+  <!-- ── Branch Grid ── -->
+  <div id="bc-grid">
+
+    <!-- 1. KARDİYOLOJİ -->
+    <div class="bc-card" data-cat="dahili" data-name="kardiyoloji">
+      <div class="bc-card-accent" style="background:linear-gradient(90deg,#3B82F6,#60A5FA)"></div>
+      <div class="bc-card-body">
+        <div class="bc-card-head">
+          <div class="bc-card-icon" style="background:#EFF6FF">🫀</div>
+          <div class="bc-card-info">
+            <div class="bc-card-name">Kardiyoloji</div>
+            <div><span class="bc-card-code">#BRN-001</span><span class="bc-status-dot on"></span><span class="bc-status-lbl">Aktif</span></div>
+          </div>
+        </div>
+        <p class="bc-card-desc">Kalp ve damar hastalıklarının kapsamlı teşhis, tedavi ve uzun vadeli takip hizmetleri sunulmaktadır.</p>
+        <div class="bc-mini-stats">
+          <div class="bc-ms-cell"><div class="bc-ms-val">6</div><div class="bc-ms-lbl">Doktor</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">87</div><div class="bc-ms-lbl">Randevu/ay</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">12</div><div class="bc-ms-lbl">Yatak</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">4.9</div><div class="bc-ms-lbl">Puan</div></div>
+        </div>
+        <div class="bc-occ-row">
+          <span class="bc-occ-lbl">Doluluk</span>
+          <div class="bc-prog-track"><div class="bc-prog-fill" style="width:87%;background:var(--primary)"></div></div>
+          <span class="bc-occ-pct" style="color:var(--primary)">87%</span>
+        </div>
+        <div class="bc-docs-row">
+          <div class="bc-av" style="background:#3B82F6">MD</div>
+          <div class="bc-av" style="background:#60A5FA">AY</div>
+          <div class="bc-av" style="background:#93C5FD">BK</div>
+          <div class="bc-av-more">+3</div>
+          <span class="bc-docs-lbl">6 doktor</span>
+          <div class="bc-rating"><i class="bi bi-star-fill"></i>4.9</div>
+        </div>
+      </div>
+      <div class="bc-expand" id="bc-exp-0">
+        <div class="bc-expand-title">Doktorlar</div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#3B82F6">MD</div>
+          <div><div class="bc-doc-name">Dr. Mehmet Demir</div><div class="bc-doc-spec">Kardiyoloji Uzmanı · 12 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Mehmet Demir')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#60A5FA">AY</div>
+          <div><div class="bc-doc-name">Dr. Ayhan Yıldız</div><div class="bc-doc-spec">Kardiyoloji Uzmanı · 8 yıl</div></div>
+          <span class="bc-doc-badge off">Meşgul</span>
+          <button class="bc-appt-btn" disabled><i class="bi bi-clock"></i> Dolu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#93C5FD">BK</div>
+          <div><div class="bc-doc-name">Dr. Berk Kaya</div><div class="bc-doc-spec">Kardiyoloji Asistanı · 3 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Berk Kaya')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+      </div>
+      <div class="bc-card-footer">
+        <button class="bc-btn primary" onclick="BC.toggleDocs(0,this)"><i class="bi bi-people"></i> Doktorlar</button>
+        <button class="bc-btn" onclick="BC.openEdit({name:'Kardiyoloji',desc:'Kalp ve damar hastalıklarının kapsamlı teşhis, tedavi ve uzun vadeli takip hizmetleri.',cat:'dahili',docs:'6',code:'#BRN-001'})"><i class="bi bi-pencil"></i> Düzenle</button>
+        <button class="bc-btn danger" onclick="BC.confirmDelete('Kardiyoloji',this)"><i class="bi bi-trash3"></i> Sil</button>
+      </div>
+    </div>
+
+    <!-- 2. DERMATOLOJİ -->
+    <div class="bc-card" data-cat="dahili" data-name="dermatoloji">
+      <div class="bc-card-accent" style="background:linear-gradient(90deg,#10B981,#34D399)"></div>
+      <div class="bc-card-body">
+        <div class="bc-card-head">
+          <div class="bc-card-icon" style="background:#ECFDF5">🩺</div>
+          <div class="bc-card-info">
+            <div class="bc-card-name">Dermatoloji</div>
+            <div><span class="bc-card-code">#BRN-002</span><span class="bc-status-dot on"></span><span class="bc-status-lbl">Aktif</span></div>
+          </div>
+        </div>
+        <p class="bc-card-desc">Cilt, saç ve tırnak hastalıklarının tanı ve tedavisi ile estetik dermatoloji uygulamaları.</p>
+        <div class="bc-mini-stats">
+          <div class="bc-ms-cell"><div class="bc-ms-val">4</div><div class="bc-ms-lbl">Doktor</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">58</div><div class="bc-ms-lbl">Randevu/ay</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">6</div><div class="bc-ms-lbl">Yatak</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">4.6</div><div class="bc-ms-lbl">Puan</div></div>
+        </div>
+        <div class="bc-occ-row">
+          <span class="bc-occ-lbl">Doluluk</span>
+          <div class="bc-prog-track"><div class="bc-prog-fill" style="width:58%;background:var(--success)"></div></div>
+          <span class="bc-occ-pct" style="color:var(--success)">58%</span>
+        </div>
+        <div class="bc-docs-row">
+          <div class="bc-av" style="background:#10B981">SA</div>
+          <div class="bc-av" style="background:#34D399">LC</div>
+          <div class="bc-av-more">+2</div>
+          <span class="bc-docs-lbl">4 doktor</span>
+          <div class="bc-rating"><i class="bi bi-star-fill"></i>4.6</div>
+        </div>
+      </div>
+      <div class="bc-expand" id="bc-exp-1">
+        <div class="bc-expand-title">Doktorlar</div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#10B981">SA</div>
+          <div><div class="bc-doc-name">Dr. Selin Arslan</div><div class="bc-doc-spec">Dermatoloji Uzmanı · 8 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Selin Arslan')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#34D399">LC</div>
+          <div><div class="bc-doc-name">Dr. Lale Çetin</div><div class="bc-doc-spec">Dermatoloji Uzmanı · 5 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Lale Çetin')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+      </div>
+      <div class="bc-card-footer">
+        <button class="bc-btn primary" onclick="BC.toggleDocs(1,this)"><i class="bi bi-people"></i> Doktorlar</button>
+        <button class="bc-btn" onclick="BC.openEdit({name:'Dermatoloji',desc:'Cilt, saç ve tırnak hastalıklarının tanı ve tedavisi ile estetik dermatoloji uygulamaları.',cat:'dahili',docs:'4',code:'#BRN-002'})"><i class="bi bi-pencil"></i> Düzenle</button>
+        <button class="bc-btn danger" onclick="BC.confirmDelete('Dermatoloji',this)"><i class="bi bi-trash3"></i> Sil</button>
+      </div>
+    </div>
+
+    <!-- 3. ORTOPEDİ -->
+    <div class="bc-card" data-cat="cerrahi" data-name="ortopedi">
+      <div class="bc-card-accent" style="background:linear-gradient(90deg,#F59E0B,#FCD34D)"></div>
+      <div class="bc-card-body">
+        <div class="bc-card-head">
+          <div class="bc-card-icon" style="background:#FFFBEB">🦴</div>
+          <div class="bc-card-info">
+            <div class="bc-card-name">Ortopedi ve Travmatoloji</div>
+            <div><span class="bc-card-code">#BRN-003</span><span class="bc-status-dot on"></span><span class="bc-status-lbl">Aktif</span></div>
+          </div>
+        </div>
+        <p class="bc-card-desc">Kemik, eklem ve kas-iskelet sistemi hastalıkları; spor yaralanmaları ve cerrahi tedaviler.</p>
+        <div class="bc-mini-stats">
+          <div class="bc-ms-cell"><div class="bc-ms-val">5</div><div class="bc-ms-lbl">Doktor</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">74</div><div class="bc-ms-lbl">Randevu/ay</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">20</div><div class="bc-ms-lbl">Yatak</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">4.7</div><div class="bc-ms-lbl">Puan</div></div>
+        </div>
+        <div class="bc-occ-row">
+          <span class="bc-occ-lbl">Doluluk</span>
+          <div class="bc-prog-track"><div class="bc-prog-fill" style="width:74%;background:var(--warning)"></div></div>
+          <span class="bc-occ-pct" style="color:var(--warning)">74%</span>
+        </div>
+        <div class="bc-docs-row">
+          <div class="bc-av" style="background:#F59E0B">CO</div>
+          <div class="bc-av" style="background:#FCD34D;color:#92400E">TK</div>
+          <div class="bc-av-more">+3</div>
+          <span class="bc-docs-lbl">5 doktor</span>
+          <div class="bc-rating"><i class="bi bi-star-fill"></i>4.7</div>
+        </div>
+      </div>
+      <div class="bc-expand" id="bc-exp-2">
+        <div class="bc-expand-title">Doktorlar</div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#F59E0B">CO</div>
+          <div><div class="bc-doc-name">Dr. Can Öztürk</div><div class="bc-doc-spec">Ortopedi Uzmanı · 10 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Can Öztürk')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#FCD34D;color:#92400E">TK</div>
+          <div><div class="bc-doc-name">Dr. Tarık Kurt</div><div class="bc-doc-spec">Travmatoloji Uzmanı · 7 yıl</div></div>
+          <span class="bc-doc-badge off">Meşgul</span>
+          <button class="bc-appt-btn" disabled><i class="bi bi-clock"></i> Dolu</button>
+        </div>
+      </div>
+      <div class="bc-card-footer">
+        <button class="bc-btn primary" onclick="BC.toggleDocs(2,this)"><i class="bi bi-people"></i> Doktorlar</button>
+        <button class="bc-btn" onclick="BC.openEdit({name:'Ortopedi ve Travmatoloji',desc:'Kemik, eklem ve kas-iskelet sistemi hastalıkları; spor yaralanmaları ve cerrahi tedaviler.',cat:'cerrahi',docs:'5',code:'#BRN-003'})"><i class="bi bi-pencil"></i> Düzenle</button>
+        <button class="bc-btn danger" onclick="BC.confirmDelete('Ortopedi ve Travmatoloji',this)"><i class="bi bi-trash3"></i> Sil</button>
+      </div>
+    </div>
+
+    <!-- 4. NÖROLOJİ -->
+    <div class="bc-card" data-cat="dahili" data-name="nöroloji">
+      <div class="bc-card-accent" style="background:linear-gradient(90deg,#7C3AED,#A78BFA)"></div>
+      <div class="bc-card-body">
+        <div class="bc-card-head">
+          <div class="bc-card-icon" style="background:#F3F0FF">🧠</div>
+          <div class="bc-card-info">
+            <div class="bc-card-name">Nöroloji</div>
+            <div><span class="bc-card-code">#BRN-004</span><span class="bc-status-dot on"></span><span class="bc-status-lbl">Aktif</span></div>
+          </div>
+        </div>
+        <p class="bc-card-desc">Beyin, omurilik ve sinir sistemi hastalıklarının ileri teşhis ve nörofizyolojik tedavi hizmetleri.</p>
+        <div class="bc-mini-stats">
+          <div class="bc-ms-cell"><div class="bc-ms-val">3</div><div class="bc-ms-lbl">Doktor</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">42</div><div class="bc-ms-lbl">Randevu/ay</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">8</div><div class="bc-ms-lbl">Yatak</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">4.9</div><div class="bc-ms-lbl">Puan</div></div>
+        </div>
+        <div class="bc-occ-row">
+          <span class="bc-occ-lbl">Doluluk</span>
+          <div class="bc-prog-track"><div class="bc-prog-fill" style="width:42%;background:#7C3AED"></div></div>
+          <span class="bc-occ-pct" style="color:#7C3AED">42%</span>
+        </div>
+        <div class="bc-docs-row">
+          <div class="bc-av" style="background:#7C3AED">ZK</div>
+          <div class="bc-av" style="background:#A78BFA">RD</div>
+          <div class="bc-av-more">+1</div>
+          <span class="bc-docs-lbl">3 doktor</span>
+          <div class="bc-rating"><i class="bi bi-star-fill"></i>4.9</div>
+        </div>
+      </div>
+      <div class="bc-expand" id="bc-exp-3">
+        <div class="bc-expand-title">Doktorlar</div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#7C3AED">ZK</div>
+          <div><div class="bc-doc-name">Dr. Zeynep Kara</div><div class="bc-doc-spec">Nöroloji Uzmanı · 15 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Zeynep Kara')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#A78BFA">RD</div>
+          <div><div class="bc-doc-name">Dr. Rıfat Doğan</div><div class="bc-doc-spec">Nöroloji Uzmanı · 9 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Rıfat Doğan')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+      </div>
+      <div class="bc-card-footer">
+        <button class="bc-btn primary" onclick="BC.toggleDocs(3,this)"><i class="bi bi-people"></i> Doktorlar</button>
+        <button class="bc-btn" onclick="BC.openEdit({name:'Nöroloji',desc:'Beyin, omurilik ve sinir sistemi hastalıklarının ileri teşhis ve nörofizyolojik tedavi hizmetleri.',cat:'dahili',docs:'3',code:'#BRN-004'})"><i class="bi bi-pencil"></i> Düzenle</button>
+        <button class="bc-btn danger" onclick="BC.confirmDelete('Nöroloji',this)"><i class="bi bi-trash3"></i> Sil</button>
+      </div>
+    </div>
+
+    <!-- 5. PEDİATRİ -->
+    <div class="bc-card" data-cat="dahili" data-name="pediatri">
+      <div class="bc-card-accent" style="background:linear-gradient(90deg,#06B6D4,#67E8F9)"></div>
+      <div class="bc-card-body">
+        <div class="bc-card-head">
+          <div class="bc-card-icon" style="background:#ECFEFF">👶</div>
+          <div class="bc-card-info">
+            <div class="bc-card-name">Pediatri (Çocuk Sağlığı)</div>
+            <div><span class="bc-card-code">#BRN-005</span><span class="bc-status-dot on"></span><span class="bc-status-lbl">Aktif</span></div>
+          </div>
+        </div>
+        <p class="bc-card-desc">0–18 yaş arası çocukların büyüme, gelişme ve sağlık takipleri ile hastalık tedavileri.</p>
+        <div class="bc-mini-stats">
+          <div class="bc-ms-cell"><div class="bc-ms-val">4</div><div class="bc-ms-lbl">Doktor</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">65</div><div class="bc-ms-lbl">Randevu/ay</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">10</div><div class="bc-ms-lbl">Yatak</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">4.8</div><div class="bc-ms-lbl">Puan</div></div>
+        </div>
+        <div class="bc-occ-row">
+          <span class="bc-occ-lbl">Doluluk</span>
+          <div class="bc-prog-track"><div class="bc-prog-fill" style="width:65%;background:#06B6D4"></div></div>
+          <span class="bc-occ-pct" style="color:#06B6D4">65%</span>
+        </div>
+        <div class="bc-docs-row">
+          <div class="bc-av" style="background:#06B6D4">AY</div>
+          <div class="bc-av" style="background:#67E8F9;color:#164E63">NS</div>
+          <div class="bc-av-more">+2</div>
+          <span class="bc-docs-lbl">4 doktor</span>
+          <div class="bc-rating"><i class="bi bi-star-fill"></i>4.8</div>
+        </div>
+      </div>
+      <div class="bc-expand" id="bc-exp-4">
+        <div class="bc-expand-title">Doktorlar</div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#06B6D4">AY</div>
+          <div><div class="bc-doc-name">Dr. Ahmet Yılmaz</div><div class="bc-doc-spec">Pediatri Uzmanı · 9 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Ahmet Yılmaz')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#67E8F9;color:#164E63">NS</div>
+          <div><div class="bc-doc-name">Dr. Nilüfer Sarı</div><div class="bc-doc-spec">Neonatoloji Uzmanı · 6 yıl</div></div>
+          <span class="bc-doc-badge off">Meşgul</span>
+          <button class="bc-appt-btn" disabled><i class="bi bi-clock"></i> Dolu</button>
+        </div>
+      </div>
+      <div class="bc-card-footer">
+        <button class="bc-btn primary" onclick="BC.toggleDocs(4,this)"><i class="bi bi-people"></i> Doktorlar</button>
+        <button class="bc-btn" onclick="BC.openEdit({name:'Pediatri',desc:'0–18 yaş arası çocukların büyüme, gelişme ve sağlık takipleri ile hastalık tedavileri.',cat:'dahili',docs:'4',code:'#BRN-005'})"><i class="bi bi-pencil"></i> Düzenle</button>
+        <button class="bc-btn danger" onclick="BC.confirmDelete('Pediatri',this)"><i class="bi bi-trash3"></i> Sil</button>
+      </div>
+    </div>
+
+    <!-- 6. RADYOLOJİ -->
+    <div class="bc-card" data-cat="tani" data-name="radyoloji">
+      <div class="bc-card-accent" style="background:linear-gradient(90deg,#6366F1,#A5B4FC)"></div>
+      <div class="bc-card-body">
+        <div class="bc-card-head">
+          <div class="bc-card-icon" style="background:#EEF2FF">🔬</div>
+          <div class="bc-card-info">
+            <div class="bc-card-name">Radyoloji ve Görüntüleme</div>
+            <div><span class="bc-card-code">#BRN-006</span><span class="bc-status-dot on"></span><span class="bc-status-lbl">Aktif</span></div>
+          </div>
+        </div>
+        <p class="bc-card-desc">MR, BT, ultrason ve dijital röntgen ile ileri düzey tanı görüntüleme ve raporlama hizmetleri.</p>
+        <div class="bc-mini-stats">
+          <div class="bc-ms-cell"><div class="bc-ms-val">3</div><div class="bc-ms-lbl">Doktor</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">120</div><div class="bc-ms-lbl">İşlem/ay</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">5</div><div class="bc-ms-lbl">Cihaz</div></div>
+          <div class="bc-ms-cell"><div class="bc-ms-val">4.5</div><div class="bc-ms-lbl">Puan</div></div>
+        </div>
+        <div class="bc-occ-row">
+          <span class="bc-occ-lbl">Doluluk</span>
+          <div class="bc-prog-track"><div class="bc-prog-fill" style="width:80%;background:#6366F1"></div></div>
+          <span class="bc-occ-pct" style="color:#6366F1">80%</span>
+        </div>
+        <div class="bc-docs-row">
+          <div class="bc-av" style="background:#6366F1">NB</div>
+          <div class="bc-av" style="background:#A5B4FC;color:#3730A3">HT</div>
+          <div class="bc-av-more">+1</div>
+          <span class="bc-docs-lbl">3 doktor</span>
+          <div class="bc-rating"><i class="bi bi-star-fill"></i>4.5</div>
+        </div>
+      </div>
+      <div class="bc-expand" id="bc-exp-5">
+        <div class="bc-expand-title">Doktorlar</div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#6366F1">NB</div>
+          <div><div class="bc-doc-name">Dr. Neslihan Baş</div><div class="bc-doc-spec">Radyoloji Uzmanı · 7 yıl</div></div>
+          <span class="bc-doc-badge on">Müsait</span>
+          <button class="bc-appt-btn" onclick="BC.book('Dr. Neslihan Baş')"><i class="bi bi-calendar-plus"></i> Randevu</button>
+        </div>
+        <div class="bc-doc-row">
+          <div class="bc-doc-av" style="background:#A5B4FC;color:#3730A3">HT</div>
+          <div><div class="bc-doc-name">Dr. Hakan Tekin</div><div class="bc-doc-spec">Radyoloji Uzmanı · 11 yıl</div></div>
+          <span class="bc-doc-badge off">Meşgul</span>
+          <button class="bc-appt-btn" disabled><i class="bi bi-clock"></i> Dolu</button>
+        </div>
+      </div>
+      <div class="bc-card-footer">
+        <button class="bc-btn primary" onclick="BC.toggleDocs(5,this)"><i class="bi bi-people"></i> Doktorlar</button>
+        <button class="bc-btn" onclick="BC.openEdit({name:'Radyoloji ve Görüntüleme',desc:'MR, BT, ultrason ve dijital röntgen ile ileri düzey tanı görüntüleme ve raporlama hizmetleri.',cat:'tani',docs:'3',code:'#BRN-006'})"><i class="bi bi-pencil"></i> Düzenle</button>
+        <button class="bc-btn danger" onclick="BC.confirmDelete('Radyoloji ve Görüntüleme',this)"><i class="bi bi-trash3"></i> Sil</button>
+      </div>
+    </div>
+
+  </div><!-- /#bc-grid -->
+
+
+  <!-- ── MODALLER ── -->
+
+  <!-- Düzenle -->
+  <div class="bc-overlay" id="bc-m-edit" onclick="if(event.target===this)BC.close('bc-m-edit')">
+    <div class="bc-modal-box" style="max-width:520px">
+      <div class="bc-modal-header">
+        <div>
+          <div class="bc-modal-title"><i class="bi bi-pencil-square me-2" style="color:var(--primary)"></i>Branşı Düzenle</div>
+          <div class="bc-modal-subtitle" id="bc-edit-code"></div>
+        </div>
+        <button class="bc-modal-close" onclick="BC.close('bc-m-edit')"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="bc-modal-body">
+        <div class="bc-form-group">
+          <label class="bc-form-label">Branş Adı</label>
+          <input class="bc-form-control" id="bc-edit-name" placeholder="Örn: Kardiyoloji">
+        </div>
+        <div class="bc-form-group">
+          <label class="bc-form-label">Açıklama</label>
+          <textarea class="bc-form-control" id="bc-edit-desc" rows="3"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div>
+            <label class="bc-form-label">Kategori</label>
+            <select class="bc-form-control" id="bc-edit-cat">
+              <option value="dahili">Dahili Tıp</option>
+              <option value="cerrahi">Cerrahi</option>
+              <option value="tani">Tanı</option>
+            </select>
+          </div>
+          <div>
+            <label class="bc-form-label">Doktor Sayısı</label>
+            <input class="bc-form-control" type="number" id="bc-edit-docs" min="0">
+          </div>
+          <div>
+            <label class="bc-form-label">Durum</label>
+            <select class="bc-form-control">
+              <option>Aktif</option><option>Pasif</option><option>Bakımda</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="bc-modal-footer">
+        <button class="bc-btn-outline" onclick="BC.close('bc-m-edit')">İptal</button>
+        <button class="bc-btn-primary" onclick="BC.saveEdit()"><i class="bi bi-floppy"></i> Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sil onay -->
+  <div class="bc-overlay" id="bc-m-delete" onclick="if(event.target===this)BC.close('bc-m-delete')">
+    <div class="bc-modal-box" style="max-width:420px">
+      <div class="bc-modal-header">
+        <div class="bc-modal-title" style="color:var(--danger)">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Branşı Sil
+        </div>
+        <button class="bc-modal-close" onclick="BC.close('bc-m-delete')"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="bc-modal-body">
+        <p style="font-size:14px;line-height:1.7;color:var(--text)">
+          <strong id="bc-del-name" style="color:var(--danger)"></strong> branşını kalıcı olarak silmek istediğinizden emin misiniz?
+        </p>
+        <div class="bc-modal-danger-note">
+          <i class="bi bi-info-circle-fill"></i>
+          Bu işlem geri alınamaz. Branşa ait randevu ve kayıtlar arşive taşınır.
+        </div>
+      </div>
+      <div class="bc-modal-footer">
+        <button class="bc-btn-outline" onclick="BC.close('bc-m-delete')">Vazgeç</button>
+        <button class="bc-btn-primary" style="background:var(--danger)" onclick="BC.execDelete()">
+          <i class="bi bi-trash3"></i> Evet, Sil
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Yeni Branş (placeholder) -->
+  <div class="bc-overlay" id="bc-m-add" onclick="if(event.target===this)BC.close('bc-m-add')">
+    <div class="bc-modal-box" style="max-width:440px">
+      <div class="bc-modal-header">
+        <div class="bc-modal-title"><i class="bi bi-plus-circle me-2" style="color:var(--primary)"></i>Yeni Branş Ekle</div>
+        <button class="bc-modal-close" onclick="BC.close('bc-m-add')"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="bc-modal-body" style="text-align:center;padding:36px 24px">
+        <i class="bi bi-layout-text-window-reverse" style="font-size:44px;color:var(--primary);opacity:.2;display:block;margin-bottom:14px"></i>
+        <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sayfa henüz bağlanmadı</div>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.7">
+          Yeni branş ekleme sayfanızı oluşturup<br>bu modal içeriğini kendi formunuzla değiştirin.
+        </p>
+      </div>
+      <div class="bc-modal-footer">
+        <button class="bc-btn-outline" onclick="BC.close('bc-m-add')">Kapat</button>
+        <button class="bc-btn-primary" onclick="BC.close('bc-m-add');Shell.toast('Ekleme sayfasına yönlendiriliyor...','info','bi-arrow-right-circle')">
+          <i class="bi bi-box-arrow-up-right"></i> Sayfaya Git
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ── PAGE JS ── -->
+  <script>
+  const BC = (() => {
+    let _cat  = 'all';
+    let _delName = '';
+    let _delCard = null;
+
+    /* ─ View ─ */
+    function setView(v) {
+      document.getElementById('bc-grid').classList.toggle('list-mode', v === 'list');
+      document.getElementById('bc-vg').classList.toggle('active', v === 'grid');
+      document.getElementById('bc-vl').classList.toggle('active', v === 'list');
+      if (v === 'list') _closeAllExpand();
+    }
+
+    /* ─ Tab ─ */
+    function setTab(el) {
+      document.querySelectorAll('.bc-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      _cat = el.dataset.cat;
+      filter();
+    }
+
+    /* ─ Filter ─ */
+    function filter() {
+      const q = (document.getElementById('bc-search').value || '').toLowerCase().trim();
+      let n = 0;
+      document.querySelectorAll('#bc-grid .bc-card').forEach(c => {
+        const show = (_cat === 'all' || c.dataset.cat === _cat) && c.dataset.name.includes(q);
+        c.style.display = show ? '' : 'none';
+        if (show) n++;
+      });
+      const cnt = document.getElementById('bc-count');
+      if (cnt) cnt.textContent = n;
+      let empty = document.getElementById('bc-empty');
+      if (n === 0 && !empty) {
+        empty = document.createElement('div');
+        empty.id = 'bc-empty'; empty.className = 'bc-empty';
+        empty.innerHTML = '<i class="bi bi-search"></i><div class="bc-empty-title">Sonuç bulunamadı</div><div style="font-size:13px">Farklı arama terimi veya kategori deneyin.</div>';
+        document.getElementById('bc-grid').appendChild(empty);
+      } else if (n > 0 && empty) { empty.remove(); }
+    }
+
+    /* ─ Docs expand ─ */
+    function toggleDocs(i, btn) {
+      const panel = document.getElementById('bc-exp-' + i);
+      const open  = panel.classList.contains('open');
+      _closeAllExpand();
+      if (!open) {
+        panel.classList.add('open');
+        btn.innerHTML = '<i class="bi bi-chevron-up"></i> Gizle';
+      }
+    }
+    function _closeAllExpand() {
+      document.querySelectorAll('.bc-expand.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.bc-btn.primary[onclick^="BC.toggleDocs"]').forEach(b => {
+        b.innerHTML = '<i class="bi bi-people"></i> Doktorlar';
+      });
+    }
+
+    /* ─ Appointment ─ */
+    function book(doc) {
+      Shell.toast(`${doc} için randevu talebi oluşturuldu!`, 'success', 'bi-calendar-check');
+    }
+
+    /* ─ Modal helpers ─ */
+    function open(id) {
+      document.getElementById(id).classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function close(id) {
+      document.getElementById(id).classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    /* ─ Add ─ */
+    function openAdd() { open('bc-m-add'); }
+
+    /* ─ Edit ─ */
+    function openEdit(d) {
+      document.getElementById('bc-edit-name').value = d.name || '';
+      document.getElementById('bc-edit-desc').value = d.desc || '';
+      document.getElementById('bc-edit-docs').value = d.docs || '';
+      document.getElementById('bc-edit-code').textContent = 'Kod: ' + (d.code || '');
+      document.getElementById('bc-edit-cat').value = d.cat || 'dahili';
+      open('bc-m-edit');
+    }
+    function saveEdit() {
+      const n = document.getElementById('bc-edit-name').value.trim();
+      if (!n) { Shell.toast('Branş adı boş olamaz!', 'danger', 'bi-exclamation-circle'); return; }
+      close('bc-m-edit');
+      Shell.toast(`"${n}" branşı güncellendi.`, 'success', 'bi-check-circle');
+    }
+
+    /* ─ Delete ─ */
+    function confirmDelete(name, btn) {
+      _delName = name;
+      _delCard = btn.closest('.bc-card');
+      document.getElementById('bc-del-name').textContent = name;
+      open('bc-m-delete');
+    }
+    function execDelete() {
+      close('bc-m-delete');
+      if (_delCard) {
+        _delCard.style.transition = 'opacity .3s ease, transform .3s ease';
+        _delCard.style.opacity = '0';
+        _delCard.style.transform = 'scale(.94)';
+        setTimeout(() => { _delCard?.remove(); _delCard = null; filter(); }, 320);
+      }
+      Shell.toast(`"${_delName}" branşı silindi.`, 'danger', 'bi-trash3');
+    }
+
+    /* ─ Export ─ */
+    function exportList() {
+      Shell.toast('Branş listesi Excel olarak hazırlanıyor...', 'info', 'bi-file-earmark-spreadsheet');
+    }
+
+    /* ─ ESC ─ */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape')
+        document.querySelectorAll('.bc-overlay.show').forEach(m => close(m.id));
+    });
+
+    /* ─ Topbar başlığını güncelle ─ */
+    if (typeof Shell !== 'undefined' && Shell.setPage)
+      Shell.setPage('Branşlar', 'Admin Paneli / Klinik / Branşlar');
+
+    return { setView, setTab, filter, toggleDocs, book, openAdd, openEdit, saveEdit, confirmDelete, execDelete, exportList, close };
+  })();
+  </script>
+
+</main>
