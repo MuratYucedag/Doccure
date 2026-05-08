@@ -1,0 +1,31 @@
+
+private string GenerateToken(AppUser user)
+        {
+            var jwtSettings = _configuration.GetSection("Jwt");
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim("name", user.Name ?? ""),
+                new Claim("surname", user.Surname ?? "")
+            };
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
+            );
+
+            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(
+                    int.Parse(jwtSettings["ExpireMinutes"]!)
+                ),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }

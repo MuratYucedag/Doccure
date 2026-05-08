@@ -1,0 +1,30 @@
+var responseMessage =
+        await _httpClient.GetAsync(
+            $"https://localhost:5000/api/branches/GetBranch?id={id}");
+
+    if (responseMessage.IsSuccessStatusCode)
+    {
+        var jsonData = await responseMessage.Content.ReadAsStringAsync();
+
+        var values =
+            JsonConvert.DeserializeObject<GetByIdBranchDto>(jsonData);
+
+        return values;
+    }
+
+    return null;
+
+
+    -----------------------------------------
+
+public async Task UpdateBranchAsync(UpdateBranchDto dto)
+{
+    var jsonData = JsonConvert.SerializeObject(dto);
+
+    StringContent stringContent =
+        new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+    await _httpClient.PutAsync(
+        "https://localhost:5000/api/branches",
+        stringContent);
+}

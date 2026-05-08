@@ -1,6 +1,7 @@
 ﻿using Doccure.IdentityService.Context;
 using Doccure.IdentityService.Entities;
 using Doccure.IdentityService.Services;
+using Doccure.IdentityService.Services.RoleServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
@@ -13,6 +14,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

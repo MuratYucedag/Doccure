@@ -1,0 +1,14 @@
+﻿BranşEmojiKardiyoloji🫀Dermatoloji🩺Ortopedi🦴Nöroloji🧠Pediatri👶Radyoloji🔬Göz Hastalıkları👁️Kulak Burun Boğaz👂Psikiyatri🧬Onkoloji🎗️Üroloji🫘Kadın Doğum🤰Endokrinoloji⚗️Gastroenteroloji🫁Enfeksiyon Hastalıkları🦠Fizik Tedavi🏃Acil Tıp🚑Anestezi💉Genel Cerrahi🔪Hematoloji🩸
+
+---------------
+
+<div class="bc-card-icon" style="background:@iconBg">
+    @if (!string.IsNullOrEmpty(b.ImageUrl))
+    {
+        @b.ImageUrl
+    }
+    else
+    {
+        <i class="bi bi-hospital" style="font-size:22px;color:#3B82F6"></i>
+    }
+</div>

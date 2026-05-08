@@ -1,0 +1,728 @@
+﻿@model RegisterViewModel
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doccure – Hasta Kayıt</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ── Root & Reset ───────────────────────────────── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --sky: #e8f4fd;
+            --sky-mid: #b8dcf8;
+            --blue: #2a84d2;
+            --blue-dk: #1a5fa0;
+            --blue-lt: #5ba8e8;
+            --teal: #3ab3b3;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-400: #94a3b8;
+            --gray-600: #475569;
+            --gray-800: #1e293b;
+            --danger: #e74c6e;
+            --success: #27ae8a;
+            --radius: 14px;
+            --radius-sm: 9px;
+            --shadow: 0 8px 40px rgba(42,132,210,.13);
+            --shadow-sm: 0 2px 12px rgba(42,132,210,.09);
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --font-head: 'DM Serif Display', serif;
+            --trans: .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: var(--font-body);
+            background: var(--gray-100);
+            color: var(--gray-800);
+        }
+
+        body {
+            background: radial-gradient(ellipse at 20% 0%, rgba(42,132,210,.09) 0%, transparent 55%), radial-gradient(ellipse at 80% 100%, rgba(58,179,179,.08) 0%, transparent 55%), var(--gray-100);
+        }
+
+        /* ── Layout ─────────────────────────────────────── */
+        .split-wrap {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── RIGHT PANEL ─────────────────────────────────── */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+            background: var(--gray-100);
+        }
+
+        .form-card {
+            background: var(--white);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            padding: 2.8rem 2.6rem;
+            width: 100%;
+            max-width: 560px;
+            animation: slideUp .5s cubic-bezier(.4,0,.2,1) both;
+        }
+
+        @@keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .form-header { text-align: center; margin-bottom: 2rem; }
+        .form-logo {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, var(--blue), var(--teal));
+            border-radius: 14px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 1.1rem;
+            box-shadow: 0 4px 16px rgba(42,132,210,.3);
+        }
+        .form-logo i { font-size: 1.5rem; color: white; }
+        .form-header h2 { font-family: var(--font-head); font-size: 1.65rem; color: var(--gray-800); margin-bottom: .3rem; }
+        .form-header p  { font-size: .875rem; color: var(--gray-400); }
+
+        /* Step Progress */
+        .step-bar { display: flex; gap: 4px; margin-bottom: 1.8rem; }
+        .step-seg {
+            flex: 1; height: 4px; border-radius: 10px;
+            background: var(--gray-200);
+            transition: background var(--trans);
+        }
+        .step-seg.active { background: linear-gradient(90deg, var(--blue), var(--teal)); }
+
+        /* Profile Upload */
+        .avatar-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem; }
+        .avatar-ring { position: relative; width: 90px; height: 90px; cursor: pointer; }
+        .avatar-ring img#preview-img {
+            width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--sky-mid); box-shadow: var(--shadow-sm);
+            transition: opacity var(--trans);
+        }
+        .avatar-overlay {
+            position: absolute; inset: 0; border-radius: 50%;
+            background: rgba(42,132,210,.55);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity var(--trans);
+        }
+        .avatar-ring:hover .avatar-overlay { opacity: 1; }
+        .avatar-overlay i { color: white; font-size: 1.3rem; }
+        #file-input { display: none; }
+        .avatar-label { margin-top: .55rem; font-size: .78rem; color: var(--gray-400); text-align: center; }
+        .avatar-label span { color: var(--blue); cursor: pointer; font-weight: 600; }
+
+        /* Form controls */
+        .form-section-title {
+            font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+            text-transform: uppercase; color: var(--blue);
+            margin-bottom: .75rem; margin-top: 1.2rem;
+            display: flex; align-items: center; gap: .4rem;
+        }
+        .form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+
+        .form-floating-custom { position: relative; margin-bottom: 1rem; }
+        .form-floating-custom .field-icon {
+            position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+            color: var(--gray-400); font-size: 1rem; pointer-events: none;
+            transition: color var(--trans); z-index: 5;
+        }
+        .form-floating-custom input,
+        .form-floating-custom select {
+            width: 100%;
+            padding: .82rem 1rem .82rem 2.7rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: .9rem; font-family: var(--font-body);
+            color: var(--gray-800); background: var(--gray-50);
+            outline: none;
+            transition: border-color var(--trans), box-shadow var(--trans), background var(--trans);
+            -webkit-appearance: none;
+        }
+        .form-floating-custom input::placeholder { color: var(--gray-400); }
+        .form-floating-custom input:focus,
+        .form-floating-custom select:focus {
+            border-color: var(--blue); background: var(--white);
+            box-shadow: 0 0 0 3.5px rgba(42,132,210,.12);
+        }
+        .form-floating-custom input:focus ~ .field-icon { color: var(--blue); }
+
+        .form-floating-custom.has-error input,
+        .form-floating-custom.has-error select {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(231,76,110,.1);
+        }
+        .form-floating-custom.has-success input,
+        .form-floating-custom.has-success select { border-color: var(--success); }
+
+        .field-icon-right {
+            position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+            color: var(--gray-400); font-size: 1rem; cursor: pointer;
+            z-index: 5; transition: color var(--trans);
+        }
+
+        .err-msg {
+            font-size: .77rem; color: var(--danger);
+            margin-top: .28rem; display: none;
+            animation: fadeIn .2s ease;
+        }
+        @@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        .form-floating-custom.has-error .err-msg { display: block; }
+
+        /* Gender Row */
+        .gender-row { display: flex; gap: .55rem; margin-bottom: .4rem; }
+        .gender-opt { flex: 1; }
+        .gender-opt input { display: none; }
+        .gender-opt label {
+            display: flex; align-items: center; justify-content: center; gap: .4rem;
+            padding: .72rem;
+            border: 1.5px solid var(--gray-200); border-radius: var(--radius-sm);
+            font-size: .84rem; font-weight: 500; color: var(--gray-600);
+            cursor: pointer; background: var(--gray-50);
+            transition: all var(--trans);
+        }
+        .gender-opt label i { font-size: 1rem; }
+        .gender-opt input:checked + label {
+            border-color: var(--blue); background: var(--sky);
+            color: var(--blue); box-shadow: 0 0 0 3px rgba(42,132,210,.1);
+        }
+        .gender-opt label:hover { border-color: var(--blue-lt); background: var(--sky); }
+
+        /* Gender error */
+        #cinsiyet-error {
+            font-size: .77rem; color: var(--danger);
+            display: none; margin-top: .28rem; margin-bottom: .8rem;
+        }
+
+        /* Two-column row */
+        .col-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+        /* Checkbox */
+        .terms-check { display: flex; align-items: flex-start; gap: .65rem; margin-bottom: 1.2rem; }
+        .terms-check input[type="checkbox"] {
+            width: 17px; height: 17px; flex-shrink: 0;
+            accent-color: var(--blue); margin-top: 2px; cursor: pointer;
+        }
+        .terms-check label { font-size: .83rem; color: var(--gray-600); cursor: pointer; line-height: 1.5; }
+        .terms-check a { color: var(--blue); text-decoration: none; font-weight: 600; }
+        .terms-check a:hover { text-decoration: underline; }
+
+        #terms-error { font-size: .77rem; color: var(--danger); display: none; margin-top: -.8rem; margin-bottom: .8rem; }
+
+        /* Submit button */
+        .btn-register {
+            width: 100%; padding: .9rem; border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dk) 50%, var(--teal) 100%);
+            background-size: 200% 200%;
+            color: white; font-family: var(--font-body);
+            font-size: .95rem; font-weight: 600; letter-spacing: .02em;
+            cursor: pointer; box-shadow: 0 4px 18px rgba(42,132,210,.35);
+            transition: all var(--trans);
+            display: flex; align-items: center; justify-content: center; gap: .55rem;
+            position: relative; overflow: hidden;
+        }
+        .btn-register::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(255,255,255,0); transition: background var(--trans);
+        }
+        .btn-register:hover { box-shadow: 0 6px 26px rgba(42,132,210,.45); transform: translateY(-1px); }
+        .btn-register:hover::before { background: rgba(255,255,255,.07); }
+        .btn-register:active { transform: translateY(0); }
+        .btn-register.loading .btn-text { opacity: 0; }
+        .btn-register .spinner {
+            position: absolute; width: 20px; height: 20px;
+            border: 2.5px solid rgba(255,255,255,.4); border-top-color: white;
+            border-radius: 50%; animation: spin .7s linear infinite; display: none;
+        }
+        .btn-register.loading .spinner { display: block; }
+        @@keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Login link */
+        .login-link { text-align: center; margin-top: 1.3rem; font-size: .85rem; color: var(--gray-400); }
+        .login-link a { color: var(--blue); font-weight: 600; text-decoration: none; }
+        .login-link a:hover { text-decoration: underline; }
+
+        /* Password strength */
+        .pw-strength { margin-top: .4rem; display: none; }
+        .pw-strength-bar { height: 4px; border-radius: 10px; background: var(--gray-200); overflow: hidden; margin-bottom: .3rem; }
+        .pw-strength-fill { height: 100%; border-radius: 10px; transition: width .4s ease, background .4s ease; }
+        .pw-strength-label { font-size: .74rem; color: var(--gray-400); }
+
+        /* Toast */
+        .toast-wrap {
+            position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999;
+            display: flex; flex-direction: column; gap: .6rem;
+        }
+        .toast-item {
+            background: white; border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.15);
+            padding: 1rem 1.3rem;
+            display: flex; align-items: center; gap: .75rem;
+            font-size: .88rem; font-weight: 500; max-width: 320px;
+            animation: toastIn .35s cubic-bezier(.4,0,.2,1) both;
+            border-left: 4px solid var(--success);
+        }
+        .toast-item i { font-size: 1.2rem; color: var(--success); }
+        @@keyframes toastIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ── Top Bar ─────────────────────────────────────── */
+        .top-bar {
+            background: white; border-bottom: 1px solid var(--gray-200);
+            box-shadow: 0 1px 8px rgba(42,132,210,.07);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .top-bar-inner {
+            max-width: 900px; margin: 0 auto; padding: .75rem 1.5rem;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .top-brand { display: flex; align-items: center; gap: .6rem; font-family: var(--font-head); font-size: 1.25rem; color: var(--gray-800); }
+        .top-logo {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, var(--blue), var(--teal));
+            border-radius: 9px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 8px rgba(42,132,210,.3);
+        }
+        .top-logo i { color: white; font-size: .95rem; }
+        .top-links { display: flex; gap: .7rem; }
+        .trust-chip {
+            display: inline-flex; align-items: center; gap: .35rem;
+            font-size: .76rem; font-weight: 500; color: var(--gray-400);
+            background: var(--gray-50); border: 1px solid var(--gray-200);
+            border-radius: 50px; padding: .28rem .7rem;
+        }
+        .trust-chip i { color: var(--teal); }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @@media (max-width: 900px) {
+            .left-panel { display: none; }
+            .right-panel { padding: 1.5rem 1rem; }
+            .form-card { padding: 2rem 1.4rem; }
+            .col-row { grid-template-columns: 1fr; }
+        }
+        @@media (max-width: 400px) {
+            .gender-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast-wrap" id="toast-wrap"></div>
+
+    <!-- Top brand bar -->
+    <header class="top-bar">
+        <div class="top-bar-inner">
+            <div class="top-brand">
+                <div class="top-logo"><i class="bi bi-heart-pulse-fill"></i></div>
+                <span>Doccure</span>
+            </div>
+            <div class="top-links">
+                <span class="trust-chip"><i class="bi bi-shield-check"></i> SSL Güvenli</span>
+                <span class="trust-chip"><i class="bi bi-telephone"></i> 7/24 Destek</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="split-wrap">
+
+        <!-- ── RIGHT PANEL ─────────────────────────────── -->
+        <main class="right-panel">
+            <div class="form-card">
+
+                <!-- Header -->
+                <div class="form-header">
+                    <div class="form-logo"><i class="bi bi-hospital"></i></div>
+                    <h2>Hasta Kayıt Ol</h2>
+                    <p>Sağlık hizmetlerine erişmek için kayıt olun</p>
+                </div>
+
+                <!-- Step bar -->
+                <div class="step-bar" id="step-bar">
+                    <div class="step-seg active" id="seg1"></div>
+                    <div class="step-seg" id="seg2"></div>
+                    <div class="step-seg" id="seg3"></div>
+                </div>
+
+                <!-- Form -->
+                <form method="post" id="register-form" novalidate>
+
+                    <!-- Profile Photo -->
+                    <div class="avatar-wrap">
+                        <div class="avatar-ring" onclick="document.getElementById('file-input').click()">
+                            <img id="preview-img"
+                                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90' viewBox='0 0 90 90'%3E%3Crect width='90' height='90' rx='45' fill='%23e8f4fd'/%3E%3Cpath d='M45 42a13 13 0 1 0 0-26 13 13 0 0 0 0 26Zm0 5c-14 0-24 7-24 16v3h48v-3c0-9-10-16-24-16Z' fill='%232a84d2' opacity='.45'/%3E%3C/svg%3E"
+                                 alt="Profil Fotoğrafı" />
+                            <div class="avatar-overlay"><i class="bi bi-camera"></i></div>
+                        </div>
+                        <input type="file" id="file-input" accept="image/*" />
+                        <div class="avatar-label">
+                            <span onclick="document.getElementById('file-input').click()">Fotoğraf Yükle</span>
+                            &nbsp;(isteğe bağlı)
+                        </div>
+                    </div>
+
+                    <!-- Section: Kişisel Bilgiler -->
+                    <div class="form-section-title"><i class="bi bi-person"></i> Kişisel Bilgiler</div>
+
+                    <div class="col-row">
+                        <!-- ✅ fc-ad ve fc-soyad ayrı id'ler -->
+                        <div class="form-floating-custom" id="fc-ad">
+                            <i class="bi bi-person field-icon"></i>
+                            <input type="text" id="ad" asp-for="Name" placeholder="Adınız" />
+                            <span class="err-msg">İsim Alanı Zorunludur.</span>
+                        </div>
+
+                        <div class="form-floating-custom" id="fc-soyad">
+                            <i class="bi bi-person field-icon"></i>
+                            <input type="text" id="soyad" asp-for="Surname" placeholder="Soyadınız" />
+                            <span class="err-msg">Soyad Alanı Zorunludur.</span>
+                        </div>
+                    </div>
+
+                    <div class="col-row">
+                        <div class="form-floating-custom" id="fc-kullanici">
+                            <i class="bi bi-at field-icon"></i>
+                            <input type="text" id="kullanici" asp-for="Username" placeholder="Kullanıcı Adı" autocomplete="username" />
+                            <span class="err-msg">Geçerli bir kullanıcı adı giriniz (harf, rakam, . veya _).</span>
+                        </div>
+
+                        <div class="form-floating-custom" id="fc-dogum">
+                            <i class="bi bi-calendar3 field-icon"></i>
+                            <input type="date" id="dogum" max="" asp-for="BirthDate" />
+                            <span class="err-msg">Doğum tarihi zorunludur.</span>
+                        </div>
+                    </div>
+
+                    <!-- Cinsiyet -->
+                    <div class="gender-row">
+                        <div class="gender-opt">
+                            <!-- ✅ asp-for="Gender" → ASP.NET name="Gender" olarak render eder -->
+                            <input type="radio" asp-for="Gender" id="c-erkek" value="erkek" />
+                            <label for="c-erkek"><i class="bi bi-gender-male"></i> Erkek</label>
+                        </div>
+                        <div class="gender-opt">
+                            <input type="radio" asp-for="Gender" id="c-kadin" value="kadin" />
+                            <label for="c-kadin"><i class="bi bi-gender-female"></i> Kadın</label>
+                        </div>
+                    </div>
+                    <!-- ✅ Cinsiyet hata mesajı HTML'e eklendi -->
+                    <div id="cinsiyet-error">Lütfen cinsiyet seçiniz.</div>
+
+                    <!-- Section: İletişim -->
+                    <div class="form-section-title"><i class="bi bi-envelope"></i> İletişim Bilgileri</div>
+
+                    <div class="form-floating-custom" id="fc-eposta">
+                        <i class="bi bi-envelope field-icon"></i>
+                        <input asp-for="Email" type="email" id="eposta" placeholder="E-posta Adresi" />
+                        <span class="err-msg">Geçerli bir e-posta giriniz.</span>
+                    </div>
+
+                    <div class="form-floating-custom" id="fc-telefon">
+                        <i class="bi bi-telephone field-icon"></i>
+                        <input type="tel" asp-for="PhoneNumber" id="telefon" placeholder="Telefon Numarası (05xx xxx xx xx)" maxlength="13" />
+                        <span class="err-msg">Geçerli bir telefon numarası giriniz.</span>
+                    </div>
+
+                    <!-- Section: Güvenlik -->
+                    <div class="form-section-title"><i class="bi bi-lock"></i> Güvenlik</div>
+
+                    <div class="form-floating-custom" id="fc-sifre">
+                        <i class="bi bi-lock field-icon"></i>
+                        <input type="password" id="sifre" asp-for="Password" placeholder="Şifre" autocomplete="new-password" />
+                        <i class="bi bi-eye field-icon-right" id="toggle-pw1" onclick="togglePw('sifre','toggle-pw1')"></i>
+                        <span class="err-msg">Şifre en az 6 karakter olmalıdır.</span>
+                    </div>
+                    <div class="pw-strength" id="pw-strength">
+                        <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-fill"></div></div>
+                        <div class="pw-strength-label" id="pw-label">Şifre gücü</div>
+                    </div>
+
+                    <div class="form-floating-custom" id="fc-sifre2" style="margin-top:.6rem;">
+                        <i class="bi bi-lock-fill field-icon"></i>
+                        <input type="password" id="sifre2" placeholder="Şifre Tekrar" autocomplete="new-password" />
+                        <i class="bi bi-eye field-icon-right" id="toggle-pw2" onclick="togglePw('sifre2','toggle-pw2')"></i>
+                        <span class="err-msg">Şifreler eşleşmiyor.</span>
+                    </div>
+
+                    <!-- Terms -->
+                    <div class="terms-check">
+                        <input type="checkbox" id="terms" />
+                        <label for="terms">
+                            <a href="#" onclick="return false">Kullanım şartlarını</a> ve
+                            <a href="#" onclick="return false">Gizlilik politikasını</a>
+                            kabul ediyorum.
+                        </label>
+                    </div>
+                    <div id="terms-error">Devam etmek için şartları kabul etmelisiniz.</div>
+
+                    <!-- Submit -->
+                    <button type="submit" class="btn-register" id="submit-btn">
+                        <div class="spinner"></div>
+                        <span class="btn-text"><i class="bi bi-person-check"></i>&nbsp;&nbsp;Kayıt Ol</span>
+                    </button>
+
+                    <div class="login-link">
+                        Zaten hesabınız var mı? <a href="#">Giriş Yap</a>
+                    </div>
+
+                </form>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        /* ─── Utility ───────────────────────────────────────── */
+        const $ = id => document.getElementById(id);
+        const setError = (fcId, show) => {
+            const el = $(fcId);
+            el.classList.toggle('has-error', show);
+            el.classList.toggle('has-success', !show);
+        };
+        const clearState = fcId => {
+            const el = $(fcId);
+            el.classList.remove('has-error', 'has-success');
+        };
+
+        /* ─── Max birth date: today ─────────────────────────── */
+        $('dogum').max = new Date().toISOString().split('T')[0];
+
+        /* ─── Profile photo preview ─────────────────────────── */
+        $('file-input').addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = ev => { $('preview-img').src = ev.target.result; };
+            reader.readAsDataURL(file);
+        });
+
+        /* ─── Phone masking ─────────────────────────────────── */
+        $('telefon').addEventListener('input', e => {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.startsWith('0')) {
+                let p = v.slice(1);
+                let out = '0';
+                if (p.length > 0) out += p.slice(0, 3);
+                if (p.length > 3) out += ' ' + p.slice(3, 6);
+                if (p.length > 6) out += ' ' + p.slice(6, 8);
+                if (p.length > 8) out += ' ' + p.slice(8, 10);
+                e.target.value = out;
+            }
+        });
+
+        /* ─── Password toggle ───────────────────────────────── */
+        function togglePw(inputId, iconId) {
+            const inp = $(inputId), icon = $(iconId);
+            if (inp.type === 'password') { inp.type = 'text'; icon.className = 'bi bi-eye-slash field-icon-right'; }
+            else { inp.type = 'password'; icon.className = 'bi bi-eye field-icon-right'; }
+        }
+
+        /* ─── Password strength ─────────────────────────────── */
+        $('sifre').addEventListener('input', function () {
+            const val = this.value;
+            const pw = $('pw-strength');
+            if (!val) { pw.style.display = 'none'; return; }
+            pw.style.display = 'block';
+
+            let score = 0;
+            if (val.length >= 6) score++;
+            if (val.length >= 10) score++;
+            if (/[A-Z]/.test(val)) score++;
+            if (/[0-9]/.test(val)) score++;
+            if (/[^A-Za-z0-9]/.test(val)) score++;
+
+            const fill = $('pw-fill');
+            const label = $('pw-label');
+            const configs = [
+                { w: '20%', bg: '#e74c6e', txt: 'Çok Zayıf' },
+                { w: '40%', bg: '#f39c12', txt: 'Zayıf' },
+                { w: '60%', bg: '#f1c40f', txt: 'Orta' },
+                { w: '80%', bg: '#3ab3b3', txt: 'Güçlü' },
+                { w: '100%', bg: '#27ae8a', txt: 'Çok Güçlü' },
+            ];
+            const c = configs[score - 1] || configs[0];
+            fill.style.width = c.w;
+            fill.style.background = c.bg;
+            label.textContent = c.txt;
+            label.style.color = c.bg;
+
+            updateStepBar();
+        });
+
+        /* ─── Step bar live update ──────────────────────────── */
+        function updateStepBar() {
+            const a = $('ad').value.trim();
+            const e = $('eposta').value.trim();
+            const p = $('sifre').value;
+            let s = 0;
+            if (a) s = 1;
+            if (a && e.includes('@@')) s = 2;
+            if (a && e.includes('@@') && p.length >= 6) s = 3;
+            ['seg1', 'seg2', 'seg3'].forEach((id, i) => {
+                $(id).classList.toggle('active', i < s);
+            });
+        }
+        ['ad', 'eposta', 'sifre', 'telefon'].forEach(id => {
+            $(id).addEventListener('input', updateStepBar);
+        });
+
+        /* ─── Toast ─────────────────────────────────────────── */
+        function showToast(msg, icon = 'bi-check-circle-fill') {
+            const wrap = $('toast-wrap');
+            const t = document.createElement('div');
+            t.className = 'toast-item';
+            t.innerHTML = `<i class="bi ${icon}"></i><span>${msg}</span>`;
+            wrap.appendChild(t);
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(40px)';
+                t.style.transition = '.3s';
+                setTimeout(() => t.remove(), 300);
+            }, 3500);
+        }
+
+        /* ─── Validation helpers ─────────────────────────────── */
+        function validateEmail(v) { return /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(v); }
+        function validatePhone(v) { return /^0\d{3}\s\d{3}\s\d{2}\s\d{2}$/.test(v) || /^0\d{10}$/.test(v.replace(/\s/g, '')); }
+
+        /* ─── Form submit ────────────────────────────────────── */
+        $('register-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            let ok = true;
+
+            const ad       = $('ad').value.trim();
+            const soyad    = $('soyad').value.trim();
+            const kullanici = $('kullanici').value.trim();
+            const dogum    = $('dogum').value;
+            const eposta   = $('eposta').value.trim();
+            const telefon  = $('telefon').value.trim();
+            const sifre    = $('sifre').value;
+            const sifre2   = $('sifre2').value;
+            // ✅ DÜZELTİLDİ: name="Gender" (asp-for="Gender" ile ASP.NET böyle render eder)
+            const cinsiyet = document.querySelector('input[name="Gender"]:checked');
+            const terms    = $('terms').checked;
+
+            /* Ad */
+            const adOk = ad.length >= 2;
+            setError('fc-ad', !adOk); if (!adOk) ok = false;
+
+            /* Soyad */
+            const soyadOk = soyad.length >= 2;
+            setError('fc-soyad', !soyadOk); if (!soyadOk) ok = false;
+
+            /* Kullanıcı Adı */
+            const kullaniciOk = kullanici.length >= 3 && /^[a-zA-Z0-9._]+$/.test(kullanici);
+            setError('fc-kullanici', !kullaniciOk); if (!kullaniciOk) ok = false;
+
+            /* Doğum */
+            const dogumOk = dogum !== '';
+            setError('fc-dogum', !dogumOk); if (!dogumOk) ok = false;
+
+            /* Cinsiyet */
+            const cinsiyetOk = cinsiyet !== null;
+            $('cinsiyet-error').style.display = cinsiyetOk ? 'none' : 'block';
+            if (!cinsiyetOk) ok = false;
+
+            /* E-posta */
+            const epostaOk = validateEmail(eposta);
+            setError('fc-eposta', !epostaOk); if (!epostaOk) ok = false;
+
+            /* Telefon */
+            const telRaw = telefon.replace(/\s/g, '');
+            const telOk = telRaw.length >= 10 && telRaw.startsWith('0');
+            setError('fc-telefon', !telOk); if (!telOk) ok = false;
+
+            /* Şifre */
+            const sifreOk = sifre.length >= 6;
+            setError('fc-sifre', !sifreOk); if (!sifreOk) ok = false;
+
+            /* Şifre tekrar */
+            const sifre2Ok = sifre === sifre2 && sifre2 !== '';
+            setError('fc-sifre2', !sifre2Ok); if (!sifre2Ok) ok = false;
+
+            /* Terms */
+            $('terms-error').style.display = terms ? 'none' : 'block';
+            if (!terms) ok = false;
+
+            if (!ok) {
+                const firstErr = document.querySelector('.has-error input, .has-error select');
+                if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            /* Simulate async submission */
+            const btn = $('submit-btn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            await new Promise(r => setTimeout(r, 1800));
+
+            btn.classList.remove('loading');
+            btn.disabled = false;
+
+            showToast('Kayıt başarıyla tamamlandı! Hoş geldiniz 🎉');
+        });
+
+        /* ─── Real-time field validation ────────────────────── */
+        $('ad').addEventListener('blur', function () {
+            if (this.value) setError('fc-ad', this.value.trim().length < 2);
+        });
+        $('soyad').addEventListener('blur', function () {
+            if (this.value) setError('fc-soyad', this.value.trim().length < 2);
+        });
+        $('kullanici').addEventListener('blur', function () {
+            if (this.value) setError('fc-kullanici', this.value.trim().length < 3 || !/^[a-zA-Z0-9._]+$/.test(this.value.trim()));
+        });
+        $('eposta').addEventListener('blur', function () {
+            if (this.value) setError('fc-eposta', !validateEmail(this.value.trim()));
+        });
+        $('telefon').addEventListener('blur', function () {
+            if (this.value) {
+                const raw = this.value.replace(/\s/g, '');
+                setError('fc-telefon', raw.length < 10 || !raw.startsWith('0'));
+            }
+        });
+        $('sifre2').addEventListener('input', function () {
+            if (this.value) setError('fc-sifre2', this.value !== $('sifre').value);
+        });
+
+        /* ─── Cinsiyet seçilince hata gizle ─────────────────── */
+        document.querySelectorAll('input[name="Gender"]').forEach(r => {
+            r.addEventListener('change', () => {
+                $('cinsiyet-error').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

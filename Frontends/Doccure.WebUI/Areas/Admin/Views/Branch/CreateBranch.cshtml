@@ -1,0 +1,1258 @@
+﻿@model CreateBranchDto
+
+@{
+    ViewData["Title"] = "CreateBranch";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+
+<main id="app-content">
+
+    <style>
+        /* ── Layout ── */
+        .cb-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @@media(max-width: 1024px) {
+            .cb-wrapper { grid-template-columns: 1fr; }
+            .cb-sidebar  { order: -1; }
+        }
+
+        /* ── Page Header ── */
+        .cb-page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .cb-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .cb-breadcrumb a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color var(--dur);
+        }
+
+        .cb-breadcrumb a:hover { color: var(--primary); }
+
+        .cb-breadcrumb i { font-size: 10px; }
+
+        .cb-page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .cb-page-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ── Section Card ── */
+        .cb-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+            animation: cbFadeUp .35s var(--ease) both;
+        }
+
+        .cb-section:nth-child(1) { animation-delay: .04s }
+        .cb-section:nth-child(2) { animation-delay: .10s }
+        .cb-section:nth-child(3) { animation-delay: .16s }
+        .cb-section:nth-child(4) { animation-delay: .22s }
+
+        @@keyframes cbFadeUp {
+            from { opacity: 0; transform: translateY(14px) }
+            to   { opacity: 1; transform: translateY(0) }
+        }
+
+        .cb-section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .cb-section-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .cb-si-blue   { background: var(--primary-bg);  color: var(--primary); }
+        .cb-si-green  { background: var(--success-bg);  color: var(--success); }
+        .cb-si-orange { background: var(--warning-bg);  color: var(--warning); }
+        .cb-si-purple { background: #F3F0FF; color: #7C3AED; }
+
+        .cb-section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .cb-section-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .cb-section-body { padding: 22px; }
+
+        /* ── Form Elements ── */
+        .cb-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .cb-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        @@media(max-width: 640px) {
+            .cb-grid-2, .cb-grid-3 { grid-template-columns: 1fr; }
+        }
+
+        .cb-form-group { margin-bottom: 0; }
+
+        .cb-form-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .cb-form-label .required {
+            color: var(--danger);
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        .cb-form-control {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px 13px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur), background var(--dur);
+            box-sizing: border-box;
+        }
+
+        .cb-form-control:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+        }
+
+        .cb-form-control::placeholder { color: var(--text-muted); }
+
+        textarea.cb-form-control {
+            resize: vertical;
+            min-height: 90px;
+            line-height: 1.6;
+        }
+
+        .cb-form-control.is-invalid {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(239,68,68,.1);
+        }
+
+        .cb-invalid-msg {
+            font-size: 11px;
+            color: var(--danger);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .cb-form-control.is-invalid ~ .cb-invalid-msg { display: block; }
+
+        .cb-input-wrap {
+            position: relative;
+        }
+
+        .cb-input-prefix {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 13px;
+            pointer-events: none;
+        }
+
+        .cb-input-wrap .cb-form-control { padding-left: 28px; }
+
+        /* ── Emoji Picker ── */
+        .cb-emoji-field {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .cb-emoji-preview {
+            width: 52px;
+            height: 52px;
+            border-radius: 13px;
+            background: var(--primary-bg);
+            border: 2px dashed #C7D9F8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all var(--dur);
+            user-select: none;
+        }
+
+        .cb-emoji-preview:hover {
+            border-color: var(--primary);
+            background: #E0EDFF;
+        }
+
+        .cb-emoji-input-wrap { flex: 1; }
+
+        .cb-emoji-grid-wrap {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            padding: 12px;
+            margin-top: 8px;
+            display: none;
+            animation: cbFadeUp .2s var(--ease);
+        }
+
+        .cb-emoji-grid-wrap.open { display: block; }
+
+        .cb-emoji-section-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            margin-top: 10px;
+        }
+
+        .cb-emoji-section-lbl:first-child { margin-top: 0; }
+
+        .cb-emoji-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .cb-emoji-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--dur);
+        }
+
+        .cb-emoji-btn:hover {
+            background: var(--primary-bg);
+            border-color: #C7D9F8;
+            transform: scale(1.15);
+        }
+
+        .cb-emoji-btn.selected {
+            background: var(--primary-bg);
+            border-color: var(--primary);
+        }
+
+        /* ── Color Picker ── */
+        .cb-color-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .cb-color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all var(--dur);
+            position: relative;
+        }
+
+        .cb-color-swatch:hover { transform: scale(1.12); }
+
+        .cb-color-swatch.selected {
+            border-color: var(--text);
+            box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+        }
+
+        .cb-color-swatch::after {
+            content: '✓';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity var(--dur);
+        }
+
+        .cb-color-swatch.selected::after { opacity: 1; }
+
+        .cb-color-preview-bar {
+            height: 5px;
+            border-radius: 10px;
+            margin-top: 10px;
+            transition: background .4s ease;
+        }
+
+        /* ── Status Toggle ── */
+        .cb-toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            cursor: pointer;
+            transition: all var(--dur);
+        }
+
+        .cb-toggle-wrap:hover { border-color: var(--primary); background: var(--primary-bg); }
+
+        .cb-toggle {
+            position: relative;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .cb-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+        .cb-toggle-track {
+            position: absolute;
+            inset: 0;
+            background: #CBD5E1;
+            border-radius: 24px;
+            transition: background .25s ease;
+        }
+
+        .cb-toggle input:checked ~ .cb-toggle-track { background: var(--success); }
+
+        .cb-toggle-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,.2);
+            transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+        }
+
+        .cb-toggle input:checked ~ .cb-toggle-thumb { transform: translateX(18px); }
+
+        .cb-toggle-label {
+            flex: 1;
+        }
+
+        .cb-toggle-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .cb-toggle-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .cb-toggle-state {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            transition: all .25s;
+        }
+
+        .cb-toggle-state.on  { background: var(--success-bg); color: #065F46; }
+        .cb-toggle-state.off { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+
+        /* ── Sidebar ── */
+        .cb-sidebar { position: sticky; top: 24px; }
+
+        /* Preview Card */
+        .cb-preview-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 16px;
+            animation: cbFadeUp .35s .28s var(--ease) both;
+        }
+
+        .cb-preview-accent {
+            height: 4px;
+            width: 100%;
+            background: linear-gradient(90deg, #3B82F6, #60A5FA);
+            transition: background .4s ease;
+        }
+
+        .cb-preview-body { padding: 16px 18px 14px; }
+
+        .cb-preview-head {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .cb-preview-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: var(--primary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+            transition: background .3s;
+        }
+
+        .cb-preview-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .cb-preview-code {
+            font-family: monospace;
+            font-size: 10px;
+            background: var(--bg);
+            color: var(--text-muted);
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .cb-preview-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 12px;
+            min-height: 36px;
+        }
+
+        .cb-preview-stats {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 11px;
+        }
+
+        .cb-ps-cell {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
+            border-right: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .cb-ps-cell:last-child { border-right: none; }
+
+        .cb-ps-val { font-size: 13px; font-weight: 700; color: var(--text); }
+        .cb-ps-lbl { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+
+        .cb-preview-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        /* Tips */
+        .cb-tips {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            animation: cbFadeUp .35s .34s var(--ease) both;
+        }
+
+        .cb-tips-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cb-tips-title i { color: #FBBF24; }
+
+        .cb-tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .cb-tip-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .cb-tip-item i { color: var(--primary); font-size: 11px; margin-top: 2px; flex-shrink: 0; }
+
+        /* ── Action Bar ── */
+        .cb-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            animation: cbFadeUp .35s .30s var(--ease) both;
+        }
+
+        .cb-action-left {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .cb-action-left i { color: var(--warning); }
+
+        .cb-action-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .cb-btn-outline {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: all var(--dur);
+            text-decoration: none;
+        }
+
+        .cb-btn-outline:hover { background: var(--bg); color: var(--text); }
+
+        .cb-btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 22px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+        }
+
+        .cb-btn-primary:hover {
+            background: var(--primary-dk);
+            box-shadow: 0 4px 14px rgba(59,130,246,.3);
+            transform: translateY(-1px);
+        }
+
+        .cb-btn-primary:active { transform: scale(.98); }
+
+        .cb-btn-primary:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Spinner */
+        .cb-spinner {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: cbSpin .7s linear infinite;
+            display: none;
+        }
+
+        @@keyframes cbSpin { to { transform: rotate(360deg); } }
+
+        /* ── Number input helpers ── */
+        .cb-num-wrap { position: relative; }
+
+        .cb-num-wrap input[type=number] { -moz-appearance: textfield; }
+        .cb-num-wrap input[type=number]::-webkit-inner-spin-button,
+        .cb-num-wrap input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+        .cb-num-arrows {
+            position: absolute;
+            right: 1px;
+            top: 1px;
+            bottom: 1px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            overflow: hidden;
+        }
+
+        .cb-num-btn {
+            flex: 1;
+            border: none;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 10px;
+            cursor: pointer;
+            padding: 0 9px;
+            transition: background var(--dur), color var(--dur);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cb-num-btn:first-child { border-bottom: 1px solid var(--border); }
+        .cb-num-btn:hover { background: var(--primary-bg); color: var(--primary); }
+
+        .cb-num-wrap .cb-form-control { padding-right: 34px; }
+    </style>
+
+    <!-- ── Page Header ── -->
+    <div class="cb-page-header">
+        <div>
+            <div class="cb-breadcrumb">
+                <a href="/Admin">Panel</a>
+                <i class="bi bi-chevron-right"></i>
+                <a href="/Admin/Branch">Branşlar</a>
+                <i class="bi bi-chevron-right"></i>
+                <span>Yeni Branş</span>
+            </div>
+            <h1 class="cb-page-title">Yeni Branş Ekle</h1>
+            <p class="cb-page-sub">Kliniğe yeni bir tıbbi branş tanımlayın</p>
+        </div>
+        <a href="/Admin/Branch" class="cb-btn-outline">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+    </div>
+
+    <form id="cb-form" method="post" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="cb-wrapper">
+
+            <!-- ── SOL KOLON ── -->
+            <div class="cb-main">
+
+                <!-- 1. Temel Bilgiler -->
+                <div class="cb-section">
+                    <div class="cb-section-header">
+                        <div class="cb-section-icon cb-si-blue"><i class="bi bi-info-circle"></i></div>
+                        <div>
+                            <div class="cb-section-title">Temel Bilgiler</div>
+                            <div class="cb-section-sub">Branş adı, kodu ve açıklaması</div>
+                        </div>
+                    </div>
+                    <div class="cb-section-body">
+                        <div class="cb-grid-2" style="margin-bottom:16px">
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">
+                                    Branş Adı <span class="required">*</span>
+                                </label>
+                                <input class="cb-form-control"
+                                       id="cb-name"
+                                       name="BranchName"
+                                       asp-for="BranchName"
+                                       placeholder="Örn: Kardiyoloji"
+                                       oninput="CB.syncPreview()"
+                                       autocomplete="off">
+                                <span class="cb-invalid-msg">Branş adı zorunludur.</span>
+                            </div>
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">
+                                    Branş Kodu <span class="required">*</span>
+                                </label>
+                                <div class="cb-input-wrap">
+                                    <span class="cb-input-prefix">#</span>
+                                    <input class="cb-form-control"
+                                           id="cb-code"
+                                           name="BranchCode"
+                                           asp-for="BranchCode"
+                                           placeholder="BRN-007"
+                                           oninput="CB.syncPreview()"
+                                           autocomplete="off"
+                                           style="padding-left:26px">
+                                </div>
+                                <span class="cb-invalid-msg">Branş kodu zorunludur.</span>
+                            </div>
+                        </div>
+
+                        <div class="cb-form-group">
+                            <label class="cb-form-label">Açıklama</label>
+                            <textarea class="cb-form-control"
+                                      id="cb-desc"
+                                      name="Description"
+                                      asp-for="Description"
+                                      placeholder="Branşın sunduğu hizmetleri kısaca açıklayın..."
+                                      rows="3"
+                                      oninput="CB.syncPreview()"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Görsel & Tema -->
+                <div class="cb-section">
+                    <div class="cb-section-header">
+                        <div class="cb-section-icon cb-si-purple"><i class="bi bi-palette"></i></div>
+                        <div>
+                            <div class="cb-section-title">Görsel & Tema</div>
+                            <div class="cb-section-sub">Branşı temsil eden ikon ve renk</div>
+                        </div>
+                    </div>
+                    <div class="cb-section-body">
+
+                        <!-- Emoji seçici -->
+                        <div class="cb-form-group" style="margin-bottom:18px">
+                            <label class="cb-form-label">Branş İkonu</label>
+                            <div class="cb-emoji-field">
+                                <div class="cb-emoji-preview" id="cb-emoji-preview" onclick="CB.toggleEmojiPicker()">
+                                    🏥
+                                </div>
+                                <div class="cb-emoji-input-wrap">
+                                    <input class="cb-form-control"
+                                           id="cb-imageurl"
+                                           name="ImageUrl"
+                                           asp-for="ImageUrl"
+                                           placeholder="Emoji seçin veya doğrudan yazın..."
+                                           oninput="CB.onEmojiInput(this.value)"
+                                           autocomplete="off">
+                                    <div style="font-size:11px;color:var(--text-muted);margin-top:5px">
+                                        <i class="bi bi-info-circle"></i>
+                                        Aşağıdan hızlıca seçin ya da istediğiniz emojiyi doğrudan yazın.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Emoji ızgarası -->
+                            <div class="cb-emoji-grid-wrap" id="cb-emoji-grid">
+                                <div class="cb-emoji-section-lbl">Dahili Tıp</div>
+                                <div class="cb-emoji-grid">
+                                    @foreach (var e in new[] { "🫀", "🧠", "🫁", "🩺", "👶", "🤰", "👁️", "👂", "🦷", "🩻" })
+                                    {
+                                        <button type="button" class="cb-emoji-btn" onclick="CB.selectEmoji('@e')">@e</button>
+                                    }
+                                </div>
+                                <div class="cb-emoji-section-lbl">Cerrahi & Tanı</div>
+                                <div class="cb-emoji-grid">
+                                    @foreach (var e in new[] { "🦴", "🔬", "💉", "🩸", "🧬", "🔪", "🩹", "🏃", "⚗️", "🦠" })
+                                    {
+                                        <button type="button" class="cb-emoji-btn" onclick="CB.selectEmoji('@e')">@e</button>
+                                    }
+                                </div>
+                                <div class="cb-emoji-section-lbl">Diğer</div>
+                                <div class="cb-emoji-grid">
+                                    @foreach (var e in new[] { "🏥", "🚑", "💊", "🩼", "🦽", "🫘", "🎗️", "🧪", "🫶", "⚕️" })
+                                    {
+                                        <button type="button" class="cb-emoji-btn" onclick="CB.selectEmoji('@e')">@e</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tema rengi -->
+                        <div class="cb-form-group">
+                            <label class="cb-form-label">Tema Rengi (Kart Accent)</label>
+                            <input type="hidden" id="cb-themecolor" name="ThemeColor" asp-for="ThemeColor" value="linear-gradient(90deg,#3B82F6,#60A5FA)">
+                            <div class="cb-color-grid" id="cb-color-grid">
+                                @{
+                                    var colors = new[]
+                                    {
+                                                                new { Label="Mavi",    Val="linear-gradient(90deg,#3B82F6,#60A5FA)",   Bg="#3B82F6" },
+                                                                new { Label="Yeşil",   Val="linear-gradient(90deg,#10B981,#34D399)",   Bg="#10B981" },
+                                                                new { Label="Turuncu", Val="linear-gradient(90deg,#F59E0B,#FCD34D)",   Bg="#F59E0B" },
+                                                                new { Label="Mor",     Val="linear-gradient(90deg,#7C3AED,#A78BFA)",   Bg="#7C3AED" },
+                                                                new { Label="Camgöbeği",Val="linear-gradient(90deg,#06B6D4,#67E8F9)", Bg="#06B6D4" },
+                                                                new { Label="İndigo",  Val="linear-gradient(90deg,#6366F1,#A5B4FC)",   Bg="#6366F1" },
+                                                                new { Label="Kırmızı", Val="linear-gradient(90deg,#EF4444,#FCA5A5)",   Bg="#EF4444" },
+                                                                new { Label="Pembe",   Val="linear-gradient(90deg,#EC4899,#F9A8D4)",   Bg="#EC4899" },
+                                                                new { Label="Teal",    Val="linear-gradient(90deg,#14B8A6,#5EEAD4)",   Bg="#14B8A6" },
+                                                                new { Label="Gri",     Val="linear-gradient(90deg,#64748B,#94A3B8)",   Bg="#64748B" },
+                                                                };
+                                }
+                                @foreach (var c in colors)
+                                {
+                                    <div class="cb-color-swatch @(c.Label == "Mavi" ? "selected" : "")"
+                                         style="background:@c.Bg"
+                                         title="@c.Label"
+                                         onclick="CB.selectColor('@c.Val', this)">
+                                    </div>
+                                }
+                            </div>
+                            <div class="cb-color-preview-bar" id="cb-color-bar"
+                                 style="background:linear-gradient(90deg,#3B82F6,#60A5FA)"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 3. İstatistik Bilgileri -->
+                <div class="cb-section">
+                    <div class="cb-section-header">
+                        <div class="cb-section-icon cb-si-green"><i class="bi bi-bar-chart"></i></div>
+                        <div>
+                            <div class="cb-section-title">İstatistik Bilgileri</div>
+                            <div class="cb-section-sub">Kapasite ve performans verileri</div>
+                        </div>
+                    </div>
+                    <div class="cb-section-body">
+                        <div class="cb-grid-3" style="margin-bottom:16px">
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">Doktor Sayısı</label>
+                                <div class="cb-num-wrap">
+                                    <input class="cb-form-control"
+                                           type="number"
+                                           id="cb-doctors"
+                                           name="DoctorCount"
+                                           asp-for="DoctorCount"
+                                           value="0" min="0"
+                                           oninput="CB.syncPreview()">
+                                    <div class="cb-num-arrows">
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-doctors',1)"><i class="bi bi-chevron-up"></i></button>
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-doctors',-1)"><i class="bi bi-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">Aylık Randevu</label>
+                                <div class="cb-num-wrap">
+                                    <input class="cb-form-control"
+                                           type="number"
+                                           id="cb-appointments"
+                                           name="MonthlyAppointmentCount"
+                                           asp-for="MonthlyAppointmentCount"
+                                           value="0" min="0"
+                                           oninput="CB.syncPreview()">
+                                    <div class="cb-num-arrows">
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-appointments',1)"><i class="bi bi-chevron-up"></i></button>
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-appointments',-1)"><i class="bi bi-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">Yatak Sayısı</label>
+                                <div class="cb-num-wrap">
+                                    <input class="cb-form-control"
+                                           type="number"
+                                           id="cb-beds"
+                                           name="BedCount"
+                                           asp-for="BedCount"
+                                           value="0" min="0"
+                                           oninput="CB.syncPreview()">
+                                    <div class="cb-num-arrows">
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-beds',1)"><i class="bi bi-chevron-up"></i></button>
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-beds',-1)"><i class="bi bi-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cb-grid-2">
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">Memnuniyet Puanı</label>
+                                <div class="cb-num-wrap">
+                                    <input class="cb-form-control"
+                                           type="number"
+                                           id="cb-rating"
+                                           name="Rating"
+                                           asp-for="Rating"
+                                           value="0" min="0" max="5" step="0.1"
+                                           oninput="CB.syncPreview()">
+                                    <div class="cb-num-arrows">
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-rating',0.1)"><i class="bi bi-chevron-up"></i></button>
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-rating',-0.1)"><i class="bi bi-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cb-form-group">
+                                <label class="cb-form-label">Doluluk Oranı (%)</label>
+                                <div class="cb-num-wrap">
+                                    <input class="cb-form-control"
+                                           type="number"
+                                           id="cb-occupancy"
+                                           name="OccupancyRate"
+                                           asp-for="OccupancyRate"
+                                           value="0" min="0" max="100"
+                                           oninput="CB.syncPreview()">
+                                    <div class="cb-num-arrows">
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-occupancy',1)"><i class="bi bi-chevron-up"></i></button>
+                                        <button type="button" class="cb-num-btn" onclick="CB.stepNum('cb-occupancy',-1)"><i class="bi bi-chevron-down"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Durum -->
+                <div class="cb-section">
+                    <div class="cb-section-header">
+                        <div class="cb-section-icon cb-si-orange"><i class="bi bi-toggle-on"></i></div>
+                        <div>
+                            <div class="cb-section-title">Durum</div>
+                            <div class="cb-section-sub">Branşın yayın durumu</div>
+                        </div>
+                    </div>
+                    <div class="cb-section-body">
+                        <label class="cb-toggle-wrap" for="cb-status">
+                            <div class="cb-toggle">
+                                <input type="checkbox"
+                                       id="cb-status"
+                                       name="Status"
+                                       asp-for="Status"
+                                       checked
+                                       onchange="CB.syncStatus()">
+                                <div class="cb-toggle-track"></div>
+                                <div class="cb-toggle-thumb"></div>
+                            </div>
+                            <div class="cb-toggle-label">
+                                <div class="cb-toggle-title">Branş Aktif</div>
+                                <div class="cb-toggle-sub">Aktif branşlar randevu sisteminde görünür</div>
+                            </div>
+                            <span class="cb-toggle-state on" id="cb-status-lbl">Aktif</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <div class="cb-action-bar">
+                    <div class="cb-action-left">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span><span class="required" style="color:var(--danger)">*</span> ile işaretli alanlar zorunludur.</span>
+                    </div>
+                    <div class="cb-action-btns">
+                        <a href="/Admin/Branch" class="cb-btn-outline">
+                            <i class="bi bi-x-lg"></i> İptal
+                        </a>
+                        <button type="button" class="cb-btn-outline" onclick="CB.resetForm()">
+                            <i class="bi bi-arrow-counterclockwise"></i> Sıfırla
+                        </button>
+                        <button type="button" class="cb-btn-primary" id="cb-save-btn" onclick="CB.submit()">
+                            <span class="cb-spinner" id="cb-spinner"></span>
+                            <i class="bi bi-floppy" id="cb-save-icon"></i>
+                            <span id="cb-save-lbl">Branşı Kaydet</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /.cb-main -->
+            <!-- ── SAĞ SIDEBAR ── -->
+            <div class="cb-sidebar">
+
+                <!-- Canlı Önizleme -->
+                <div class="cb-preview-card">
+                    <div class="cb-preview-accent" id="prev-accent"></div>
+                    <div class="cb-preview-body">
+                        <div class="cb-preview-lbl"><i class="bi bi-eye" style="margin-right:4px"></i>Canlı Önizleme</div>
+                        <div class="cb-preview-head">
+                            <div class="cb-preview-icon" id="prev-icon">🏥</div>
+                            <div>
+                                <div class="cb-preview-name" id="prev-name">Branş Adı</div>
+                                <span class="cb-preview-code" id="prev-code">#BRN-000</span>
+                            </div>
+                        </div>
+                        <p class="cb-preview-desc" id="prev-desc">Branş açıklaması burada görünecek...</p>
+                        <div class="cb-preview-stats">
+                            <div class="cb-ps-cell">
+                                <div class="cb-ps-val" id="prev-docs">0</div>
+                                <div class="cb-ps-lbl">Doktor</div>
+                            </div>
+                            <div class="cb-ps-cell">
+                                <div class="cb-ps-val" id="prev-appt">0</div>
+                                <div class="cb-ps-lbl">Randevu/ay</div>
+                            </div>
+                            <div class="cb-ps-cell">
+                                <div class="cb-ps-val" id="prev-beds">0</div>
+                                <div class="cb-ps-lbl">Yatak</div>
+                            </div>
+                            <div class="cb-ps-cell">
+                                <div class="cb-ps-val" id="prev-rating">0.0</div>
+                                <div class="cb-ps-lbl">Puan</div>
+                            </div>
+                        </div>
+                        <!-- Doluluk mini bar -->
+                        <div style="display:flex;align-items:center;gap:8px">
+                            <span style="font-size:11px;color:var(--text-muted);white-space:nowrap">Doluluk</span>
+                            <div style="flex:1;height:5px;background:var(--border);border-radius:10px;overflow:hidden">
+                                <div id="prev-occ-bar" style="height:100%;border-radius:10px;background:var(--primary);width:0%;transition:width .5s ease"></div>
+                            </div>
+                            <span id="prev-occ-pct" style="font-size:11px;font-weight:700;color:var(--primary);min-width:28px;text-align:right">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- İpuçları -->
+                <div class="cb-tips">
+                    <div class="cb-tips-title"><i class="bi bi-lightbulb-fill"></i> İpuçları</div>
+                    <div class="cb-tip-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Branş adı kısa ve anlaşılır olmalıdır.
+                    </div>
+                    <div class="cb-tip-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Branş kodu benzersiz olmalı; örnek: BRN-007.
+                    </div>
+                    <div class="cb-tip-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        İkon, listelemede kartın sol üstünde görünür.
+                    </div>
+                    <div class="cb-tip-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Tema rengi kart üstündeki şerit rengini belirler.
+                    </div>
+                    <div class="cb-tip-item">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Pasif branşlar randevu sisteminde gizlenir.
+                    </div>
+                </div>
+
+            </div><!-- /.cb-sidebar -->
+
+        </div><!-- /.cb-wrapper -->
+    </form>
+
+    <script>
+        const CB = (() => {
+
+            /* ─ Preview sync ─ */
+            function syncPreview() {
+                const name  = document.getElementById('cb-name').value        || 'Branş Adı';
+                const code  = document.getElementById('cb-code').value        || 'BRN-000';
+                const desc  = document.getElementById('cb-desc').value        || 'Branş açıklaması burada görünecek...';
+                const docs  = document.getElementById('cb-doctors').value     || '0';
+                const appt  = document.getElementById('cb-appointments').value|| '0';
+                const beds  = document.getElementById('cb-beds').value        || '0';
+                const rat   = parseFloat(document.getElementById('cb-rating').value || 0).toFixed(1);
+                const occ   = parseInt(document.getElementById('cb-occupancy').value || 0);
+
+                document.getElementById('prev-name').textContent    = name;
+                document.getElementById('prev-code').textContent    = '#' + code;
+                document.getElementById('prev-desc').textContent    = desc;
+                document.getElementById('prev-docs').textContent    = docs;
+                document.getElementById('prev-appt').textContent    = appt;
+                document.getElementById('prev-beds').textContent    = beds;
+                document.getElementById('prev-rating').textContent  = rat;
+
+                const clamp = Math.min(100, Math.max(0, occ));
+                const occBar = document.getElementById('prev-occ-bar');
+                const occPct = document.getElementById('prev-occ-pct');
+                const occColor = clamp >= 80 ? 'var(--primary)' : clamp >= 60 ? 'var(--warning)' : 'var(--success)';
+                occBar.style.width      = clamp + '%';
+                occBar.style.background = occColor;
+                occPct.textContent      = clamp + '%';
+                occPct.style.color      = occColor;
+            }
+
+            /* ─ Status toggle ─ */
+            function syncStatus() {
+                const chk = document.getElementById('cb-status');
+                const lbl = document.getElementById('cb-status-lbl');
+                if (chk.checked) {
+                    lbl.textContent = 'Aktif';
+                    lbl.className   = 'cb-toggle-state on';
+                } else {
+                    lbl.textContent = 'Pasif';
+                    lbl.className   = 'cb-toggle-state off';
+                }
+            }
+
+            /* ─ Emoji picker ─ */
+            function toggleEmojiPicker() {
+                document.getElementById('cb-emoji-grid').classList.toggle('open');
+            }
+
+            function selectEmoji(emoji) {
+                document.getElementById('cb-imageurl').value  = emoji;
+                document.getElementById('cb-emoji-preview').textContent = emoji;
+                document.getElementById('prev-icon').textContent        = emoji;
+
+                // Seçili state
+                document.querySelectorAll('.cb-emoji-btn').forEach(b => {
+                    b.classList.toggle('selected', b.textContent.trim() === emoji);
+                });
+
+                document.getElementById('cb-emoji-grid').classList.remove('open');
+            }
+
+            function onEmojiInput(val) {
+                const v = val.trim() || '🏥';
+                document.getElementById('cb-emoji-preview').textContent = v;
+                document.getElementById('prev-icon').textContent         = v;
+            }
+
+            /* ─ Color picker ─ */
+            function selectColor(gradVal, el) {
+                document.querySelectorAll('.cb-color-swatch').forEach(s => s.classList.remove('selected'));
+                el.classList.add('selected');
+                document.getElementById('cb-themecolor').value  = gradVal;
+                document.getElementById('cb-color-bar').style.background = gradVal;
+                document.getElementById('prev-accent').style.background  = gradVal;
+            }
+
+            /* ─ Number stepper ─ */
+            function stepNum(id, step) {
+                const el  = document.getElementById(id);
+                const min = parseFloat(el.min ?? '-Infinity');
+                const max = parseFloat(el.max ?? 'Infinity');
+                let val   = parseFloat(el.value || 0) + step;
+                val = Math.min(max, Math.max(min, Math.round(val * 10) / 10));
+                el.value  = val;
+                syncPreview();
+            }
+
+            /* ─ Validate ─ */
+            function validate() {
+                let ok = true;
+                const required = [
+                    { id: 'cb-name', msg: 'Branş adı zorunludur.' },
+                    { id: 'cb-code', msg: 'Branş kodu zorunludur.' }
+                ];
+                required.forEach(r => {
+                    const el = document.getElementById(r.id);
+                    if (!el.value.trim()) {
+                        el.classList.add('is-invalid');
+                        ok = false;
+                    } else {
+                        el.classList.remove('is-invalid');
+                    }
+                });
+                return ok;
+            }
+
+            /* ─ Submit ─ */
+            function submit() {
+                if (!validate()) {
+                    Shell.toast('Lütfen zorunlu alanları doldurun.', 'danger', 'bi-exclamation-circle');
+                    return;
+                }
+
+                const btn     = document.getElementById('cb-save-btn');
+                const spinner = document.getElementById('cb-spinner');
+                const icon    = document.getElementById('cb-save-icon');
+                const lbl     = document.getElementById('cb-save-lbl');
+
+                btn.disabled          = true;
+                spinner.style.display = 'block';
+                icon.style.display    = 'none';
+                lbl.textContent       = 'Kaydediliyor...';
+
+                document.getElementById('cb-form').submit();
+            }
+
+            /* ─ Reset ─ */
+            function resetForm() {
+                document.getElementById('cb-form').reset();
+                document.getElementById('cb-emoji-preview').textContent = '🏥';
+                document.getElementById('prev-icon').textContent         = '🏥';
+                document.querySelectorAll('.cb-color-swatch').forEach((s, i) => s.classList.toggle('selected', i === 0));
+                const defaultGrad = 'linear-gradient(90deg,#3B82F6,#60A5FA)';
+                document.getElementById('cb-themecolor').value           = defaultGrad;
+                document.getElementById('cb-color-bar').style.background = defaultGrad;
+                document.getElementById('prev-accent').style.background  = defaultGrad;
+                document.querySelectorAll('.cb-form-control.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                syncPreview();
+                syncStatus();
+                Shell.toast('Form sıfırlandı.', 'info', 'bi-arrow-counterclockwise');
+            }
+
+            /* ─ Dışarı tıklayınca emoji picker kapat ─ */
+            document.addEventListener('click', e => {
+                const grid    = document.getElementById('cb-emoji-grid');
+                const preview = document.getElementById('cb-emoji-preview');
+                if (!grid.contains(e.target) && e.target !== preview) {
+                    grid.classList.remove('open');
+                }
+            });
+
+            /* ─ Topbar ─ */
+            if (typeof Shell !== 'undefined' && Shell.setPage)
+                Shell.setPage('Yeni Branş', 'Admin Paneli / Klinik / Branşlar / Yeni');
+
+            /* ─ İlk render ─ */
+            syncPreview();
+            // Accent bar başlangıç
+            document.getElementById('prev-accent').style.background = 'linear-gradient(90deg,#3B82F6,#60A5FA)';
+
+            return { syncPreview, syncStatus, toggleEmojiPicker, selectEmoji, onEmojiInput, selectColor, stepNum, submit, resetForm };
+        })();
+    </script>
+
+</main>
+

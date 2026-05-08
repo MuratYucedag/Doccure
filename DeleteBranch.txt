@@ -1,0 +1,59 @@
+﻿/* ─ Delete ─ */
+function confirmDelete(name, id, btn) {
+    _delName = name;
+    _delId   = id;
+    _delCard = btn.closest('.bc-card');
+    document.getElementById('bc-del-name').textContent = name;
+    open('bc-m-delete');
+}
+
+function execDelete() {
+    close('bc-m-delete');
+
+    fetch(`/admin/Branch/deletebranch/${_delId}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                _removeCard();
+                Shell.toast(`"${_delName}" branşı silindi.`, 'danger', 'bi-trash3');
+            } else {
+                Shell.toast(res.message || 'Silme işlemi başarısız.', 'warning', 'bi-exclamation-circle');
+            }
+        })
+        .catch(err => {
+            console.error('Silme hatası:', err);
+            Shell.toast('Bir hata oluştu. Lütfen tekrar deneyin.', 'danger', 'bi-x-circle');
+        });
+}
+
+function _removeCard() {
+    if (_delCard) {
+        _delCard.style.transition = 'opacity .3s ease, transform .3s ease';
+        _delCard.style.opacity    = '0';
+        _delCard.style.transform  = 'scale(.94)';
+        setTimeout(() => { _delCard?.remove(); _delCard = null; filter(); }, 320);
+    }
+}
+
+
+--------------------------------------------
+
+function execDelete() {
+    close('bc-m-delete');
+
+    fetch(`/admin/Branch/deletebranch/${_delId}`, {
+        method: 'POST',
+        redirect: 'manual'
+    })
+    .then(r => {
+        if (r.ok || r.type === 'opaqueredirect') {
+            _removeCard();
+            Shell.toast(`"${_delName}" branşı silindi.`, 'danger', 'bi-trash3');
+        } else {
+            Shell.toast('Silme işlemi başarısız.', 'warning', 'bi-exclamation-circle');
+        }
+    })
+    .catch(err => {
+        Shell.toast('Bir hata oluştu.', 'danger', 'bi-x-circle');
+    });
+}

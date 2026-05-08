@@ -1,0 +1,257 @@
+{
+  "BranchName": "Kardiyoloji",
+  "Description": "Kalp ve damar hastalýklarýnýn teþhis, tedavi ve takip süreçlerini yöneten uzmanlýk alaný.",
+  "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2966/2966480.png",
+  "Status": true,
+  "BranchCode": "BRN-001",
+  "DoctorCount": 6,
+  "MonthlyAppointmentCount": 87,
+  "BedCount": 12,
+  "Rating": 4.9,
+  "OccupancyRate": 87,
+  "ThemeColor": "#4F8CFF"
+}
+
+-----------------------------------------
+
+{
+  "BranchName": "Ortopedi ve Travmatoloji",
+  "Description": "Kemik, eklem, kas ve spor yaralanmalarýnýn taný ve tedavisini gerçekleþtiren bölüm.",
+  "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3774/3774299.png",
+  "Status": true,
+  "BranchCode": "BRN-004",
+  "DoctorCount": 5,
+  "MonthlyAppointmentCount": 74,
+  "BedCount": 20,
+  "Rating": 4.7,
+  "OccupancyRate": 74,
+  "ThemeColor": "#F59E0B"
+}
+
+---------------------------------------------
+
+
+{
+  "BranchName": "Pediatri (Çocuk Saðlýðý)",
+  "Description": "0-18 yaþ arasý çocuklarýn saðlýk, geliþim ve hastalýk takiplerini gerçekleþtiren uzmanlýk alaný.",
+  "ImageUrl": "https://cdn-icons-png.flaticon.com/512/4341/4341025.png",
+  "Status": true,
+  "BranchCode": "BRN-005",
+  "DoctorCount": 7,
+  "MonthlyAppointmentCount": 96,
+  "BedCount": 15,
+  "Rating": 4.8,
+  "OccupancyRate": 91,
+  "ThemeColor": "#06B6D4"
+}
+
+--------------------------------------------
+
+{
+  "BranchName": "Göz Hastalýklarý",
+  "Description": "Göz saðlýðý, görme bozukluklarý ve göz hastalýklarýnýn teþhis ve tedavisini gerçekleþtiren bölüm.",
+  "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2785/2785544.png",
+  "Status": true,
+  "BranchCode": "BRN-006",
+  "DoctorCount": 4,
+  "MonthlyAppointmentCount": 63,
+  "BedCount": 5,
+  "Rating": 4.7,
+  "OccupancyRate": 66,
+  "ThemeColor": "#EC4899"
+}
+
+----------------------------------------------
+
+{
+  "BranchName": "Kulak Burun Boðaz",
+  "Description": "Kulak, burun ve boðaz hastalýklarýnýn taný ve tedavisini saðlayan uzmanlýk alaný.",
+  "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3774/3774293.png",
+  "Status": true,
+  "BranchCode": "BRN-007",
+  "DoctorCount": 5,
+  "MonthlyAppointmentCount": 71,
+  "BedCount": 9,
+  "Rating": 4.5,
+  "OccupancyRate": 73,
+  "ThemeColor": "#EF4444"
+}
+
+---------------------------------------------------
+
+{
+  "BranchName": "Genel Cerrahi",
+  "Description": "Cerrahi müdahale gerektiren hastalýklarýn operasyon ve tedavi süreçlerini yöneten bölüm.",
+  "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3304/3304567.png",
+  "Status": true,
+  "BranchCode": "BRN-008",
+  "DoctorCount": 8,
+  "MonthlyAppointmentCount": 112,
+  "BedCount": 25,
+  "Rating": 4.9,
+  "OccupancyRate": 94,
+  "ThemeColor": "#14B8A6"
+}
+
+--------------------------------------------------------
+
+[
+  {
+    "BranchName": "Radyoloji",
+    "Description": "Týbbi görüntüleme yöntemleri ile hastalýklarýn teþhis süreçlerini yöneten bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
+    "Status": true,
+    "BranchCode": "BRN-009",
+    "DoctorCount": 4,
+    "MonthlyAppointmentCount": 68,
+    "BedCount": 4,
+    "Rating": 4.6,
+    "OccupancyRate": 61,
+    "ThemeColor": "#6366F1"
+  },
+  {
+    "BranchName": "Psikiyatri",
+    "Description": "Ruh saðlýðý ve psikolojik hastalýklarýn teþhis ve tedavisini gerçekleþtiren bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/4320/4320337.png",
+    "Status": true,
+    "BranchCode": "BRN-010",
+    "DoctorCount": 3,
+    "MonthlyAppointmentCount": 52,
+    "BedCount": 10,
+    "Rating": 4.8,
+    "OccupancyRate": 57,
+    "ThemeColor": "#8B5CF6"
+  },
+  {
+    "BranchName": "Onkoloji",
+    "Description": "Kanser hastalýklarýnýn teþhis, tedavi ve takip süreçlerini yöneten uzmanlýk alaný.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3774/3774290.png",
+    "Status": true,
+    "BranchCode": "BRN-011",
+    "DoctorCount": 6,
+    "MonthlyAppointmentCount": 81,
+    "BedCount": 30,
+    "Rating": 4.9,
+    "OccupancyRate": 89,
+    "ThemeColor": "#DC2626"
+  },
+  {
+    "BranchName": "Üroloji",
+    "Description": "Ýdrar yollarý ve erkek üreme sistemi hastalýklarýnýn tedavisini gerçekleþtiren bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2785/2785819.png",
+    "Status": true,
+    "BranchCode": "BRN-012",
+    "DoctorCount": 4,
+    "MonthlyAppointmentCount": 47,
+    "BedCount": 11,
+    "Rating": 4.5,
+    "OccupancyRate": 54,
+    "ThemeColor": "#0EA5E9"
+  },
+  {
+    "BranchName": "Kadýn Doðum",
+    "Description": "Kadýn saðlýðý, gebelik ve doðum süreçlerinin takibini gerçekleþtiren bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3209/3209265.png",
+    "Status": true,
+    "BranchCode": "BRN-013",
+    "DoctorCount": 7,
+    "MonthlyAppointmentCount": 104,
+    "BedCount": 22,
+    "Rating": 4.9,
+    "OccupancyRate": 92,
+    "ThemeColor": "#F472B6"
+  },
+  {
+    "BranchName": "Endokrinoloji",
+    "Description": "Hormon ve metabolizma hastalýklarýnýn teþhis ve tedavisini gerçekleþtiren uzmanlýk alaný.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3774/3774322.png",
+    "Status": true,
+    "BranchCode": "BRN-014",
+    "DoctorCount": 3,
+    "MonthlyAppointmentCount": 39,
+    "BedCount": 7,
+    "Rating": 4.7,
+    "OccupancyRate": 48,
+    "ThemeColor": "#F59E0B"
+  },
+  {
+    "BranchName": "Gastroenteroloji",
+    "Description": "Sindirim sistemi hastalýklarýnýn teþhis ve tedavisini gerçekleþtiren bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/4320/4320376.png",
+    "Status": true,
+    "BranchCode": "BRN-015",
+    "DoctorCount": 5,
+    "MonthlyAppointmentCount": 66,
+    "BedCount": 13,
+    "Rating": 4.6,
+    "OccupancyRate": 69,
+    "ThemeColor": "#10B981"
+  },
+  {
+    "BranchName": "Enfeksiyon Hastalýklarý",
+    "Description": "Bakteriyel, viral ve bulaþýcý hastalýklarýn taný ve tedavisini gerçekleþtiren bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2785/2785765.png",
+    "Status": true,
+    "BranchCode": "BRN-016",
+    "DoctorCount": 4,
+    "MonthlyAppointmentCount": 59,
+    "BedCount": 14,
+    "Rating": 4.5,
+    "OccupancyRate": 63,
+    "ThemeColor": "#EF4444"
+  },
+  {
+    "BranchName": "Fizik Tedavi",
+    "Description": "Kas, eklem ve hareket sistemi rahatsýzlýklarýnýn rehabilitasyon süreçlerini yöneten bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2966/2966484.png",
+    "Status": true,
+    "BranchCode": "BRN-017",
+    "DoctorCount": 6,
+    "MonthlyAppointmentCount": 88,
+    "BedCount": 18,
+    "Rating": 4.8,
+    "OccupancyRate": 77,
+    "ThemeColor": "#06B6D4"
+  },
+  {
+    "BranchName": "Acil Týp",
+    "Description": "Acil müdahale gerektiren saðlýk durumlarýnýn hýzlý teþhis ve tedavisini saðlayan bölüm.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/3774/3774278.png",
+    "Status": true,
+    "BranchCode": "BRN-018",
+    "DoctorCount": 12,
+    "MonthlyAppointmentCount": 210,
+    "BedCount": 40,
+    "Rating": 4.7,
+    "OccupancyRate": 97,
+    "ThemeColor": "#DC2626"
+  },
+  {
+    "BranchName": "Anestezi",
+    "Description": "Cerrahi operasyonlarda aðrý kontrolü ve anestezi süreçlerini yöneten uzmanlýk alaný.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2785/2785482.png",
+    "Status": true,
+    "BranchCode": "BRN-019",
+    "DoctorCount": 5,
+    "MonthlyAppointmentCount": 73,
+    "BedCount": 9,
+    "Rating": 4.8,
+    "OccupancyRate": 71,
+    "ThemeColor": "#7C3AED"
+  },
+  {
+    "BranchName": "Hematoloji",
+    "Description": "Kan hastalýklarýnýn teþhis ve tedavi süreçlerini gerçekleþtiren uzmanlýk alaný.",
+    "ImageUrl": "https://cdn-icons-png.flaticon.com/512/2966/2966433.png",
+    "Status": true,
+    "BranchCode": "BRN-020",
+    "DoctorCount": 3,
+    "MonthlyAppointmentCount": 41,
+    "BedCount": 8,
+    "Rating": 4.7,
+    "OccupancyRate": 52,
+    "ThemeColor": "#B91C1C"
+  }
+]
+
+-----------------------------------------------

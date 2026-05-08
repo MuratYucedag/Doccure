@@ -1,5 +1,6 @@
 ﻿using Doccure.BranchService.Dtos.BranchDtos;
 using Doccure.BranchService.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,14 +8,17 @@ namespace Doccure.BranchService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    // [Authorize]
     public class BranchesController : ControllerBase
     {
         private readonly IBranchService _branchService;
+
         public BranchesController(IBranchService branchService)
         {
             _branchService = branchService;
         }
 
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> BrachList()
         {
