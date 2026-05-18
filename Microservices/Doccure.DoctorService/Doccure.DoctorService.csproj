@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.36" />
     <PackageReference Include="MongoDB.Bson" Version="3.7.1" />
     <PackageReference Include="MongoDB.Driver" Version="3.7.1" />
     <PackageReference Include="MongoDB.Driver.Core" Version="2.30.0" />

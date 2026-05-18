@@ -1,0 +1,1613 @@
+﻿@model Doccure.WebUI.Dtos.DoctorDtos.CreateDoctorDto
+
+@{
+    ViewData["Title"] = "CreateDoctor";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+
+<main id="app-content">
+    <style>
+        /* ── Page Layout ── */
+        .da-page-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .da-page-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .da-page-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ── Step Progress Bar ── */
+        .da-steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 28px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .da-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 80px;
+            position: relative;
+            cursor: pointer;
+        }
+
+            .da-step::before {
+                content: '';
+                position: absolute;
+                top: 19px;
+                left: 50%;
+                right: -50%;
+                height: 2px;
+                background: var(--border);
+                z-index: 0;
+                transition: background .3s;
+            }
+
+            .da-step:last-child::before {
+                display: none;
+            }
+
+            .da-step.done::before {
+                background: var(--primary);
+            }
+
+        .da-step-dot {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+            transition: all .3s var(--ease);
+            flex-shrink: 0;
+        }
+
+        .da-step.active .da-step-dot {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 0 0 4px rgba(59,130,246,.15);
+        }
+
+        .da-step.done .da-step-dot {
+            border-color: var(--success);
+            background: var(--success);
+            color: #fff;
+        }
+
+        .da-step-lbl {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .da-step.active .da-step-lbl {
+            color: var(--primary);
+        }
+
+        .da-step.done .da-step-lbl {
+            color: var(--success);
+        }
+
+        /* ── Two-column layout ── */
+        .da-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @@media(max-width:1024px) {
+            .da-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Panels ── */
+        .da-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: none;
+        }
+
+            .da-panel.active {
+                display: block;
+                animation: daFadeUp .3s var(--ease) both;
+            }
+
+        @@keyframes daFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .da-panel-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #F8FAFF 0%, var(--surface) 100%);
+        }
+
+        .da-panel-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary-bg);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .da-panel-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .da-panel-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .da-panel-body {
+            padding: 22px;
+        }
+
+        /* ── Form Elements ── */
+        .da-form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+            .da-form-label .da-req {
+                color: var(--danger);
+                margin-left: 2px;
+            }
+
+        .da-form-control {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            transition: border-color var(--dur), box-shadow var(--dur), background var(--dur);
+        }
+
+            .da-form-control:focus {
+                border-color: var(--primary);
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+            }
+
+            .da-form-control::placeholder {
+                color: var(--text-muted);
+            }
+
+            .da-form-control.has-error {
+                border-color: var(--danger);
+                box-shadow: 0 0 0 3px rgba(239,68,68,.1);
+            }
+
+        .da-form-group {
+            margin-bottom: 16px;
+        }
+
+            .da-form-group:last-child {
+                margin-bottom: 0;
+            }
+
+        .da-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .da-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        @@media(max-width:640px) {
+            .da-grid-2, .da-grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ── Avatar Upload ── */
+        .da-avatar-upload {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 20px;
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            background: var(--bg);
+            transition: border-color var(--dur), background var(--dur);
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+            .da-avatar-upload:hover {
+                border-color: var(--primary);
+                background: var(--primary-bg);
+            }
+
+        .da-avatar-preview {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#3B82F6,#1D4ED8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 14px rgba(0,0,0,.12);
+        }
+
+            .da-avatar-preview img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+        .da-avatar-info-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .da-avatar-info-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* ── Dynamic List Sections ── */
+        .da-list-section {
+            margin-bottom: 0;
+        }
+
+        .da-list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .da-list-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .da-list-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: var(--primary-bg);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        .da-list-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .da-list-count {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .da-add-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border: 1px dashed var(--primary);
+            border-radius: var(--radius-sm);
+            background: var(--primary-bg);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--dur) var(--ease);
+        }
+
+            .da-add-btn:hover {
+                background: var(--primary);
+                color: #fff;
+                border-style: solid;
+            }
+
+        .da-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Accordion item */
+        .da-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            animation: daFadeUp .25s ease both;
+            transition: border-color var(--dur);
+        }
+
+            .da-item:hover {
+                border-color: #C7D9F8;
+            }
+
+        .da-item-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            cursor: pointer;
+            background: var(--bg);
+            user-select: none;
+            transition: background var(--dur);
+        }
+
+            .da-item-header:hover {
+                background: var(--primary-bg);
+            }
+
+        .da-item-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-bg);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .da-item-summary {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .da-item-summary-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .da-item-chevron {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform .25s ease;
+            flex-shrink: 0;
+        }
+
+        .da-item.open .da-item-chevron {
+            transform: rotate(180deg);
+        }
+
+        .da-item-del {
+            width: 26px;
+            height: 26px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all var(--dur);
+        }
+
+            .da-item-del:hover {
+                background: var(--danger-bg);
+                border-color: #FCA5A5;
+                color: var(--danger);
+            }
+
+        .da-item-body {
+            padding: 0 14px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .35s cubic-bezier(.4,0,.2,1), padding .3s ease;
+            background: var(--surface);
+        }
+
+        .da-item.open .da-item-body {
+            padding: 14px 14px 16px;
+            max-height: 600px;
+        }
+
+        /* Tag input (services / specializations) */
+        .da-tag-input-wrap {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            background: var(--bg);
+            cursor: text;
+            transition: border-color var(--dur), box-shadow var(--dur);
+            min-height: 42px;
+            align-items: center;
+        }
+
+            .da-tag-input-wrap:focus-within {
+                border-color: var(--primary);
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+            }
+
+        .da-tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--primary-bg);
+            color: var(--primary);
+            border: 1px solid #C7D9F8;
+            border-radius: 20px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            animation: daFadeUp .2s ease;
+        }
+
+        .da-tag-pill-del {
+            cursor: pointer;
+            font-size: 10px;
+            background: none;
+            border: none;
+            color: var(--primary);
+            padding: 0;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+
+            .da-tag-pill-del:hover {
+                color: var(--danger);
+            }
+
+        .da-tag-raw {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            flex: 1;
+            min-width: 100px;
+        }
+
+            .da-tag-raw::placeholder {
+                color: var(--text-muted);
+            }
+
+        .da-tag-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* ── Sidebar ── */
+        .da-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Preview card */
+        .da-preview-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: sticky;
+            top: 80px;
+        }
+
+        .da-preview-hero {
+            padding: 24px 20px 18px;
+            background: linear-gradient(135deg, #EFF6FF 0%, #F8FAFC 100%);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .da-preview-av {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#3B82F6,#1D4ED8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 14px rgba(0,0,0,.12);
+            overflow: hidden;
+        }
+
+            .da-preview-av img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+        .da-preview-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .da-preview-branch {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .da-preview-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .da-preview-chip {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-muted);
+        }
+
+        .da-preview-stats {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            border-top: 1px solid var(--border);
+        }
+
+        .da-prev-stat {
+            text-align: center;
+            padding: 12px 6px;
+            border-right: 1px solid var(--border);
+        }
+
+            .da-prev-stat:last-child {
+                border-right: none;
+            }
+
+        .da-prev-stat-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .da-prev-stat-lbl {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .da-preview-footer {
+            padding: 16px;
+        }
+
+        /* Checklist */
+        .da-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .da-check-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: color .2s;
+        }
+
+            .da-check-item.done {
+                color: var(--success);
+            }
+
+        .da-check-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            flex-shrink: 0;
+            transition: all .25s;
+        }
+
+        .da-check-item.done .da-check-dot {
+            background: var(--success);
+            border-color: var(--success);
+            color: #fff;
+        }
+
+        /* ── Bottom Action Bar ── */
+        .da-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding: 16px 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .da-action-left {
+            display: flex;
+            gap: 8px;
+        }
+
+        .da-action-right {
+            display: flex;
+            gap: 8px;
+        }
+
+        .da-btn-outline {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 9px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all var(--dur);
+        }
+
+            .da-btn-outline:hover {
+                background: var(--bg);
+                color: var(--text);
+            }
+
+        .da-btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+        }
+
+            .da-btn-primary:hover {
+                background: var(--primary-dk);
+                box-shadow: 0 4px 12px rgba(59,130,246,.3);
+                transform: translateY(-1px);
+            }
+
+            .da-btn-primary:active {
+                transform: scale(.98);
+            }
+
+        .da-btn-success {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 22px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+        }
+
+            .da-btn-success:hover {
+                background: #059669;
+                box-shadow: 0 4px 12px rgba(16,185,129,.3);
+                transform: translateY(-1px);
+            }
+
+        /* ── Separator ── */
+        .da-sep {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        /* ── Hint box ── */
+        .da-hint {
+            background: var(--primary-bg);
+            border: 1px solid #C7D9F8;
+            border-radius: var(--radius-sm);
+            padding: 10px 13px;
+            font-size: 12px;
+            color: #1E40AF;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+            .da-hint i {
+                flex-shrink: 0;
+                margin-top: 1px;
+            }
+
+        /* Empty state */
+        .da-list-empty {
+            text-align: center;
+            padding: 18px 12px;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            font-size: 12px;
+            background: var(--bg);
+        }
+
+            .da-list-empty i {
+                display: block;
+                font-size: 22px;
+                opacity: .3;
+                margin-bottom: 6px;
+            }
+    </style>
+
+    <!-- ── Page Header ── -->
+    <div class="da-page-header">
+        <div>
+            <h1 class="da-page-title">Yeni Doktor Ekle</h1>
+            <p class="da-page-sub">Doktor profilini oluşturun; temel bilgiler, eğitim, deneyim ve konum gibi detayları ekleyin</p>
+        </div>
+        <div style="display:flex;gap:8px">
+            <a href="/Admin/Doctor/List" class="da-btn-outline"><i class="bi bi-arrow-left"></i> Listeye Dön</a>
+        </div>
+    </div>
+
+    <!-- ── Step Bar ── -->
+    <div class="da-steps" id="da-steps">
+        <div class="da-step active" data-step="0" onclick="DA.goStep(0)">
+            <div class="da-step-dot"><i class="bi bi-person"></i></div>
+            <span class="da-step-lbl">Temel Bilgiler</span>
+        </div>
+        <div class="da-step" data-step="1" onclick="DA.goStep(1)">
+            <div class="da-step-dot"><i class="bi bi-mortarboard"></i></div>
+            <span class="da-step-lbl">Eğitim & Deneyim</span>
+        </div>
+        <div class="da-step" data-step="2" onclick="DA.goStep(2)">
+            <div class="da-step-dot"><i class="bi bi-stars"></i></div>
+            <span class="da-step-lbl">Uzmanlık & Hizmet</span>
+        </div>
+        <div class="da-step" data-step="3" onclick="DA.goStep(3)">
+            <div class="da-step-dot"><i class="bi bi-geo-alt"></i></div>
+            <span class="da-step-lbl">Konum & Ödüller</span>
+        </div>
+    </div>
+
+    <!-- ── FORM ── -->
+    <form id="da-form" method="post" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="da-layout">
+            <!-- ════ MAIN COLUMN ════ -->
+            <div>
+
+                <!-- ══ STEP 0: Temel Bilgiler ══ -->
+                <div class="da-panel active" data-panel="0">
+                    <div class="da-panel-header">
+                        <div class="da-panel-icon"><i class="bi bi-person-badge"></i></div>
+                        <div>
+                            <div class="da-panel-title">Temel Bilgiler</div>
+                            <div class="da-panel-sub">Ad, iletişim, branş ve fiyat bilgilerini girin</div>
+                        </div>
+                    </div>
+                    <div class="da-panel-body">
+
+                        <!-- Avatar Upload -->
+                        <div class="da-avatar-upload" onclick="document.getElementById('da-img-file').click()">
+                            <div class="da-avatar-preview" id="da-prev-av">
+                                <span id="da-prev-initials">?</span>
+                            </div>
+                            <div>
+                                <div class="da-avatar-info-title">Profil Fotoğrafı Yükle</div>
+                                <div class="da-avatar-info-sub">JPG, PNG veya WebP · Maks. 2 MB · Önerilen 400×400</div>
+                                <div style="margin-top:6px;font-size:11px;color:var(--primary);font-weight:600">
+                                    <i class="bi bi-upload"></i> Fotoğraf seç veya URL gir
+                                </div>
+                            </div>
+                            <input type="file" id="da-img-file" accept="image/*" style="display:none" onchange="DA.previewImg(this)">
+                        </div>
+
+                        <div class="da-form-group">
+                            <label class="da-form-label">Profil Fotoğraf URL <span style="font-weight:400;text-transform:none;font-size:10px">(veya dosya yükleyin)</span></label>
+                            <input class="da-form-control" id="da-imageurl" name="ImageUrl"
+                                   placeholder="https://example.com/foto.jpg"
+                                   oninput="DA.updatePreview()">
+                        </div>
+
+                        <div class="da-grid-2">
+                            <div class="da-form-group">
+                                <label class="da-form-label">Ad <span class="da-req">*</span></label>
+                                <input class="da-form-control" id="da-name" name="Name"
+                                       placeholder="Örn: Ahmet" required
+                                       oninput="DA.updatePreview()">
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">Soyad <span class="da-req">*</span></label>
+                                <input class="da-form-control" id="da-surname" name="Surname"
+                                       placeholder="Örn: Yılmaz" required
+                                       oninput="DA.updatePreview()">
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">E-posta <span class="da-req">*</span></label>
+                                <input class="da-form-control" type="email" id="da-email" name="Email"
+                                       placeholder="doktor@klinik.com" required>
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">Telefon</label>
+                                <input class="da-form-control" id="da-phone" name="Phone"
+                                       placeholder="+90 212 555 0100">
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">Branş <span class="da-req">*</span></label>
+                                <select class="da-form-control" id="da-branch" name="BranchId" required onchange="DA.updatePreview()">
+                                    <option value="">— Branş seçin —</option>
+                                    <option value="kardiyoloji">Kardiyoloji</option>
+                                    <option value="dermatoloji">Dermatoloji</option>
+                                    <option value="noroloji">Nöroloji</option>
+                                    <option value="pediatri">Pediatri</option>
+                                    <option value="ortopedi">Ortopedi</option>
+                                    <option value="genel-cerrahi">Genel Cerrahi</option>
+                                    <option value="travmatoloji">Travmatoloji</option>
+                                    <option value="radyoloji">Radyoloji</option>
+                                    <option value="patoloji">Patoloji</option>
+                                    <option value="labaratuvar">Laboratuvar</option>
+                                </select>
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">Deneyim (yıl) <span class="da-req">*</span></label>
+                                <input class="da-form-control" type="number" id="da-exp" name="ExperienceYear"
+                                       min="0" max="60" placeholder="0" required oninput="DA.updatePreview()">
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">Seans Ücreti (₺/sa) <span class="da-req">*</span></label>
+                                <input class="da-form-control" type="number" id="da-price" name="PricePerHour"
+                                       min="0" step="50" placeholder="0" required oninput="DA.updatePreview()">
+                            </div>
+                            <div class="da-form-group">
+                                <label class="da-form-label">Durum</label>
+                                <select class="da-form-control" name="Status">
+                                    <option value="true">Aktif</option>
+                                    <option value="false">Pasif</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="da-form-group">
+                            <label class="da-form-label">Hakkında / Özgeçmiş</label>
+                            <textarea class="da-form-control" name="About" rows="4"
+                                      placeholder="Doktorun uzmanlık alanları, kişisel yaklaşımı ve hastalarına sunduğu değer hakkında kısa bir açıklama..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ STEP 1: Eğitim & Deneyim ══ -->
+                <div class="da-panel" data-panel="1">
+                    <div class="da-panel-header">
+                        <div class="da-panel-icon"><i class="bi bi-mortarboard"></i></div>
+                        <div>
+                            <div class="da-panel-title">Eğitim & İş Deneyimi</div>
+                            <div class="da-panel-sub">Okul ve çalışma geçmişini dinamik olarak ekleyin</div>
+                        </div>
+                    </div>
+                    <div class="da-panel-body">
+
+                        <!-- Eğitimler -->
+                        <div class="da-list-section" style="margin-bottom:28px">
+                            <div class="da-list-header">
+                                <div class="da-list-title-wrap">
+                                    <div class="da-list-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                                    <span class="da-list-title">Eğitim Bilgileri</span>
+                                    <span class="da-list-count" id="edu-count">0</span>
+                                </div>
+                                <button type="button" class="da-add-btn" onclick="DA.addItem('edu')">
+                                    <i class="bi bi-plus-lg"></i> Eğitim Ekle
+                                </button>
+                            </div>
+                            <div class="da-hint"><i class="bi bi-info-circle-fill"></i> Lisans, tıpta uzmanlık, doktora gibi tüm eğitim kademelerini ekleyebilirsiniz.</div>
+                            <div class="da-items-list" id="edu-list">
+                                <div class="da-list-empty" id="edu-empty">
+                                    <i class="bi bi-mortarboard"></i>
+                                    Henüz eğitim eklenmedi. "Eğitim Ekle" butonuna tıklayın.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="da-sep"></div>
+
+                        <!-- Deneyimler -->
+                        <div class="da-list-section">
+                            <div class="da-list-header">
+                                <div class="da-list-title-wrap">
+                                    <div class="da-list-icon" style="background:var(--success-bg);color:var(--success)"><i class="bi bi-building"></i></div>
+                                    <span class="da-list-title">İş Deneyimi</span>
+                                    <span class="da-list-count" id="exp-count">0</span>
+                                </div>
+                                <button type="button" class="da-add-btn" onclick="DA.addItem('exp')">
+                                    <i class="bi bi-plus-lg"></i> Deneyim Ekle
+                                </button>
+                            </div>
+                            <div class="da-hint"><i class="bi bi-info-circle-fill"></i> Çalıştığı klinik ve hastaneleri, yıl aralığıyla birlikte girin.</div>
+                            <div class="da-items-list" id="exp-list">
+                                <div class="da-list-empty" id="exp-empty">
+                                    <i class="bi bi-building"></i>
+                                    Henüz deneyim eklenmedi. "Deneyim Ekle" butonuna tıklayın.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ STEP 2: Uzmanlık & Hizmet ══ -->
+                <div class="da-panel" data-panel="2">
+                    <div class="da-panel-header">
+                        <div class="da-panel-icon"><i class="bi bi-stars"></i></div>
+                        <div>
+                            <div class="da-panel-title">Uzmanlık Alanları & Hizmetler</div>
+                            <div class="da-panel-sub">Virgülle veya Enter ile birden fazla etiket ekleyin</div>
+                        </div>
+                    </div>
+                    <div class="da-panel-body">
+                        <!-- Uzmanlıklar -->
+                        <div class="da-form-group">
+                            <label class="da-form-label">Uzmanlık Alanları</label>
+                            <div class="da-tag-input-wrap" id="spec-wrap" onclick="document.getElementById('spec-raw').focus()">
+                                <input type="text" class="da-tag-raw" id="spec-raw" placeholder="Uzmanlık yaz ve Enter'a bas...">
+                            </div>
+                            <div class="da-tag-hint"><i class="bi bi-keyboard"></i> Enter veya virgül (,) ile etiket ekleyin</div>
+                            <div id="spec-hidden-inputs"></div>
+                        </div>
+
+                        <div class="da-sep"></div>
+
+                        <!-- Hizmetler -->
+                        <div class="da-form-group">
+                            <label class="da-form-label">Sunulan Hizmetler</label>
+                            <div class="da-tag-input-wrap" id="svc-wrap" onclick="document.getElementById('svc-raw').focus()">
+                                <input type="text" class="da-tag-raw" id="svc-raw" placeholder="Hizmet yaz ve Enter'a bas...">
+                            </div>
+                            <div class="da-tag-hint"><i class="bi bi-keyboard"></i> Enter veya virgül (,) ile etiket ekleyin</div>
+                            <div id="svc-hidden-inputs"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══ STEP 3: Konum & Ödüller ══ -->
+                <div class="da-panel" data-panel="3">
+                    <div class="da-panel-header">
+                        <div class="da-panel-icon"><i class="bi bi-geo-alt"></i></div>
+                        <div>
+                            <div class="da-panel-title">Klinik Konumları & Ödüller</div>
+                            <div class="da-panel-sub">Doktorun çalıştığı klinikleri ve aldığı ödülleri girin</div>
+                        </div>
+                    </div>
+                    <div class="da-panel-body">
+
+                        <!-- Konumlar -->
+                        <div class="da-list-section" style="margin-bottom:28px">
+                            <div class="da-list-header">
+                                <div class="da-list-title-wrap">
+                                    <div class="da-list-icon" style="background:#FEF3C7;color:#D97706"><i class="bi bi-geo-alt-fill"></i></div>
+                                    <span class="da-list-title">Klinik Konumları</span>
+                                    <span class="da-list-count" id="loc-count">0</span>
+                                </div>
+                                <button type="button" class="da-add-btn" onclick="DA.addItem('loc')">
+                                    <i class="bi bi-plus-lg"></i> Konum Ekle
+                                </button>
+                            </div>
+                            <div class="da-hint"><i class="bi bi-info-circle-fill"></i> Birden fazla klinik veya muayenehane ekleyebilirsiniz.</div>
+                            <div class="da-items-list" id="loc-list">
+                                <div class="da-list-empty" id="loc-empty">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Henüz konum eklenmedi. "Konum Ekle" butonuna tıklayın.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="da-sep"></div>
+
+                        <!-- Ödüller -->
+                        <div class="da-list-section">
+                            <div class="da-list-header">
+                                <div class="da-list-title-wrap">
+                                    <div class="da-list-icon" style="background:var(--warning-bg);color:var(--warning)"><i class="bi bi-trophy-fill"></i></div>
+                                    <span class="da-list-title">Ödüller & Sertifikalar</span>
+                                    <span class="da-list-count" id="award-count">0</span>
+                                </div>
+                                <button type="button" class="da-add-btn" onclick="DA.addItem('award')">
+                                    <i class="bi bi-plus-lg"></i> Ödül Ekle
+                                </button>
+                            </div>
+                            <div class="da-hint"><i class="bi bi-info-circle-fill"></i> Alınan ödüller, sertifikalar ve akademik başarılar.</div>
+                            <div class="da-items-list" id="award-list">
+                                <div class="da-list-empty" id="award-empty">
+                                    <i class="bi bi-trophy"></i>
+                                    Henüz ödül eklenmedi. "Ödül Ekle" butonuna tıklayın.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Action Bar ── -->
+                <div class="da-action-bar">
+                    <div class="da-action-left">
+                        <button type="button" class="da-btn-outline" id="da-prev-btn" onclick="DA.prevStep()" style="display:none">
+                            <i class="bi bi-arrow-left"></i> Geri
+                        </button>
+                    </div>
+                    <div style="font-size:12px;color:var(--text-muted)" id="da-step-indicator">Adım 1 / 4</div>
+                    <div class="da-action-right">
+                        <button type="button" class="da-btn-primary" id="da-next-btn" onclick="DA.nextStep()">
+                            İleri <i class="bi bi-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="da-btn-success" id="da-submit-btn" style="display:none" onclick="DA.beforeSubmit()">
+                            <i class="bi bi-check2-circle"></i> Doktoru Kaydet
+                        </button>
+                    </div>
+                </div>
+            </div><!-- /main col -->
+            <!-- ════ SIDEBAR ════ -->
+            <div class="da-sidebar">
+
+                <!-- Preview Card -->
+                <div class="da-preview-card">
+                    <div class="da-preview-hero">
+                        <div class="da-preview-av" id="prev-av">
+                            <span id="prev-initials">?</span>
+                        </div>
+                        <div class="da-preview-name" id="prev-name">Dr. — —</div>
+                        <div class="da-preview-branch" id="prev-branch">Branş seçin</div>
+                        <div class="da-preview-chips">
+                            <span class="da-preview-chip"><i class="bi bi-briefcase"></i> <span id="prev-exp">0</span> yıl</span>
+                            <span class="da-preview-chip"><i class="bi bi-currency-dollar"></i> ₺<span id="prev-price">0</span>/sa</span>
+                        </div>
+                    </div>
+                    <div class="da-preview-stats">
+                        <div class="da-prev-stat">
+                            <div class="da-prev-stat-val" id="prev-edus">0</div>
+                            <div class="da-prev-stat-lbl">Eğitim</div>
+                        </div>
+                        <div class="da-prev-stat">
+                            <div class="da-prev-stat-val" id="prev-locs">0</div>
+                            <div class="da-prev-stat-lbl">Konum</div>
+                        </div>
+                        <div class="da-prev-stat">
+                            <div class="da-prev-stat-val" id="prev-svcs">0</div>
+                            <div class="da-prev-stat-lbl">Hizmet</div>
+                        </div>
+                    </div>
+                    <div class="da-preview-footer">
+                        <div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px">
+                            Form Tamamlama
+                        </div>
+                        <div class="da-checklist" id="da-checklist">
+                            <div class="da-check-item" id="chk-name">
+                                <div class="da-check-dot"><i class="bi bi-check-lg"></i></div>
+                                Ad & Soyad girildi
+                            </div>
+                            <div class="da-check-item" id="chk-email">
+                                <div class="da-check-dot"><i class="bi bi-check-lg"></i></div>
+                                E-posta girildi
+                            </div>
+                            <div class="da-check-item" id="chk-branch">
+                                <div class="da-check-dot"><i class="bi bi-check-lg"></i></div>
+                                Branş seçildi
+                            </div>
+                            <div class="da-check-item" id="chk-price">
+                                <div class="da-check-dot"><i class="bi bi-check-lg"></i></div>
+                                Ücret girildi
+                            </div>
+                            <div class="da-check-item" id="chk-edu">
+                                <div class="da-check-dot"><i class="bi bi-check-lg"></i></div>
+                                Eğitim eklendi
+                            </div>
+                            <div class="da-check-item" id="chk-loc">
+                                <div class="da-check-dot"><i class="bi bi-check-lg"></i></div>
+                                Konum eklendi
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /sidebar -->
+        </div><!-- /da-layout -->
+        <!-- Hidden arrays will be injected here by JS before submit -->
+        <div id="da-hidden-arrays"></div>
+
+    </form>
+
+    <!-- ════ PAGE JAVASCRIPT ════ -->
+    <script>
+        const DA = (() => {
+            let _step = 0;
+            const TOTAL = 4;
+
+            // ── Counters ──
+            const _counts = { edu: 0, exp: 0, loc: 0, award: 0 };
+            const _svcTags  = [];
+            const _specTags = [];
+
+            // ── Step Nav ──
+            function goStep(s) {
+                if (s < 0 || s >= TOTAL) return;
+                // mark done
+                document.querySelectorAll('.da-step').forEach((el, i) => {
+                    el.classList.toggle('active', i === s);
+                    el.classList.toggle('done',   i < s);
+                });
+                document.querySelectorAll('.da-panel').forEach(p => p.classList.remove('active'));
+                document.querySelectorAll('.da-panel')[s].classList.add('active');
+                _step = s;
+                document.getElementById('da-prev-btn').style.display = s === 0 ? 'none' : '';
+                document.getElementById('da-next-btn').style.display = s === TOTAL - 1 ? 'none' : '';
+                document.getElementById('da-submit-btn').style.display = s === TOTAL - 1 ? '' : 'none';
+                document.getElementById('da-step-indicator').textContent = `Adım ${s + 1} / ${TOTAL}`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function nextStep() {
+                if (_step === 0 && !validateStep0()) return;
+                goStep(_step + 1);
+            }
+            function prevStep() { goStep(_step - 1); }
+
+            function validateStep0() {
+                const name    = document.getElementById('da-name').value.trim();
+                const surname = document.getElementById('da-surname').value.trim();
+                const email   = document.getElementById('da-email').value.trim();
+                const branch  = document.getElementById('da-branch').value;
+                let ok = true;
+                [
+                    [document.getElementById('da-name'),    !name],
+                    [document.getElementById('da-surname'), !surname],
+                    [document.getElementById('da-email'),   !email],
+                    [document.getElementById('da-branch'),  !branch],
+                    [document.getElementById('da-price'),   !document.getElementById('da-price').value],
+                ].forEach(([el, err]) => {
+                    el.classList.toggle('has-error', err);
+                    if (err) ok = false;
+                });
+                if (!ok) Shell?.toast('Lütfen zorunlu alanları doldurun.', 'danger', 'bi-exclamation-circle');
+                return ok;
+            }
+
+            // ── Preview ──
+            function updatePreview() {
+                const name    = document.getElementById('da-name').value.trim();
+                const surname = document.getElementById('da-surname').value.trim();
+                const branch  = document.getElementById('da-branch').value;
+                const exp     = document.getElementById('da-exp').value;
+                const price   = document.getElementById('da-price').value;
+                const imgUrl  = document.getElementById('da-imageurl').value.trim();
+
+                const initials = ((name?.[0] ?? '') + (surname?.[0] ?? '')).toUpperCase() || '?';
+                const fullName = name || surname ? `Dr. ${name} ${surname}`.trim() : 'Dr. — —';
+
+                // sidebar preview
+                document.getElementById('prev-name').textContent   = fullName;
+                document.getElementById('prev-branch').textContent = branch || 'Branş seçin';
+                document.getElementById('prev-exp').textContent    = exp || '0';
+                document.getElementById('prev-price').textContent  = price || '0';
+
+                // avatar
+                const prevAv = document.getElementById('prev-av');
+                const prevIn = document.getElementById('prev-initials');
+                const topAv  = document.getElementById('da-prev-av');
+                const topIn  = document.getElementById('da-prev-initials');
+                if (imgUrl) {
+                    prevAv.innerHTML = `<img src="${imgUrl}" alt="preview" onerror="this.remove()">`;
+                    topAv.innerHTML  = `<img src="${imgUrl}" alt="preview" onerror="this.remove()"><span id="da-prev-initials" style="display:none">${initials}</span>`;
+                } else {
+                    prevAv.innerHTML    = `<span id="prev-initials">${initials}</span>`;
+                    topAv.innerHTML     = `<span id="da-prev-initials">${initials}</span>`;
+                }
+
+                // checklist
+                setCheck('chk-name',   name && surname);
+                setCheck('chk-email',  document.getElementById('da-email').value.trim());
+                setCheck('chk-branch', branch);
+                setCheck('chk-price',  price && price > 0);
+                setCheck('chk-edu',    _counts.edu > 0);
+                setCheck('chk-loc',    _counts.loc > 0);
+            }
+
+            function setCheck(id, done) {
+                document.getElementById(id)?.classList.toggle('done', !!done);
+            }
+
+            function previewImg(input) {
+                const file = input.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const src = e.target.result;
+                    document.getElementById('da-prev-av').innerHTML = `<img src="${src}" alt="preview">`;
+                    document.getElementById('prev-av').innerHTML    = `<img src="${src}" alt="preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // ── Dynamic List ──
+            const ITEM_CONFIG = {
+                edu: {
+                    label: 'Eğitim',
+                    icon: 'bi-mortarboard-fill',
+                    listId: 'edu-list',
+                    emptyId: 'edu-empty',
+                    countId: 'edu-count',
+                    previewId: 'prev-edus',
+                    fields: [
+                        { name: 'SchoolName', label: 'Okul / Üniversite Adı', placeholder: 'Örn: İstanbul Üniversitesi', required: true, span: 2 },
+                        { name: 'Degree',     label: 'Derece / Unvan',        placeholder: 'Örn: Tıp Doktoru, Uzman', required: true, span: 1 },
+                        { name: 'Year',       label: 'Mezuniyet Yılı',         placeholder: 'Örn: 2015',              required: false, span: 1 },
+                    ],
+                    summary: r => r['SchoolName'] ? `${r['SchoolName']} · ${r['Degree'] || ''}` : 'Yeni Eğitim',
+                },
+                exp: {
+                    label: 'Deneyim',
+                    icon: 'bi-building',
+                    listId: 'exp-list',
+                    emptyId: 'exp-empty',
+                    countId: 'exp-count',
+                    previewId: null,
+                    fields: [
+                        { name: 'ClinicName', label: 'Klinik / Hastane Adı', placeholder: 'Örn: Acıbadem Hastanesi', required: true,  span: 2 },
+                        { name: 'YearRange', label: 'Yıl Aralığı',          placeholder: 'Örn: 2015 – 2020',         required: false, span: 2 },
+                    ],
+                    summary: r => r['ClinicName'] ? `${r['ClinicName']} · ${r['YearRange'] || ''}` : 'Yeni Deneyim',
+                },
+                loc: {
+                    label: 'Konum',
+                    icon: 'bi-geo-alt-fill',
+                    listId: 'loc-list',
+                    emptyId: 'loc-empty',
+                    countId: 'loc-count',
+                    previewId: 'prev-locs',
+                    fields: [
+                        { name: 'ClinicName',    label: 'Klinik Adı',      placeholder: 'Örn: Merkez Poliklinik',       required: true,  span: 2 },
+                        { name: 'Address',       label: 'Adres',            placeholder: 'Mahalle, Cadde, No',           required: false, span: 2 },
+                        { name: 'City',          label: 'Şehir',            placeholder: 'Örn: İstanbul',                required: false, span: 1 },
+                        { name: 'Price',         label: 'Muayene Ücreti (₺)', placeholder: '0',                         required: false, span: 1, type: 'number' },
+                        { name: 'BusinessHours', label: 'Çalışma Saatleri', placeholder: 'Örn: Pzt–Cum 09:00–18:00',    required: false, span: 2 },
+                        { name: 'Description',   label: 'Açıklama',         placeholder: 'Ek bilgi (opsiyonel)',         required: false, span: 2, type: 'textarea' },
+                    ],
+                    summary: r => r['ClinicName'] ? `${r['ClinicName']}${r['City'] ? ' · ' + r['City'] : ''}` : 'Yeni Konum',
+                },
+                award: {
+                    label: 'Ödül',
+                    icon: 'bi-trophy-fill',
+                    listId: 'award-list',
+                    emptyId: 'award-empty',
+                    countId: 'award-count',
+                    previewId: null,
+                    fields: [
+                        { name: 'Title',       label: 'Ödül / Sertifika Adı', placeholder: 'Örn: En İyi Uzman Ödülü', required: true,  span: 2 },
+                        { name: 'Year',        label: 'Yıl',                   placeholder: 'Örn: 2022',              required: false, span: 1 },
+                        { name: 'Description', label: 'Açıklama',              placeholder: 'Kısa açıklama',          required: false, span: 2, type: 'textarea' },
+                    ],
+                    summary: r => r['Title'] ? `${r['Title']}${r['Year'] ? ' · ' + r['Year'] : ''}` : 'Yeni Ödül',
+                },
+            };
+
+            function addItem(type) {
+                const cfg = ITEM_CONFIG[type];
+                const idx = _counts[type];
+                const listEl  = document.getElementById(cfg.listId);
+                const emptyEl = document.getElementById(cfg.emptyId);
+                if (emptyEl) emptyEl.style.display = 'none';
+
+                const item = document.createElement('div');
+                item.className = 'da-item open';
+                item.dataset.type = type;
+                item.dataset.idx  = idx;
+
+                // Build field HTML
+                let fieldsHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+                cfg.fields.forEach(f => {
+                    const inputName = `${type}[${idx}].${f.name}`;
+                    const inputEl = f.type === 'textarea'
+                        ? `<textarea class="da-form-control da-item-field" name="${inputName}" rows="2"
+                              placeholder="${f.placeholder}"
+                              oninput="DA.refreshSummary('${type}',${idx})"
+                              style="resize:vertical"></textarea>`
+                        : `<input class="${'da-form-control da-item-field'}"
+                              type="${f.type || 'text'}"
+                              name="${inputName}"
+                              placeholder="${f.placeholder}"
+                              ${f.required ? 'required' : ''}
+                              oninput="DA.refreshSummary('${type}',${idx})">`;
+                    const colSpan = f.span === 2 ? 'grid-column:1/-1' : '';
+                    fieldsHtml += `
+                        <div class="da-form-group" style="${colSpan}">
+                            <label class="da-form-label">${f.label}${f.required ? ' <span class="da-req">*</span>' : ''}</label>
+                            ${inputEl}
+                        </div>`;
+                });
+                fieldsHtml += '</div>';
+
+                item.innerHTML = `
+                    <div class="da-item-header" onclick="DA.toggleItem(this)">
+                        <div class="da-item-num">${idx + 1}</div>
+                        <div class="da-item-summary">
+                            <span class="da-item-sum-text">Yeni ${cfg.label}</span>
+                            <span class="da-item-summary-sub"></span>
+                        </div>
+                        <i class="bi bi-chevron-down da-item-chevron"></i>
+                        <button type="button" class="da-item-del" onclick="event.stopPropagation();DA.removeItem(this,'${type}')">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                    <div class="da-item-body">${fieldsHtml}</div>
+                `;
+
+                listEl.appendChild(item);
+                _counts[type]++;
+                _refreshCount(type);
+                updatePreview();
+            }
+
+            function toggleItem(headerEl) {
+                const item = headerEl.closest('.da-item');
+                item.classList.toggle('open');
+            }
+
+            function removeItem(btn, type) {
+                const item = btn.closest('.da-item');
+                item.style.transition = 'opacity .25s ease, transform .25s ease';
+                item.style.opacity = '0';
+                item.style.transform = 'scale(.95)';
+                setTimeout(() => {
+                    item.remove();
+                    _counts[type] = Math.max(0, _counts[type] - 1);
+                    _refreshCount(type);
+                    const listEl = document.getElementById(ITEM_CONFIG[type].listId);
+                    if (!listEl.querySelector('.da-item')) {
+                        document.getElementById(ITEM_CONFIG[type].emptyId).style.display = '';
+                    }
+                    // Re-number
+                    listEl.querySelectorAll('.da-item').forEach((el, i) => {
+                        el.querySelector('.da-item-num').textContent = i + 1;
+                    });
+                    updatePreview();
+                }, 260);
+            }
+
+            function refreshSummary(type, idx) {
+                const cfg  = ITEM_CONFIG[type];
+                const list = document.getElementById(cfg.listId);
+                const item = list.querySelector(`[data-idx="${idx}"]`);
+                if (!item) return;
+                const vals = {};
+                cfg.fields.forEach(f => {
+                    const el = item.querySelector(`[name="${type}[${idx}].${f.name}"]`);
+                    if (el) vals[f.name] = el.value.trim();
+                });
+                const sumText = item.querySelector('.da-item-sum-text');
+                if (sumText) sumText.textContent = cfg.summary(vals);
+            }
+
+            function _refreshCount(type) {
+                const cfg = ITEM_CONFIG[type];
+                const listEl = document.getElementById(cfg.listId);
+                const n = listEl.querySelectorAll('.da-item').length;
+                document.getElementById(cfg.countId).textContent = n;
+                if (cfg.previewId) document.getElementById(cfg.previewId).textContent = n;
+            }
+
+            // ── Tag Input ──
+            function initTagInput(wrapId, rawId, hiddenId, namePfx, arr) {
+                const raw = document.getElementById(rawId);
+                raw.addEventListener('keydown', e => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault();
+                        const val = raw.value.replace(',', '').trim();
+                        if (val) addTag(wrapId, hiddenId, namePfx, arr, val, raw);
+                        raw.value = '';
+                    }
+                    if (e.key === 'Backspace' && !raw.value && arr.length) {
+                        removeTag(wrapId, hiddenId, arr, arr[arr.length - 1]);
+                    }
+                });
+            }
+
+            function addTag(wrapId, hiddenId, namePfx, arr, val, rawEl) {
+                if (arr.includes(val)) return;
+                arr.push(val);
+                const wrap    = document.getElementById(wrapId);
+                const hiddenW = document.getElementById(hiddenId);
+                const pill = document.createElement('span');
+                pill.className = 'da-tag-pill';
+                pill.dataset.val = val;
+                pill.innerHTML = `${escHtml(val)}<button class="da-tag-pill-del" type="button" onclick="DA._removeTagByVal('${wrapId}','${hiddenId}',${JSON.stringify(arr)},'${val}')"><i class="bi bi-x-lg"></i></button>`;
+                wrap.insertBefore(pill, rawEl);
+                const inp = document.createElement('input');
+                inp.type  = 'hidden';
+                inp.name  = `${namePfx}[]`;
+                inp.value = val;
+                inp.dataset.tag = val;
+                hiddenW.appendChild(inp);
+                updatePreview();
+                document.getElementById('prev-svcs').textContent = _svcTags.length;
+            }
+
+            function _removeTagByVal(wrapId, hiddenId, arr, val) {
+                removeTag(wrapId, hiddenId, arr, val);
+            }
+
+            function removeTag(wrapId, hiddenId, arr, val) {
+                const i = arr.indexOf(val);
+                if (i > -1) arr.splice(i, 1);
+                const wrap    = document.getElementById(wrapId);
+                const hiddenW = document.getElementById(hiddenId);
+                wrap.querySelector(`[data-val="${CSS.escape(val)}"]`)?.remove();
+                hiddenW.querySelector(`[data-tag="${CSS.escape(val)}"]`)?.remove();
+                updatePreview();
+                document.getElementById('prev-svcs').textContent = _svcTags.length;
+            }
+
+            function escHtml(s) {
+                return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+
+            // ── Before Submit ──
+            function beforeSubmit() {
+                // Renumber hidden inputs so indices are sequential
+                ['edu','exp','loc','award'].forEach(type => {
+                    const list = document.getElementById(ITEM_CONFIG[type].listId);
+                    list.querySelectorAll('.da-item').forEach((item, i) => {
+                        item.querySelectorAll('.da-item-field').forEach(field => {
+                            const oldName = field.name;
+                            field.name = oldName.replace(/\[\d+\]/, `[${i}]`);
+                        });
+                    });
+                });
+                Shell?.toast('Doktor kaydediliyor...', 'info', 'bi-arrow-repeat');
+            }
+
+            // ── Init ──
+            (function init() {
+                initTagInput('spec-wrap','spec-raw','spec-hidden-inputs','Specializations', _specTags);
+                initTagInput('svc-wrap', 'svc-raw', 'svc-hidden-inputs', 'Services',       _svcTags);
+
+                // Remove has-error on input
+                document.querySelectorAll('.da-form-control').forEach(el => {
+                    el.addEventListener('input', () => el.classList.remove('has-error'));
+                });
+
+                if (typeof Shell !== 'undefined' && Shell.setPage)
+                    Shell.setPage('Yeni Doktor', 'Admin Paneli / Klinik / Doktorlar / Ekle');
+            })();
+
+            return {
+                goStep, nextStep, prevStep,
+                addItem, toggleItem, removeItem, refreshSummary,
+                updatePreview, previewImg,
+                _removeTagByVal, beforeSubmit,
+            };
+        })();
+    </script>
+
+</main>
+
+

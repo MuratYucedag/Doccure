@@ -1,0 +1,653 @@
+﻿
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>401 — Erişim Yetkisi Yok | HastaneSis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:       #dde9f4;
+      --bg-mid:        #eaf3fb;
+      --cyan-main:     #0ea5c4;
+      --cyan-light:    #e0f4f9;
+      --cyan-dark:     #0c7fa0;
+      --blue-main:     #2563a8;
+      --blue-soft:     #e8f0fb;
+      --gray-muted:    #6b7a8d;
+      --gray-label:    #94a3b2;
+      --white:         #ffffff;
+      --red-accent:    #e53e3e;
+      --red-soft:      #fff0f0;
+      --text-head:     #0f1f3a;
+      --text-body:     #344054;
+      --glass-bg:      rgba(255,255,255,0.72);
+      --glass-border:  rgba(255,255,255,0.90);
+      --shadow-card:   0 24px 64px rgba(14,60,110,0.13), 0 4px 16px rgba(14,60,110,0.07);
+    }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #c9dff5 0%, #d8ecf8 40%, #e3f2fb 70%, #cde4f4 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated background orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(14,165,196,0.22) 0%, rgba(37,99,168,0.10) 70%);
+      top: -140px; left: -160px;
+      animation-duration: 14s;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(37,99,168,0.18) 0%, rgba(14,165,196,0.06) 70%);
+      bottom: -100px; right: -120px;
+      animation-duration: 18s; animation-delay: -6s;
+    }
+    .orb-3 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(229,62,62,0.09) 0%, transparent 70%);
+      top: 30%; right: 8%;
+      animation-duration: 22s; animation-delay: -3s;
+    }
+    @keyframes orbFloat {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(30px, -40px) scale(1.06); }
+      100% { transform: translate(-20px, 20px) scale(0.96); }
+    }
+
+    /* ── Medical cross pattern overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(14,165,196,0.08) 1px, transparent 0);
+      background-size: 36px 36px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(14,165,196,0.15);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(14,60,110,0.06);
+    }
+    .topbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .topbar-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--cyan-main), var(--blue-main));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .topbar-icon svg { width: 18px; height: 18px; fill: white; }
+    .topbar-name {
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text-head);
+      letter-spacing: -0.3px;
+    }
+    .topbar-name span { color: var(--cyan-main); }
+    .topbar-badge {
+      margin-left: 10px;
+      background: var(--cyan-light);
+      color: var(--cyan-dark);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--gray-muted);
+    }
+    .topbar-dot {
+      width: 8px; height: 8px;
+      background: var(--red-accent);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    /* ── Main card ── */
+    .error-card {
+      position: relative;
+      z-index: 10;
+      margin-top: 56px;
+      width: 100%;
+      max-width: 580px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 28px;
+      box-shadow: var(--shadow-card);
+      padding: 3rem 2.5rem 2.8rem;
+      animation: cardIn 0.8s cubic-bezier(0.34,1.12,0.64,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(36px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ── Status pill ── */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--red-soft);
+      border: 1px solid rgba(229,62,62,0.2);
+      color: var(--red-accent);
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 30px;
+      margin-bottom: 2rem;
+      animation: fadeSlideDown 0.5s 0.3s both;
+    }
+    .status-pill-dot {
+      width: 6px; height: 6px;
+      background: var(--red-accent);
+      border-radius: 50%;
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    /* ── Lock icon container ── */
+    .lock-wrap {
+      position: relative;
+      width: 110px; height: 110px;
+      margin: 0 auto 2.2rem;
+      animation: fadeSlideDown 0.6s 0.2s both;
+    }
+    .lock-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(14,165,196,0.12), rgba(37,99,168,0.08));
+      border: 2px solid rgba(14,165,196,0.18);
+      animation: ringPulse 3s ease-in-out infinite;
+    }
+    .lock-ring-2 {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 1.5px dashed rgba(14,165,196,0.14);
+      animation: ringRotate 18s linear infinite;
+    }
+    @keyframes ringPulse {
+      0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(14,165,196,0.15); }
+      50%       { transform: scale(1.04); box-shadow: 0 0 0 10px rgba(14,165,196,0); }
+    }
+    @keyframes ringRotate { to { transform: rotate(360deg); } }
+
+    .lock-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(145deg, #ffffff, #eef6fc);
+      border-radius: 50%;
+      box-shadow: 0 8px 24px rgba(14,60,110,0.12), inset 0 1px 2px rgba(255,255,255,0.9);
+    }
+    .lock-icon {
+      animation: lockFloat 3.5s ease-in-out infinite;
+    }
+    @keyframes lockFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-5px); }
+    }
+
+    /* ── Error code ── */
+    .error-code {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cyan-main);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 0.6rem;
+      animation: fadeSlideDown 0.5s 0.35s both;
+    }
+
+    /* ── Headings ── */
+    .error-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.3rem, 4vw, 1.75rem);
+      font-weight: 700;
+      color: var(--text-head);
+      line-height: 1.25;
+      margin-bottom: 0.8rem;
+      letter-spacing: -0.5px;
+      animation: fadeSlideDown 0.5s 0.4s both;
+    }
+    .error-subtitle {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--blue-main);
+      margin-bottom: 0.6rem;
+      animation: fadeSlideDown 0.5s 0.45s both;
+    }
+    .error-desc {
+      font-size: 14px;
+      color: var(--gray-muted);
+      line-height: 1.65;
+      margin-bottom: 2.2rem;
+      animation: fadeSlideDown 0.5s 0.5s both;
+    }
+
+    /* ── Divider ── */
+    .card-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(14,165,196,0.25), transparent);
+      margin-bottom: 2rem;
+      animation: fadeSlideDown 0.5s 0.52s both;
+    }
+
+    /* ── Info strip ── */
+    .info-strip {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: linear-gradient(135deg, rgba(14,165,196,0.06), rgba(37,99,168,0.04));
+      border: 1px solid rgba(14,165,196,0.15);
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 2rem;
+      animation: fadeSlideDown 0.5s 0.55s both;
+    }
+    .info-strip-icon {
+      flex-shrink: 0;
+      width: 34px; height: 34px;
+      background: var(--cyan-light);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .info-strip-text {
+      font-size: 13px;
+      color: var(--text-body);
+      line-height: 1.55;
+    }
+    .info-strip-text strong {
+      display: block;
+      font-weight: 600;
+      color: var(--cyan-dark);
+      margin-bottom: 2px;
+      font-size: 12.5px;
+    }
+
+    /* ── Buttons ── */
+    .btn-group-custom {
+      display: flex;
+      gap: 12px;
+      animation: fadeSlideDown 0.5s 0.6s both;
+    }
+    .btn-primary-custom {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--cyan-main), var(--blue-main));
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px 20px;
+      border: none;
+      border-radius: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.22s ease;
+      box-shadow: 0 4px 14px rgba(14,165,196,0.30);
+      letter-spacing: -0.1px;
+    }
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(14,165,196,0.38);
+      color: white;
+    }
+    .btn-primary-custom:active { transform: translateY(0); }
+
+    .btn-secondary-custom {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.80);
+      color: var(--blue-main);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 13px 20px;
+      border: 1.5px solid rgba(37,99,168,0.18);
+      border-radius: 13px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.22s ease;
+      letter-spacing: -0.1px;
+    }
+    .btn-secondary-custom:hover {
+      background: var(--blue-soft);
+      border-color: rgba(37,99,168,0.30);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37,99,168,0.10);
+      color: var(--blue-main);
+    }
+    .btn-secondary-custom:active { transform: translateY(0); }
+
+    /* ── Footer note ── */
+    .footer-note {
+      margin-top: 1.8rem;
+      font-size: 12px;
+      color: var(--gray-label);
+      text-align: center;
+      animation: fadeSlideDown 0.5s 0.7s both;
+    }
+    .footer-note a {
+      color: var(--cyan-dark);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .footer-note a:hover { text-decoration: underline; }
+
+    /* ── Bottom system bar ── */
+    .system-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 44px;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(14,165,196,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      z-index: 100;
+    }
+    .sys-item {
+      font-size: 11.5px;
+      color: var(--gray-label);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .sys-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .sys-dot.green  { background: #22c55e; }
+    .sys-dot.yellow { background: #f59e0b; }
+
+    @keyframes fadeSlideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 540px) {
+      .error-card { padding: 2rem 1.4rem 2rem; border-radius: 20px; }
+      .btn-group-custom { flex-direction: column; }
+      .topbar-badge { display: none; }
+      .system-bar .sys-item:last-child { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Top navigation bar -->
+  <header class="topbar">
+    <a href="#" class="topbar-logo">
+      <div class="topbar-icon">
+        <!-- Medical cross SVG -->
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>
+        </svg>
+      </div>
+      <span class="topbar-name">Hastane<span>Sis</span></span>
+      <span class="topbar-badge">v4.2</span>
+    </a>
+    <div class="topbar-right">
+      <div class="topbar-dot"></div>
+      <span>Erişim Kısıtlandı</span>
+    </div>
+  </header>
+
+  <!-- Main content card -->
+  <main class="error-card text-center">
+
+    <!-- Status pill -->
+    <div class="d-flex justify-content-center">
+      <div class="status-pill">
+        <div class="status-pill-dot"></div>
+        Hata 401 — Yetkisiz Erişim
+      </div>
+    </div>
+
+    <!-- Animated lock icon -->
+    <div class="lock-wrap">
+      <div class="lock-ring-2"></div>
+      <div class="lock-ring"></div>
+      <div class="lock-inner">
+        <div class="lock-icon">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Lock body -->
+            <rect x="8" y="21" width="30" height="21" rx="5" fill="url(#lockGrad)" />
+            <!-- Lock shackle -->
+            <path d="M14 21v-7a9 9 0 0 1 18 0v7" stroke="url(#shackleGrad)" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+            <!-- Keyhole circle -->
+            <circle cx="23" cy="31" r="3.5" fill="white" fill-opacity="0.9"/>
+            <!-- Keyhole stem -->
+            <rect x="21.5" y="31" width="3" height="5" rx="1.5" fill="white" fill-opacity="0.9"/>
+            <!-- Shine -->
+            <rect x="10" y="23" width="10" height="3" rx="1.5" fill="white" fill-opacity="0.12"/>
+            <defs>
+              <linearGradient id="lockGrad" x1="8" y1="21" x2="38" y2="42" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#0ea5c4"/>
+                <stop offset="100%" stop-color="#2563a8"/>
+              </linearGradient>
+              <linearGradient id="shackleGrad" x1="14" y1="7" x2="32" y2="21" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#0ea5c4"/>
+                <stop offset="100%" stop-color="#2563a8"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error code label -->
+    <p class="error-code">HTTP 401 · Forbidden Access</p>
+
+    <!-- Main heading -->
+    <h1 class="error-title">
+      Bu Sayfaya Erişim Yetkiniz<br>Bulunmuyor
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="error-subtitle">
+      Bu alan yalnızca yetkili kullanıcılar tarafından görüntülenebilir.
+    </p>
+
+    <!-- Description -->
+    <p class="error-desc">
+      Lütfen hesabınızın yetkilerini kontrol edin veya sistem yöneticisi ile iletişime geçin.
+    </p>
+
+    <!-- Visual divider -->
+    <div class="card-divider"></div>
+
+    <!-- Info strip -->
+    <div class="info-strip text-start">
+      <div class="info-strip-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0ea5c4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="info-strip-text">
+        <strong>Neden Bu Ekranı Görüyorum?</strong>
+        Hesabınızın mevcut rolü bu modüle erişim için gerekli izne sahip değil. Yöneticinize başvurarak erişim talebinde bulunabilirsiniz.
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="btn-group-custom">
+      <a href="/login" class="btn-primary-custom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Giriş Sayfasına Dön
+      </a>
+      <a href="/dashboard" class="btn-secondary-custom">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Ana Sayfaya Git
+      </a>
+    </div>
+
+    <!-- Footer note -->
+    <p class="footer-note">
+      Sorun yaşamaya devam ediyorsanız,
+      <a href="mailto:destek@hastanesis.com">destek@hastanesis.com</a>
+      adresine yazabilirsiniz.
+    </p>
+
+  </main>
+
+  <!-- Bottom system status bar -->
+  <div class="system-bar">
+    <div class="sys-item">
+      <div class="sys-dot green"></div>
+      Sistem Aktif
+    </div>
+    <div class="sys-item">
+      <div class="sys-dot yellow"></div>
+      Güvenlik Denetimi: Açık
+    </div>
+    <div class="sys-item">
+      HastaneSis © 2025 — Tüm hakları saklıdır
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Inject session info timestamp into system bar
+    (function () {
+      const now = new Date();
+      const fmt = now.toLocaleString('tr-TR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+      const bar = document.querySelector('.system-bar');
+      if (bar) {
+        const ts = document.createElement('div');
+        ts.className = 'sys-item';
+        ts.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b2" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${fmt}`;
+        bar.appendChild(ts);
+      }
+    })();
+
+    // Subtle parallax on orbs with mouse
+    document.addEventListener('mousemove', function (e) {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const dx = (e.clientX - cx) / cx;
+      const dy = (e.clientY - cy) / cy;
+      document.querySelector('.orb-1').style.transform =
+        `translate(${dx * 18}px, ${dy * 14}px)`;
+      document.querySelector('.orb-2').style.transform =
+        `translate(${-dx * 14}px, ${-dy * 10}px)`;
+    });
+
+    // Button ripple
+    document.querySelectorAll('.btn-primary-custom, .btn-secondary-custom').forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const ripple = document.createElement('span');
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        ripple.style.cssText = `
+          position:absolute; border-radius:50%;
+          width:${size}px; height:${size}px;
+          left:${e.clientX - rect.left - size/2}px;
+          top:${e.clientY - rect.top - size/2}px;
+          background:rgba(255,255,255,0.28);
+          transform:scale(0); animation:ripple 0.5s linear;
+          pointer-events:none;
+        `;
+        btn.style.position = 'relative';
+        btn.style.overflow = 'hidden';
+        btn.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 520);
+      });
+    });
+
+    const style = document.createElement('style');
+    style.textContent = `@keyframes ripple { to { transform: scale(2.5); opacity: 0; } }`;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

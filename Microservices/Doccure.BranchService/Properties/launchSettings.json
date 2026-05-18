@@ -12,7 +12,7 @@
     "Doccure.BranchService": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7001;http://localhost:7101",
       "environmentVariables": {

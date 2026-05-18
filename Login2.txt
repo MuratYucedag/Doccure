@@ -1,0 +1,259 @@
+﻿
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Doccure – Giriş Yap</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sky:#e8f4fd;--sky-mid:#b8dcf8;
+  --blue:#2a84d2;--blue-dk:#1a5fa0;--blue-lt:#5ba8e8;
+  --teal:#3ab3b3;
+  --white:#ffffff;
+  --gray-50:#f9fafb;--gray-100:#f1f5f9;--gray-200:#e2e8f0;
+  --gray-400:#94a3b8;--gray-600:#475569;--gray-800:#1e293b;
+  --danger:#e74c6e;--success:#27ae8a;
+  --radius:14px;--radius-sm:9px;
+  --shadow:0 8px 40px rgba(42,132,210,.13);
+  --shadow-sm:0 2px 12px rgba(42,132,210,.09);
+  --font-body:'Plus Jakarta Sans',sans-serif;
+  --font-head:'DM Serif Display',serif;
+  --trans:.22s cubic-bezier(.4,0,.2,1);
+}
+html,body{min-height:100vh;font-family:var(--font-body);color:var(--gray-800);}
+body{
+  background:
+    radial-gradient(ellipse at 20% 0%,rgba(42,132,210,.09) 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 100%,rgba(58,179,179,.08) 0%,transparent 55%),
+    var(--gray-100);
+  display:flex;flex-direction:column;
+}
+.top-bar{background:white;border-bottom:1px solid var(--gray-200);box-shadow:0 1px 8px rgba(42,132,210,.07);position:sticky;top:0;z-index:100;}
+.top-bar-inner{max-width:900px;margin:0 auto;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;}
+.top-brand{display:flex;align-items:center;gap:.6rem;font-family:var(--font-head);font-size:1.25rem;color:var(--gray-800);}
+.top-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(42,132,210,.3);}
+.top-logo i{color:white;font-size:.95rem;}
+.trust-chip{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;font-weight:500;color:var(--gray-400);background:var(--gray-50);border:1px solid var(--gray-200);border-radius:50px;padding:.28rem .7rem;}
+.trust-chip i{color:var(--teal);}
+.top-links{display:flex;gap:.7rem;}
+.main-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;}
+.form-card{background:var(--white);border-radius:22px;box-shadow:var(--shadow);padding:2.8rem 2.6rem;width:100%;max-width:440px;animation:slideUp .5s cubic-bezier(.4,0,.2,1) both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.form-header{text-align:center;margin-bottom:2rem;}
+.form-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1.1rem;box-shadow:0 4px 18px rgba(42,132,210,.3);}
+.form-logo i{font-size:1.6rem;color:white;}
+.form-header h2{font-family:var(--font-head);font-size:1.7rem;color:var(--gray-800);margin-bottom:.3rem;}
+.form-header p{font-size:.875rem;color:var(--gray-400);}
+.section-divider{display:flex;align-items:center;gap:.75rem;margin-bottom:1.6rem;}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+.section-divider span{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);white-space:nowrap;}
+.form-floating-custom{position:relative;margin-bottom:1rem;}
+.form-floating-custom .field-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:1rem;pointer-events:none;transition:color var(--trans);z-index:5;}
+.form-floating-custom input{width:100%;padding:.85rem 1rem .85rem 2.7rem;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:.9rem;font-family:var(--font-body);color:var(--gray-800);background:var(--gray-50);outline:none;transition:border-color var(--trans),box-shadow var(--trans),background var(--trans);}
+.form-floating-custom input::placeholder{color:var(--gray-400);}
+.form-floating-custom input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3.5px rgba(42,132,210,.12);}
+.form-floating-custom.has-error input{border-color:var(--danger);box-shadow:0 0 0 3px rgba(231,76,110,.1);}
+.form-floating-custom.has-success input{border-color:var(--success);}
+.field-icon-right{position:absolute;right:1rem;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:1rem;cursor:pointer;z-index:5;transition:color var(--trans);}
+.field-icon-right:hover{color:var(--blue);}
+.err-msg{font-size:.77rem;color:var(--danger);margin-top:.28rem;display:none;animation:fadeIn .2s ease;}
+.form-floating-custom.has-error .err-msg{display:block;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.meta-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;}
+.remember-check{display:flex;align-items:center;gap:.5rem;cursor:pointer;}
+.remember-check input[type="checkbox"]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
+.remember-check span{font-size:.83rem;color:var(--gray-600);}
+.forgot-link{font-size:.83rem;color:var(--blue);font-weight:600;text-decoration:none;transition:opacity var(--trans);}
+.forgot-link:hover{opacity:.75;text-decoration:underline;}
+.btn-login{width:100%;padding:.9rem;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--blue) 0%,var(--blue-dk) 50%,var(--teal) 100%);color:white;font-family:var(--font-body);font-size:.95rem;font-weight:600;letter-spacing:.02em;cursor:pointer;box-shadow:0 4px 18px rgba(42,132,210,.35);transition:all var(--trans);display:flex;align-items:center;justify-content:center;gap:.55rem;position:relative;overflow:hidden;}
+.btn-login::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background var(--trans);}
+.btn-login:hover{box-shadow:0 6px 26px rgba(42,132,210,.45);transform:translateY(-1px);}
+.btn-login:hover::before{background:rgba(255,255,255,.07);}
+.btn-login:active{transform:translateY(0);}
+.btn-login.loading .btn-text{opacity:0;}
+.btn-login .spinner{position:absolute;width:20px;height:20px;border:2.5px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.btn-login.loading .spinner{display:block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.or-divider{display:flex;align-items:center;gap:.75rem;margin:1.4rem 0;}
+.or-divider::before,.or-divider::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+.or-divider span{font-size:.78rem;color:var(--gray-400);font-weight:500;}
+.social-row{display:flex;gap:.6rem;}
+.btn-social{flex:1;padding:.72rem;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);background:var(--gray-50);cursor:pointer;font-family:var(--font-body);font-size:.83rem;font-weight:500;color:var(--gray-600);display:flex;align-items:center;justify-content:center;gap:.45rem;transition:all var(--trans);}
+.btn-social:hover{border-color:var(--blue-lt);background:var(--sky);color:var(--blue);}
+.btn-social i{font-size:1.05rem;}
+.register-link{text-align:center;margin-top:1.3rem;font-size:.85rem;color:var(--gray-400);}
+.register-link a{color:var(--blue);font-weight:600;text-decoration:none;}
+.register-link a:hover{text-decoration:underline;}
+.alert-box{background:rgba(231,76,110,.07);border:1.5px solid rgba(231,76,110,.25);border-radius:var(--radius-sm);padding:.85rem 1rem;display:flex;align-items:center;gap:.6rem;font-size:.84rem;color:var(--danger);margin-bottom:1rem;display:none;animation:fadeIn .25s ease;}
+.alert-box i{font-size:1.1rem;flex-shrink:0;}
+.toast-wrap{position:fixed;top:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.6rem;}
+.toast-item{background:white;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);padding:1rem 1.3rem;display:flex;align-items:center;gap:.75rem;font-size:.88rem;font-weight:500;max-width:300px;animation:toastIn .35s cubic-bezier(.4,0,.2,1) both;border-left:4px solid var(--success);}
+.toast-item i{font-size:1.2rem;color:var(--success);}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:500px){.main-wrap{padding:1.5rem 1rem;}.form-card{padding:2rem 1.4rem;}.social-row{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<header class="top-bar">
+  <div class="top-bar-inner">
+    <div class="top-brand">
+      <div class="top-logo"><i class="bi bi-heart-pulse-fill"></i></div>
+      <span>Doccure</span>
+    </div>
+    <div class="top-links">
+      <span class="trust-chip"><i class="bi bi-shield-check"></i> SSL Güvenli</span>
+      <span class="trust-chip"><i class="bi bi-telephone"></i> 7/24 Destek</span>
+    </div>
+  </div>
+</header>
+
+<div class="main-wrap">
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-logo"><i class="bi bi-heart-pulse-fill"></i></div>
+      <h2>Tekrar Hoş Geldiniz</h2>
+      <p>Hesabınıza giriş yaparak devam edin</p>
+    </div>
+
+    <div class="section-divider"><span><i class="bi bi-lock"></i> Güvenli Giriş</span></div>
+
+    <div class="alert-box" id="alert-box">
+      <i class="bi bi-exclamation-circle-fill"></i>
+      <span id="alert-msg">E-posta veya şifre hatalı.</span>
+    </div>
+
+    <form id="login-form" method="post" novalidate>
+      <div class="form-floating-custom" id="fc-eposta">
+        <i class="bi bi-envelope field-icon"></i>
+        <input type="email" id="eposta" name="Email" placeholder="E-posta Adresi" autocomplete="email"/>
+        <span class="err-msg">Geçerli bir e-posta adresi giriniz.</span>
+      </div>
+
+      <div class="form-floating-custom" id="fc-sifre">
+        <i class="bi bi-lock field-icon"></i>
+        <input type="password" id="sifre" name="Password" placeholder="Şifre" autocomplete="current-password"/>
+        <i class="bi bi-eye field-icon-right" id="toggle-pw" onclick="togglePw()"></i>
+        <span class="err-msg">Şifre en az 6 karakter olmalıdır.</span>
+      </div>
+
+      <div class="meta-row">
+        <label class="remember-check">
+          <input type="checkbox" id="remember" name="RememberMe"/>
+          <span>Beni Hatırla</span>
+        </label>
+        <a href="/Account/ForgotPassword" class="forgot-link">Şifremi Unuttum</a>
+      </div>
+
+      <button type="submit" class="btn-login" id="submit-btn">
+        <div class="spinner"></div>
+        <span class="btn-text"><i class="bi bi-box-arrow-in-right"></i>&nbsp;&nbsp;Giriş Yap</span>
+      </button>
+
+      <div class="or-divider"><span>veya</span></div>
+
+      <div class="social-row">
+        <button type="button" class="btn-social">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Google ile Giriş
+        </button>
+        <button type="button" class="btn-social">
+          <i class="bi bi-apple"></i>
+          Apple ile Giriş
+        </button>
+      </div>
+    </form>
+
+    <div class="register-link">
+      Hesabınız yok mu? <a href="/Account/Register">Kayıt Ol</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function validateEmail(v) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function setError(fcId, show) {
+  const el = $(fcId);
+  el.classList.toggle('has-error', show);
+  el.classList.toggle('has-success', !show);
+}
+
+function togglePw() {
+  const inp = $('sifre'), icon = $('toggle-pw');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.className = 'bi bi-eye-slash field-icon-right';
+  } else {
+    inp.type = 'password';
+    icon.className = 'bi bi-eye field-icon-right';
+  }
+}
+
+function showAlert(msg) {
+  const box = $('alert-box');
+  $('alert-msg').textContent = msg;
+  box.style.display = 'flex';
+}
+
+function hideAlert() {
+  $('alert-box').style.display = 'none';
+}
+
+$('eposta').addEventListener('blur', function () {
+  if (this.value) setError('fc-eposta', !validateEmail(this.value.trim()));
+});
+
+$('sifre').addEventListener('blur', function () {
+  if (this.value) setError('fc-sifre', this.value.length < 6);
+});
+
+[$('eposta'), $('sifre')].forEach(el => el.addEventListener('input', hideAlert));
+
+$('login-form').addEventListener('submit', function (e) {
+  // Önce validasyonu yap
+  const eposta = $('eposta').value.trim();
+  const sifre  = $('sifre').value;
+  let ok = true;
+
+  const epostaOk = validateEmail(eposta);
+  setError('fc-eposta', !epostaOk);
+  if (!epostaOk) ok = false;
+
+  const sifreOk = sifre.length >= 6;
+  setError('fc-sifre', !sifreOk);
+  if (!sifreOk) ok = false;
+
+  if (!ok) {
+    // Validasyon hatası varsa formu durdur
+    e.preventDefault();
+    hideAlert();
+    const firstErr = document.querySelector('.has-error input');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // Validasyon geçti → spinner göster, formu gönder (e.preventDefault() YOK)
+  const btn = $('submit-btn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  // Form method="post" ile normal şekilde submit olur
+});
+</script>
+</body>
+</html>

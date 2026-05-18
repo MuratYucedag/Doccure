@@ -1,5 +1,6 @@
 ﻿using Doccure.DoctorService.Dtos.DoctorDtos;
 using Doccure.DoctorService.Services.DoctorServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +16,7 @@ namespace Doccure.DoctorService.Controllers
             _doctorService = doctorService;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> GetAllDoctors()
         {

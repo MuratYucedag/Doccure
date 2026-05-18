@@ -8,7 +8,7 @@ namespace Doccure.BranchService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    // [Authorize]
+    [Authorize]
     public class BranchesController : ControllerBase
     {
         private readonly IBranchService _branchService;
@@ -18,7 +18,7 @@ namespace Doccure.BranchService.Controllers
             _branchService = branchService;
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> BrachList()
         {
@@ -26,6 +26,7 @@ namespace Doccure.BranchService.Controllers
             return Ok(values);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> CreateBranch(CreateBranchDto createBranchDto)
         {

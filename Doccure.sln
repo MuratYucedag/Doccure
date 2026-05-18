@@ -54,7 +54,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Branches", "Branches", "{18
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doctors", "Doctors", "{82ABE57D-EB51-4CEF-AFDF-E1530388479E}"
 	ProjectSection(SolutionItems) = preProject
+		CreateDoctor.txt = CreateDoctor.txt
+		CreateDoctor2.txt = CreateDoctor2.txt
 		DoctorList.txt = DoctorList.txt
+		DoctorList2.txt = DoctorList2.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nurses", "Nurses", "{06F2D220-3D89-43A5-910D-2D88CA02FD15}"
@@ -85,6 +88,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ocelot", "Ocelot", "{40A770E9-8837-4D0D-AA49-EF0C136EFAE0}"
 	ProjectSection(SolutionItems) = preProject
 		OcelotBranch.txt = OcelotBranch.txt
+		OcelotWithDoctorGetById.txt = OcelotWithDoctorGetById.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Register", "Register", "{66469CCD-479B-46E7-92F8-F40C04B4209C}"
@@ -92,6 +96,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Register", "Register", "{66
 		Register.txt = Register.txt
 		RegisterConstError.txt = RegisterConstError.txt
 		RegisterWithGender.txt = RegisterWithGender.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Login", "Login", "{E16BB003-E78C-41C3-B487-D2115101800E}"
+	ProjectSection(SolutionItems) = preProject
+		Login2.txt = Login2.txt
+		LoginService.txt = LoginService.txt
+		UserLogin.txt = UserLogin.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ErrorPages", "ErrorPages", "{53195429-E5E5-4D52-B3DF-A368653748C3}"
+	ProjectSection(SolutionItems) = preProject
+		403Forbidden.txt = 403Forbidden.txt
+		404NotFound.txt = 404NotFound.txt
 	EndProjectSection
 EndProject
 Global
@@ -156,6 +173,8 @@ Global
 		{DE8096DD-2BA9-4F5E-95A4-DA43718BF304} = {B94FC331-E51C-4037-A5C3-9424272F2297}
 		{40A770E9-8837-4D0D-AA49-EF0C136EFAE0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{66469CCD-479B-46E7-92F8-F40C04B4209C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E16BB003-E78C-41C3-B487-D2115101800E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{53195429-E5E5-4D52-B3DF-A368653748C3} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6794892D-F830-403C-AFC1-D9269F669C31}
