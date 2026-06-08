@@ -12,7 +12,7 @@
     "Doccure.DoctorService": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": false,
+      "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7002;http://localhost:7102",
       "environmentVariables": {

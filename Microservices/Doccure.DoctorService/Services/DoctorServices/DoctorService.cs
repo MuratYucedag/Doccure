@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Doccure.DoctorService.Dtos.BranchDtos;
 using Doccure.DoctorService.Dtos.DoctorDtos;
 using Doccure.DoctorService.Entities;
 using Doccure.DoctorService.Settings;
@@ -10,12 +11,14 @@ namespace Doccure.DoctorService.Services.DoctorServices
     {
         private readonly IMongoCollection<Doctor> _doctorCollection;
         private readonly IMapper _mapper;
-        public DoctorService(IDatabaseSettings _settings, IMapper mapper)
+        private readonly HttpClient _httpClient;
+        public DoctorService(IDatabaseSettings _settings, IMapper mapper, HttpClient httpClient)
         {
             var client = new MongoClient(_settings.ConnectionString);
             var database = client.GetDatabase(_settings.DatabaseName);
             _doctorCollection = database.GetCollection<Doctor>(_settings.DoctorCollectionName);
             _mapper = mapper;
+            _httpClient = httpClient;
         }
         public async Task CreateAsync(CreateDoctorDto dto)
         {
@@ -36,6 +39,23 @@ namespace Doccure.DoctorService.Services.DoctorServices
             var value = await _doctorCollection.Find(x => x.DoctorId == id).FirstOrDefaultAsync();
             return _mapper.Map<GetByIdDoctorDto>(value);
         }
+
+        public async Task<GetDoctorNameAndSurnameByIdDto> GetDoctorByIdAsync(string id)
+        {
+            var value = await _doctorCollection.Find(x => x.DoctorId == id).FirstOrDefaultAsync();
+
+            var branch = await _httpClient.GetFromJsonAsync<BranchDto>($"https://localhost:7001/api/branches/GetBranch?id={value.BranchId}");
+
+            return new GetDoctorNameAndSurnameByIdDto
+            {
+                DoctorId = value.DoctorId,
+                Name = value.Name,
+                Surname = value.Surname,
+                BranchId = value.BranchId,
+                BranchName = branch.BranchName
+            };
+        }
+
         public async Task UpdateAsync(UpdateDoctorDto dto)
         {
             var entity = _mapper.Map<Doctor>(dto);

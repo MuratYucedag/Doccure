@@ -1,0 +1,33 @@
+   public int AppointmentId { get; set; }
+
+    public string DoctorId { get; set; }
+
+    public string BranchId { get; set; }
+
+    public DateTime AppointmentDate { get; set; }
+
+    public string Diagnosis { get; set; }
+
+    public string Status { get; set; }
+
+
+-----------------------------------------------
+
+ var value = await _context.Appointments
+        .Include(x => x.AppointmentDetail)
+        .Where(x => x.PatientId == patientId)
+        .OrderByDescending(x => x.AppointmentDate)
+        .FirstOrDefaultAsync();
+
+    if (value == null)
+        return null;
+
+    return new LastAppointmentDto
+    {
+        AppointmentId = value.AppointmentId,
+        DoctorId = value.DoctorId,
+        BranchId = value.BranchId,
+        AppointmentDate = value.AppointmentDate,
+        Diagnosis = value.AppointmentDetail?.Diagnosis,
+        Status = value.Status
+    };

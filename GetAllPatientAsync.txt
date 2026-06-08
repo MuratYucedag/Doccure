@@ -1,0 +1,39 @@
+public async Task<List<ResultPatientDto>> GetAllPatientsAsync()
+{
+    var patients = await _context.Patients.ToListAsync();
+
+    var result = new List<ResultPatientDto>();
+
+    foreach (var patient in patients)
+    {
+        var identityUser = await _httpClient
+            .GetFromJsonAsync<IdentityUserDto>(
+                $"https://localhost:7001/api/users/{patient.AppUserId}");
+
+        var dto = new ResultPatientDto
+        {
+            PatientId = patient.PatientId,
+            AppUserId = patient.AppUserId,
+            TcKimlikNo = patient.TcKimlikNo,
+            InsuranceType = patient.InsuranceType,
+            CreatedDate = patient.CreatedDate,
+            Status = patient.Status,
+
+            Name = identityUser.Name,
+            Surname = identityUser.Surname,
+            FullName = $"{identityUser.Name} {identityUser.Surname}",
+            Email = identityUser.Email,
+            PhoneNumber = identityUser.PhoneNumber,
+            Gender = identityUser.Gender,
+            BirthDate = identityUser.BirthDate,
+            BloodGroup = identityUser.BloodGroup,
+            ImageUrl = identityUser.ImageUrl,
+            City = identityUser.City,
+            Address = identityUser.Address
+        };
+
+        result.Add(dto);
+    }
+
+    return result;
+}

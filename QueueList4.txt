@@ -1,0 +1,578 @@
+﻿@{
+    ViewData["Title"] = "Sıra Yönetimi";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+<main id="app-content">
+<style>
+    /* ── Reset ── */
+    #app-content * { box-sizing: border-box; }
+
+    :root {
+        --hq-primary:   #1B4FD8;
+        --hq-primary-d: #1440B5;
+        --hq-primary-l: #EEF3FF;
+        --hq-primary-b: #C7D6FA;
+        --hq-cyan:      #0EA5E9;
+        --hq-cyan-l:    #E0F5FF;
+        --hq-green:     #059669;
+        --hq-green-l:   #D1FAE5;
+        --hq-amber:     #D97706;
+        --hq-amber-l:   #FEF3C7;
+        --hq-red:       #DC2626;
+        --hq-red-l:     #FEE2E2;
+        --hq-text:      #0F172A;
+        --hq-text-2:    #475569;
+        --hq-text-3:    #94A3B8;
+        --hq-border:    #E2E8F0;
+        --hq-bg:        #F8FAFC;
+        --hq-surface:   #FFFFFF;
+        --hq-shadow:    0 1px 4px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.05);
+        --hq-radius:    10px;
+        --hq-radius-sm: 6px;
+    }
+
+    .hq-page {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        color: var(--hq-text);
+        background: var(--hq-bg);
+    }
+
+    /* ── Sayfa başlığı ── */
+    .hq-page-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--hq-surface);
+        border-bottom: 1px solid var(--hq-border);
+        gap: 10px; flex-wrap: wrap;
+    }
+    .hq-page-title {
+        font-size: 14px; font-weight: 700; color: var(--hq-text);
+        display: flex; align-items: center; gap: 7px; margin: 0;
+    }
+    .hq-icon-badge {
+        width: 26px; height: 26px;
+        background: var(--hq-primary-l); color: var(--hq-primary);
+        border-radius: var(--hq-radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; flex-shrink: 0;
+    }
+    .hq-live-pill {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: var(--hq-green-l); color: var(--hq-green);
+        border: 1px solid #A7F3D0; border-radius: 20px;
+        padding: 3px 9px; font-size: 10.5px; font-weight: 600;
+    }
+    .hq-live-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--hq-green);
+        animation: hqPulse 1.8s ease-in-out infinite; flex-shrink: 0;
+    }
+    @@keyframes hqPulse {
+        0%,100%{opacity:1;transform:scale(1);}
+        50%{opacity:.4;transform:scale(.65);}
+    }
+
+    /* ── Durum bandı ── */
+    .hq-status-bar {
+        display: flex; align-items: center; gap: 14px;
+        padding: 7px 16px;
+        background: var(--hq-surface);
+        border-bottom: 1px solid var(--hq-border);
+        font-size: 11px; color: var(--hq-text-2);
+        flex-wrap: wrap;
+    }
+    .hq-sb-item { display: flex; align-items: center; gap: 4px; font-weight: 500; }
+    .hq-sb-item i { font-size: 12px; color: var(--hq-primary); }
+
+    .hq-conn-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: 10px; font-weight: 600;
+        padding: 2px 8px; border-radius: 20px;
+        background: var(--hq-amber-l); color: #92400E; border: 1px solid #FCD34D;
+        margin-left: auto;
+    }
+    .hq-conn-badge.connected    { background:var(--hq-green-l); color:#065F46; border-color:#6EE7B7; }
+    .hq-conn-badge.disconnected { background:var(--hq-red-l);   color:#991B1B; border-color:#FCA5A5; }
+    .hq-conn-dot2 { width:5px; height:5px; border-radius:50%; background:currentColor; animation:hqPulse 2s infinite; }
+
+    /* ── Body padding ── */
+    .hq-body { padding: 12px; }
+
+    /* ── Row 1: 70/30 ── */
+    .hq-row1 {
+        display: grid;
+        grid-template-columns: 1fr 210px;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    @@media(max-width:800px){ .hq-row1{ grid-template-columns:1fr; } }
+
+    /* ── Kart ortak ── */
+    .hq-card {
+        background: var(--hq-surface);
+        border: 1px solid var(--hq-border);
+        border-radius: var(--hq-radius);
+        box-shadow: var(--hq-shadow);
+        overflow: hidden;
+    }
+    .hq-card-head {
+        padding: 9px 13px;
+        border-bottom: 1px solid var(--hq-border);
+        display: flex; align-items: center; gap: 7px;
+        background: var(--hq-bg);
+    }
+    .hq-ched-icon {
+        width: 23px; height: 23px; border-radius: 5px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11.5px; flex-shrink: 0;
+    }
+    .hq-ched-icon.blue  { background:var(--hq-primary-l); color:var(--hq-primary); }
+    .hq-ched-icon.amber { background:var(--hq-amber-l);   color:var(--hq-amber);   }
+    .hq-card-label {
+        font-size: 10.5px; font-weight: 700;
+        color: var(--hq-text-2); letter-spacing:.06em; text-transform:uppercase;
+    }
+
+    /* ── Current patient body ── */
+    .hq-cur-body {
+        padding: 14px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0 16px;
+        align-items: center;
+    }
+    @@media(max-width:480px){ .hq-cur-body{ grid-template-columns:1fr; } }
+
+    /* Sıra numarası kutusu — sabit px, vw yok */
+    .hq-num-box {
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        background: var(--hq-primary);
+        border-radius: var(--hq-radius);
+        padding: 10px 18px;
+        min-width: 96px; max-width: 120px;
+        box-shadow: 0 4px 14px rgba(27,79,216,.25);
+        flex-shrink: 0;
+    }
+    .hq-num-label { font-size: 8.5px; font-weight: 700; letter-spacing:.13em; text-transform:uppercase; color:rgba(255,255,255,.6); margin-bottom:3px; }
+    .hq-num-val   { font-size: 40px; font-weight: 800; color:#fff; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+    .hq-num-time  { font-size: 9px; color:rgba(255,255,255,.55); margin-top:4px; }
+
+    .hq-cur-info { min-width: 0; }
+    .hq-cur-name {
+        font-size: 17px; font-weight: 700; color: var(--hq-text);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: 7px;
+    }
+    .hq-cur-meta { display:flex; flex-direction:column; gap:4px; }
+    .hq-meta-row {
+        display:flex; align-items:center; gap:5px;
+        font-size: 12px; color: var(--hq-text-2);
+    }
+    .hq-meta-row i { color:var(--hq-primary); font-size:12px; flex-shrink:0; }
+    .hq-meta-row strong { color:var(--hq-text); }
+
+    .hq-room-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: var(--hq-primary-l); border: 1px solid var(--hq-primary-b);
+        border-radius: 20px; padding: 4px 11px;
+        font-size: 11.5px; font-weight: 600; color: var(--hq-primary);
+        margin-top: 9px; max-width: 100%;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .hq-cur-prev {
+        padding: 7px 14px;
+        border-top: 1px solid var(--hq-border);
+        background: var(--hq-bg);
+        display: flex; align-items: center; gap: 6px;
+        font-size: 11px; color: var(--hq-text-3); flex-wrap: wrap;
+    }
+    .hq-cur-prev strong { color:var(--hq-text-2); }
+
+    /* ── İstatistik kartları ── */
+    .hq-stats-col { display:flex; flex-direction:column; gap:9px; }
+
+    .hq-stat {
+        background: var(--hq-surface);
+        border: 1px solid var(--hq-border);
+        border-radius: var(--hq-radius);
+        box-shadow: var(--hq-shadow);
+        padding: 11px 13px;
+        display: flex; align-items: center; gap: 11px;
+        position: relative; overflow: hidden;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .hq-stat:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(0,0,0,.1); }
+    .hq-stat::after {
+        content:''; position:absolute; left:0; top:0; bottom:0;
+        width:3px; border-radius:3px 0 0 3px;
+    }
+    .hq-stat.waiting::after { background:var(--hq-amber); }
+    .hq-stat.called::after  { background:var(--hq-cyan);  }
+    .hq-stat.done::after    { background:var(--hq-green); }
+
+    .hq-stat-icon {
+        width: 34px; height: 34px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px; flex-shrink: 0;
+    }
+    .hq-stat.waiting .hq-stat-icon { background:var(--hq-amber-l); color:var(--hq-amber); }
+    .hq-stat.called  .hq-stat-icon { background:var(--hq-cyan-l);  color:var(--hq-cyan);  }
+    .hq-stat.done    .hq-stat-icon { background:var(--hq-green-l); color:var(--hq-green); }
+
+    .hq-stat-num {
+        font-size: 24px; font-weight: 800; line-height:1;
+        font-variant-numeric: tabular-nums;
+    }
+    .hq-stat.waiting .hq-stat-num { color:var(--hq-amber); }
+    .hq-stat.called  .hq-stat-num { color:var(--hq-cyan);  }
+    .hq-stat.done    .hq-stat-num { color:var(--hq-green); }
+    .hq-stat-lbl { font-size:10px; font-weight:600; color:var(--hq-text-2); margin-top:2px; }
+
+    /* ── Tablo ── */
+    .hq-tbl-wrap { overflow-x:hidden; overflow-y:auto; max-height:296px; }
+
+    .hq-tbl {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 12px;
+    }
+    .hq-tbl colgroup .col-num    { width: 85px;  }
+    .hq-tbl colgroup .col-name   { width: auto;  }
+    .hq-tbl colgroup .col-branch { width: 100px; }
+    .hq-tbl colgroup .col-status { width: 95px;  }
+    .hq-tbl colgroup .col-time   { width: 72px;  }
+
+    .hq-tbl thead th {
+        position: sticky; top: 0; z-index: 2;
+        padding: 7px 11px;
+        background: var(--hq-bg);
+        border-bottom: 2px solid var(--hq-border);
+        font-size: 9.5px; font-weight: 700;
+        letter-spacing:.08em; text-transform:uppercase;
+        color: var(--hq-text-2); white-space:nowrap;
+    }
+    .hq-tbl tbody tr {
+        border-bottom: 1px solid var(--hq-border);
+        transition: background .15s;
+        animation: hqRow .3s ease both;
+    }
+    .hq-tbl tbody tr:last-child  { border-bottom:none; }
+    .hq-tbl tbody tr:hover       { background:var(--hq-primary-l); }
+    .hq-tbl tbody tr.hq-active-row { background:#EEF3FF; }
+
+    @@keyframes hqRow {
+        from{opacity:0;transform:translateX(5px);}
+        to{opacity:1;transform:translateX(0);}
+    }
+    .hq-tbl tbody tr:nth-child(1){animation-delay:.03s;}
+    .hq-tbl tbody tr:nth-child(2){animation-delay:.06s;}
+    .hq-tbl tbody tr:nth-child(3){animation-delay:.09s;}
+    .hq-tbl tbody tr:nth-child(4){animation-delay:.12s;}
+    .hq-tbl tbody tr:nth-child(5){animation-delay:.15s;}
+    .hq-tbl tbody tr:nth-child(6){animation-delay:.18s;}
+    .hq-tbl tbody tr:nth-child(7){animation-delay:.21s;}
+    .hq-tbl tbody tr:nth-child(8){animation-delay:.24s;}
+
+    .hq-tbl td {
+        padding: 8px 11px; vertical-align:middle;
+        color: var(--hq-text);
+        overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        max-width:0;
+    }
+    .hq-tbl td:first-child,
+    .hq-tbl td:last-child { max-width:none; }
+
+    .hq-ticket {
+        display:inline-flex; align-items:center; justify-content:center;
+        font-size:11px; font-weight:700; font-variant-numeric:tabular-nums;
+        background:var(--hq-primary-l); color:var(--hq-primary);
+        border:1px solid var(--hq-primary-b); border-radius:4px;
+        padding:2px 7px; white-space:nowrap;
+    }
+    .hq-ticket.active {
+        background:var(--hq-primary); color:#fff; border-color:var(--hq-primary);
+        box-shadow:0 2px 8px rgba(27,79,216,.3);
+    }
+
+    .hq-pill {
+        display:inline-flex; align-items:center; gap:4px;
+        padding:2px 8px; border-radius:20px;
+        font-size:10px; font-weight:700; white-space:nowrap;
+    }
+    .hq-pill::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+    .hq-pill.waiting { background:var(--hq-amber-l); color:var(--hq-amber); border:1px solid #FCD34D; }
+    .hq-pill.waiting::before { background:var(--hq-amber); animation:hqPulse 2s infinite; }
+    .hq-pill.called  { background:var(--hq-primary-l); color:var(--hq-primary); border:1px solid var(--hq-primary-b); }
+    .hq-pill.called::before  { background:var(--hq-primary); }
+    .hq-pill.done    { background:var(--hq-green-l); color:var(--hq-green); border:1px solid #6EE7B7; }
+    .hq-pill.done::before    { background:var(--hq-green); }
+
+    .hq-tbl-foot {
+        padding: 7px 13px;
+        border-top: 1px solid var(--hq-border);
+        background: var(--hq-bg);
+        display:flex; align-items:center; justify-content:space-between;
+        font-size: 10.5px; color: var(--hq-text-3); flex-wrap:wrap; gap:5px;
+    }
+    .hq-tbl-foot strong { color:var(--hq-text-2); }
+</style>
+
+<div class="hq-page">
+
+    <!-- Başlık -->
+    <div class="hq-page-head">
+        <h1 class="hq-page-title">
+            <span class="hq-icon-badge"><i class="bi bi-hospital"></i></span>
+            Sıra Yönetim Sistemi
+        </h1>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="hq-live-pill"><span class="hq-live-dot"></span>Canlı</span>
+            <span style="font-size:11.5px;color:var(--hq-text-2);font-weight:500" id="hq-clock">—</span>
+        </div>
+    </div>
+
+    <!-- Durum bandı -->
+    <div class="hq-status-bar">
+        <span class="hq-sb-item"><i class="bi bi-person-badge"></i> Nöbetçi: <strong style="margin-left:3px">Dr. Selin Arslan</strong></span>
+        <span class="hq-sb-item"><i class="bi bi-building"></i> Poliklinik 3</span>
+        <span class="hq-sb-item" style="color:var(--hq-text-3)"><i class="bi bi-calendar3" style="color:var(--hq-text-3)"></i> <span id="hq-date-text">—</span></span>
+        <span class="hq-conn-badge" id="hq-conn-badge">
+            <span class="hq-conn-dot2"></span>
+            <span id="hq-conn-text">Bağlanıyor...</span>
+        </span>
+    </div>
+
+    <div class="hq-body">
+
+        <!-- ROW 1 -->
+        <div class="hq-row1">
+
+            <!-- SOL: Aktif hasta -->
+            <div class="hq-card">
+                <div class="hq-card-head">
+                    <div class="hq-ched-icon blue"><i class="bi bi-megaphone-fill"></i></div>
+                    <span class="hq-card-label">Şu An Çağrılan Hasta</span>
+                    <span style="margin-left:auto;font-size:10px;color:var(--hq-text-3)" id="hq-call-time-badge">—</span>
+                </div>
+
+                <div class="hq-cur-body">
+                    <div class="hq-num-box">
+                        <div class="hq-num-label">Sıra No</div>
+                        <div class="hq-num-val" id="currentQueueNumber">042</div>
+                        <div class="hq-num-time" id="hq-call-time">09:14</div>
+                    </div>
+                    <div class="hq-cur-info">
+                        <div class="hq-cur-name" id="currentPatientName">Ayşe Fatma Kaya</div>
+                        <div class="hq-cur-meta">
+                            <div class="hq-meta-row"><i class="bi bi-person-vcard"></i><span>Kardiyoloji Polikliniği</span></div>
+                            <div class="hq-meta-row"><i class="bi bi-clock"></i><span>Bekleme süresi: <strong>~8 dk</strong></span></div>
+                        </div>
+                        <div class="hq-room-badge" id="currentRoomNumber">
+                            <i class="bi bi-door-open"></i>
+                            Lütfen <strong style="margin:0 3px">3 Numaralı Muayene Odası</strong>'na geçiniz
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hq-cur-prev">
+                    <i class="bi bi-arrow-left-short" style="font-size:13px"></i>
+                    Önceki: <strong>No 039</strong>
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px">Mehmet Ali Demir</span>
+                    <span style="margin-left:auto">08:58</span>
+                </div>
+            </div>
+
+            <!-- SAĞ: İstatistikler -->
+            <div class="hq-stats-col">
+                <div class="hq-stat waiting">
+                    <div class="hq-stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                    <div>
+                        <div class="hq-stat-num" id="waitingCount">14</div>
+                        <div class="hq-stat-lbl">Bekleyen Hasta</div>
+                    </div>
+                </div>
+                <div class="hq-stat called">
+                    <div class="hq-stat-icon"><i class="bi bi-megaphone"></i></div>
+                    <div>
+                        <div class="hq-stat-num" id="calledCount">7</div>
+                        <div class="hq-stat-lbl">Çağrılan Hasta</div>
+                    </div>
+                </div>
+                <div class="hq-stat done">
+                    <div class="hq-stat-icon"><i class="bi bi-check2-circle"></i></div>
+                    <div>
+                        <div class="hq-stat-num" id="completedCount">21</div>
+                        <div class="hq-stat-lbl">Tamamlanan</div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.hq-row1 -->
+
+        <!-- ROW 2: Bekleme tablosu -->
+        <div class="hq-card">
+            <div class="hq-card-head">
+                <div class="hq-ched-icon amber"><i class="bi bi-list-ol"></i></div>
+                <span class="hq-card-label">Bekleyen Hastalar</span>
+                <span style="margin-left:auto;font-size:10.5px;color:var(--hq-text-3)">
+                    Bugün · <strong style="color:var(--hq-text-2)" id="hq-row-count">10</strong> kayıt
+                </span>
+            </div>
+
+            <div class="hq-tbl-wrap">
+                <table class="hq-tbl" id="waitingPatientTable">
+                    <colgroup>
+                        <col class="col-num">
+                        <col class="col-name">
+                        <col class="col-branch">
+                        <col class="col-status">
+                        <col class="col-time">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Sıra No</th>
+                            <th>Hasta Adı</th>
+                            <th>Branş</th>
+                            <th>Durum</th>
+                            <th>Saat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="hq-active-row">
+                            <td><span class="hq-ticket active">No 042</span></td>
+                            <td title="Ayşe Fatma Kaya">Ayşe Fatma Kaya</td>
+                            <td title="Kardiyoloji">Kardiyoloji</td>
+                            <td><span class="hq-pill called">Çağrıldı</span></td>
+                            <td>09:14</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 043</span></td>
+                            <td title="Mustafa Çelik">Mustafa Çelik</td>
+                            <td title="Dahiliye">Dahiliye</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:20</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 044</span></td>
+                            <td title="Zeynep Arslan">Zeynep Arslan</td>
+                            <td title="Nöroloji">Nöroloji</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:25</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 045</span></td>
+                            <td title="Hasan Yıldız">Hasan Yıldız</td>
+                            <td title="Ortopedi">Ortopedi</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:31</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 046</span></td>
+                            <td title="Fatma Nur Öztürk">Fatma Nur Öztürk</td>
+                            <td title="Kardiyoloji">Kardiyoloji</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:38</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 047</span></td>
+                            <td title="İbrahim Koç">İbrahim Koç</td>
+                            <td title="Dahiliye">Dahiliye</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:42</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 048</span></td>
+                            <td title="Elif Şahin">Elif Şahin</td>
+                            <td title="Dermatoloji">Dermatoloji</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:47</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 049</span></td>
+                            <td title="Ahmet Berk Demir">Ahmet Berk Demir</td>
+                            <td title="Nöroloji">Nöroloji</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:51</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 050</span></td>
+                            <td title="Seda Kara">Seda Kara</td>
+                            <td title="Ortopedi">Ortopedi</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>09:55</td>
+                        </tr>
+                        <tr>
+                            <td><span class="hq-ticket">No 051</span></td>
+                            <td title="Cem Yılmaz">Cem Yılmaz</td>
+                            <td title="Dahiliye">Dahiliye</td>
+                            <td><span class="hq-pill waiting">Bekliyor</span></td>
+                            <td>10:02</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="hq-tbl-foot">
+                <span>Maks. 8 satır · kaydırarak daha fazlasına ulaşın</span>
+                <span>
+                    <strong id="hq-waiting-inline">14</strong> bekleyen ·
+                    <strong id="hq-done-inline">21</strong> tamamlanan
+                </span>
+            </div>
+        </div>
+
+    </div><!-- /.hq-body -->
+</div><!-- /.hq-page -->
+
+<!-- Saat/Tarih -->
+<script>
+(function(){
+    const ce=document.getElementById('hq-clock'),de=document.getElementById('hq-date-text');
+    const MO=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    const DY=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    function p(n){return String(n).padStart(2,'0');}
+    function tick(){
+        const n=new Date();
+        if(ce)ce.textContent=p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());
+        if(de)de.textContent=DY[n.getDay()]+', '+n.getDate()+' '+MO[n.getMonth()]+' '+n.getFullYear();
+    }
+    tick(); setInterval(tick,1000);
+})();
+</script>
+
+<!--
+    ════════════════════════════════════════
+    SignalR Hazırlık — Bağlanacak Element IDleri
+    ════════════════════════════════════════
+    currentQueueNumber   → sıra numarası (div)
+    currentPatientName   → hasta adı (div)
+    currentRoomNumber    → oda bilgisi (div)
+    waitingCount         → bekleyen sayacı (div)
+    calledCount          → çağrılan sayacı (div)
+    completedCount       → tamamlanan sayacı (div)
+    waitingPatientTable  → tbody tablosu (table)
+    hq-conn-badge        → bağlantı rozeti (span)
+    hq-conn-text         → bağlantı metni (span)
+
+    SignalR kodu buraya eklenecek:
+    ─────────────────────────────
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/queue")
+        .build();
+
+    connection.on("PatientCalled", function(queueNumber, patientName) {
+        document.getElementById("currentQueueNumber").textContent = queueNumber;
+        document.getElementById("currentPatientName").textContent = patientName;
+    });
+
+    connection.start();
+    ════════════════════════════════════════
+-->
+
+</main>

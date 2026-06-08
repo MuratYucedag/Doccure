@@ -1,0 +1,85 @@
+public Guid PatientId { get; set; }
+
+    // Identity iliþkisi
+    public string AppUserId { get; set; }
+
+    // Temel Bilgiler
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+
+    public string TcKimlikNo { get; set; }
+
+    public DateTime BirthDate { get; set; }
+
+    public string Gender { get; set; }
+
+    // Ýletiþim
+    public string PhoneNumber { get; set; }
+
+    public string Email { get; set; }
+
+    public string Address { get; set; }
+
+    // Saðlýk Bilgileri
+    public string BloodType { get; set; }
+
+    public string InsuranceType { get; set; }
+
+    public string CurrentDiagnosis { get; set; }
+
+    // Durum
+    public bool IsActiveTreatment { get; set; }
+
+    public bool IsCritical { get; set; }
+
+    public DateTime? LastVisitDate { get; set; }
+
+    // Audit
+    public DateTime CreatedDate { get; set; }
+
+    public bool Status { get; set; }
+
+    // Navigation
+    public ICollection<Appointment> Appointments { get; set; }
+
+    public ICollection<Prescription> Prescriptions { get; set; }
+
+    public ICollection<PatientVisit> PatientVisits { get; set; }
+
+    ----------------------------------
+
+ public Guid PatientId { get; set; }
+
+        // Identity iliþkisi
+        public string AppUserId { get; set; }
+
+        public string TcKimlikNo { get; set; }
+
+        // Saðlýk Bilgileri
+        public string InsuranceType { get; set; }
+
+        public string CurrentDiagnosis { get; set; }
+
+        // Durum
+        public bool IsActiveTreatment { get; set; }
+
+        public bool IsCritical { get; set; }
+
+        public DateTime? LastVisitDate { get; set; }
+
+        // Audit
+        public DateTime CreatedDate { get; set; }
+
+        public bool Status { get; set; }
+
+        // Navigation
+        public ICollection<Appointment> Appointments { get; set; }
+
+        public ICollection<Prescription> Prescriptions { get; set; }
+
+        public ICollection<PatientVisit> PatientVisits { get; set; }
+
+     
+    ---------------------------------------------------------
+
+

@@ -10,5 +10,6 @@ namespace Doccure.AppointmentService.Services.AppointmentServices
         Task CreateAsync(CreateAppointmentDto dto);
         Task UpdateAsync(UpdateAppointmentDto dto);
         Task DeleteAsync(int id);
+        Task<LastAppointmentDto> GetLastAppointmentByPatientIdAsync(string patientId);
     }
 }

@@ -1,0 +1,37 @@
+﻿namespace Doccure.WebUI.Dtos.PatientDtos
+{
+    public class ResultPatientDto
+    { // Patient Service
+        public int PatientId { get; set; }
+        public string AppUserId { get; set; }
+        public string TcKimlikNo { get; set; }
+        public string InsuranceType { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public bool Status { get; set; }
+
+        // Identity Service
+        public string Name { get; set; }
+        public string Surname { get; set; }
+        public string FullName { get; set; }
+        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
+        public string Gender { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public string BloodGroup { get; set; }
+        public string ImageUrl { get; set; }
+        public string City { get; set; }
+        public string Address { get; set; }
+
+        // Appointment Service
+        public DateTime? LastVisitDate { get; set; }
+        public string CurrentDiagnosis { get; set; }
+
+        // Doctor Service
+        public string DoctorId { get; set; }
+        public string DoctorName { get; set; }
+
+        // Branch Service
+        public string BranchId { get; set; }
+        public string BranchName { get; set; }
+    }
+}

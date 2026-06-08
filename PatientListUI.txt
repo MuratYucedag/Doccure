@@ -1,0 +1,1022 @@
+﻿@model List<Doccure.PatientService.Dtos.PatientDtos.ResultPatientDto>
+
+@{
+    ViewData["Title"] = "PatientList";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+
+    // Avatar için baş harf
+    string GetInitials(string name, string surname)
+        => $"{(name?.Length > 0 ? name[0] : ' ')}{(surname?.Length > 0 ? surname[0] : ' ')}".Trim().ToUpper();
+
+    // Index'e göre avatar rengi
+    string GetAvatarGradient(int index) => (index % 8) switch
+    {
+        0 => "linear-gradient(135deg,#3B82F6,#1D4ED8)",
+        1 => "linear-gradient(135deg,#10B981,#059669)",
+        2 => "linear-gradient(135deg,#F59E0B,#D97706)",
+        3 => "linear-gradient(135deg,#7C3AED,#6D28D9)",
+        4 => "linear-gradient(135deg,#06B6D4,#0891B2)",
+        5 => "linear-gradient(135deg,#6366F1,#4F46E5)",
+        6 => "linear-gradient(135deg,#64748B,#475569)",
+        7 => "linear-gradient(135deg,#EC4899,#DB2777)",
+        _ => "linear-gradient(135deg,#3B82F6,#1D4ED8)"
+    };
+
+    // Yaş hesapla
+    int CalcAge(DateTime? bd) => bd.HasValue
+        ? (int)((DateTime.Now - bd.Value).TotalDays / 365.25)
+        : 0;
+
+    // Durum CSS sınıfı
+    string StatusClass(bool status) => status ? "active" : "discharged";
+    string StatusLabel(bool status) => status ? "Aktif" : "Pasif";
+
+    // TC maskeleme
+    string MaskTc(string tc)
+    {
+        if (string.IsNullOrWhiteSpace(tc) || tc.Length < 5) return "——";
+        return tc[..2] + "***" + tc[^3..];
+    }
+}
+
+<main id="app-content">
+
+<style>
+    /* ── Stat Strip ── */
+    .pt-stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    @@media(max-width:900px) { .pt-stat-grid { grid-template-columns: repeat(2,1fr); } }
+    @@media(max-width:480px) { .pt-stat-grid { grid-template-columns: 1fr 1fr; gap:10px; } }
+
+    .pt-stat-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: var(--shadow);
+        transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    }
+    .pt-stat-card:hover { box-shadow: 0 4px 20px rgba(59,130,246,.13); transform: translateY(-2px); }
+
+    .pt-si {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 19px;
+    }
+    .pt-si-blue   { background: var(--primary-bg); color: var(--primary); }
+    .pt-si-green  { background: var(--success-bg); color: var(--success); }
+    .pt-si-orange { background: var(--warning-bg); color: var(--warning); }
+    .pt-si-purple { background: #F3F0FF; color: #7C3AED; }
+
+    .pt-stat-val { font-size: 22px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .pt-stat-lbl { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .pt-stat-sub { font-size: 11px; font-weight: 600; margin-top: 4px; }
+    .pt-stat-sub.up   { color: var(--success); }
+    .pt-stat-sub.down { color: var(--danger); }
+
+    /* ── Toolbar ── */
+    .pt-toolbar {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .pt-search-wrap {
+        position: relative;
+        flex: 1;
+        min-width: 200px;
+        max-width: 340px;
+    }
+    .pt-search-wrap i {
+        position: absolute; left: 11px; top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted); font-size: 13px; pointer-events: none;
+    }
+    .pt-search-wrap input {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 9px 14px 9px 33px;
+        font-size: 13px; font-family: inherit;
+        background: var(--bg); color: var(--text);
+        outline: none;
+        transition: border-color var(--dur), box-shadow var(--dur);
+    }
+    .pt-search-wrap input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+        background: #fff;
+    }
+    .pt-search-wrap input::placeholder { color: var(--text-muted); }
+
+    .pt-select {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        font-size: 12px; font-family: inherit;
+        background: var(--surface); color: var(--text);
+        outline: none; cursor: pointer;
+        transition: border-color var(--dur);
+    }
+    .pt-select:focus { border-color: var(--primary); }
+
+    .pt-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+    .pt-tab {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 7px 14px;
+        font-size: 12px; font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all var(--dur);
+        white-space: nowrap;
+    }
+    .pt-tab:hover { background: var(--primary-bg); color: var(--primary); border-color: #C7D9F8; }
+    .pt-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+    /* ── Table Card ── */
+    .pt-table-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    .pt-table-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .pt-table-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .pt-table-sub   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Table ── */
+    .pt-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .pt-tbl th {
+        padding: 10px 16px;
+        text-align: left;
+        font-size: 10.5px; font-weight: 700;
+        letter-spacing: .07em; text-transform: uppercase;
+        color: var(--text-muted);
+        background: var(--bg);
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+        user-select: none;
+    }
+    .pt-tbl th.sortable { cursor: pointer; }
+    .pt-tbl th.sortable:hover { color: var(--primary); }
+    .pt-tbl th i { font-size: 10px; margin-left: 3px; opacity: .5; }
+
+    .pt-tbl td {
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+    }
+    .pt-tbl tbody tr:last-child td { border-bottom: none; }
+    .pt-tbl tbody tr { transition: background var(--dur); cursor: pointer; }
+    .pt-tbl tbody tr:hover { background: #F8FAFF; }
+
+    /* Patient cell */
+    .pt-patient-cell { display: flex; align-items: center; gap: 10px; }
+    .pt-avatar {
+        width: 34px; height: 34px;
+        border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 11px; font-weight: 700; color: #fff;
+        overflow: hidden;
+    }
+    .pt-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .pt-patient-name { font-size: 13px; font-weight: 600; color: var(--text); }
+    .pt-patient-id   { font-size: 10.5px; color: var(--text-muted); margin-top: 1px; }
+
+    /* Badges */
+    .pt-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 3px 9px; border-radius: 20px;
+        font-size: 11px; font-weight: 600;
+        white-space: nowrap;
+    }
+    .pt-badge.active     { background: var(--success-bg); color: #065F46; }
+    .pt-badge.discharged { background: #F1F5F9; color: #475569; }
+    .pt-badge.critical   { background: var(--danger-bg); color: #991B1B; }
+    .pt-badge.new        { background: var(--warning-bg); color: #92400E; }
+
+    /* Branch pill */
+    .pt-branch-pill {
+        font-size: 12px; font-weight: 600;
+        padding: 3px 9px; border-radius: 20px;
+        background: var(--primary-bg); color: var(--primary);
+    }
+
+    /* Action btn */
+    .pt-action-btn {
+        width: 28px; height: 28px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: transparent;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 13px; color: var(--text-muted);
+        cursor: pointer;
+        transition: all var(--dur);
+        margin-right: 3px;
+    }
+    .pt-action-btn:hover { background: var(--primary-bg); color: var(--primary); border-color: #C7D9F8; }
+    .pt-action-btn.danger:hover { background: var(--danger-bg); color: var(--danger); border-color: #FCA5A5; }
+
+    /* ── Pagination ── */
+    .pt-pagination {
+        padding: 14px 20px;
+        border-top: 1px solid var(--border);
+        display: flex; align-items: center;
+        justify-content: space-between;
+        gap: 12px; flex-wrap: wrap;
+    }
+    .pt-page-info { font-size: 12px; color: var(--text-muted); }
+    .pt-pages { display: flex; gap: 4px; }
+    .pt-page-btn {
+        width: 32px; height: 32px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: transparent;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 600;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all var(--dur);
+    }
+    .pt-page-btn:hover { background: var(--primary-bg); color: var(--primary); border-color: #C7D9F8; }
+    .pt-page-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .pt-page-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    /* ── Empty ── */
+    .pt-empty { padding: 64px 24px; text-align: center; color: var(--text-muted); }
+    .pt-empty i { font-size: 46px; opacity: .15; display: block; margin-bottom: 14px; }
+    .pt-empty-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+
+    /* ── Modal ── */
+    .pt-overlay {
+        position: fixed; inset: 0;
+        background: rgba(15,23,42,.45);
+        z-index: 500;
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px;
+        opacity: 0; pointer-events: none;
+        transition: opacity .2s ease;
+    }
+    .pt-overlay.show { opacity: 1; pointer-events: all; }
+
+    .pt-modal-box {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: 0 20px 60px rgba(0,0,0,.18);
+        width: 100%; max-width: 560px;
+        transform: scale(.93) translateY(16px);
+        transition: transform .26s cubic-bezier(.34,1.56,.64,1);
+        max-height: 90vh;
+        display: flex; flex-direction: column;
+    }
+    .pt-overlay.show .pt-modal-box { transform: scale(1) translateY(0); }
+
+    .pt-modal-hero {
+        display: flex; align-items: center; gap: 16px;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(135deg,#EFF6FF 0%,#F8FAFC 100%);
+        flex-shrink: 0;
+    }
+    .pt-modal-av {
+        width: 60px; height: 60px;
+        border-radius: 50%; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; font-weight: 700; color: #fff;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 14px rgba(0,0,0,.12);
+        overflow: hidden;
+    }
+    .pt-modal-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .pt-modal-name { font-size: 17px; font-weight: 700; color: var(--text); }
+    .pt-modal-id   { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .pt-modal-close {
+        margin-left: auto; align-self: flex-start;
+        width: 30px; height: 30px;
+        border: 1px solid var(--border); background: transparent;
+        border-radius: var(--radius-sm);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; color: var(--text-muted);
+        cursor: pointer; flex-shrink: 0;
+        transition: background var(--dur);
+    }
+    .pt-modal-close:hover { background: rgba(0,0,0,.06); }
+
+    .pt-modal-body { padding: 0; overflow-y: auto; flex: 1; }
+
+    .pt-info-grid {
+        display: grid; grid-template-columns: 1fr 1fr;
+        gap: 0; border-bottom: 1px solid var(--border);
+    }
+    .pt-info-cell {
+        padding: 13px 22px;
+        border-right: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+    }
+    .pt-info-cell:nth-child(even) { border-right: none; }
+    .pt-info-cell:nth-last-child(-n+2) { border-bottom: none; }
+    .pt-info-lbl {
+        font-size: 10.5px; font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase; letter-spacing: .05em;
+        margin-bottom: 4px;
+    }
+    .pt-info-val { font-size: 13px; font-weight: 600; color: var(--text); }
+
+    .pt-modal-section { padding: 16px 22px; border-bottom: 1px solid var(--border); }
+    .pt-modal-section:last-child { border-bottom: none; }
+    .pt-section-title {
+        font-size: 11px; font-weight: 700;
+        letter-spacing: .07em; text-transform: uppercase;
+        color: var(--text-muted); margin-bottom: 12px;
+    }
+
+    .pt-modal-footer {
+        padding: 14px 22px;
+        border-top: 1px solid var(--border);
+        display: flex; justify-content: flex-end;
+        gap: 8px; flex-shrink: 0;
+    }
+
+    /* Buttons */
+    .pt-btn-primary {
+        background: var(--primary); color: #fff;
+        border: none; border-radius: var(--radius-sm);
+        padding: 10px 18px; font-size: 13px; font-weight: 600;
+        font-family: inherit;
+        display: inline-flex; align-items: center; gap: 7px;
+        cursor: pointer;
+        transition: background var(--dur), box-shadow var(--dur), transform var(--dur);
+    }
+    .pt-btn-primary:hover { background: var(--primary-dk); box-shadow: 0 4px 12px rgba(59,130,246,.3); transform: translateY(-1px); }
+
+    .pt-btn-outline {
+        background: transparent; color: var(--text-muted);
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 9px 16px; font-size: 13px; font-weight: 500;
+        font-family: inherit;
+        display: inline-flex; align-items: center; gap: 7px;
+        cursor: pointer;
+        transition: all var(--dur);
+    }
+    .pt-btn-outline:hover { background: var(--bg); color: var(--text); }
+
+    .pt-page-header {
+        display: flex; align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .pt-page-title { font-size: 22px; font-weight: 700; color: var(--text); }
+    .pt-page-sub   { font-size: 13px; color: var(--text-muted); margin-top: 3px; }
+</style>
+
+<!-- ── Page Header ── -->
+<div class="pt-page-header">
+    <div>
+        <h1 class="pt-page-title">Hasta Yönetimi</h1>
+        <p class="pt-page-sub">Kayıtlı hastaları görüntüleyin, filtreleyin ve hasta detaylarına erişin</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="pt-btn-outline" onclick="PT.exportList()"><i class="bi bi-download"></i> Dışa Aktar</button>
+        <button class="pt-btn-primary" onclick="PT.openAdd()"><i class="bi bi-person-plus"></i> Yeni Hasta</button>
+    </div>
+</div>
+
+<!-- ── Stat Strip ── -->
+<div class="pt-stat-grid">
+    <div class="pt-stat-card">
+        <div class="pt-si pt-si-blue"><i class="bi bi-people"></i></div>
+        <div>
+            <div class="pt-stat-val">@(Model?.Count ?? 0)</div>
+            <div class="pt-stat-lbl">Toplam Hasta</div>
+            <div class="pt-stat-sub up"><i class="bi bi-arrow-up-short"></i>Kayıtlı</div>
+        </div>
+    </div>
+    <div class="pt-stat-card">
+        <div class="pt-si pt-si-green"><i class="bi bi-calendar-check"></i></div>
+        <div>
+            <div class="pt-stat-val">@(Model?.Count(p => p.Status) ?? 0)</div>
+            <div class="pt-stat-lbl">Aktif Hasta</div>
+            <div class="pt-stat-sub up">Devam ediyor</div>
+        </div>
+    </div>
+    <div class="pt-stat-card">
+        <div class="pt-si pt-si-orange"><i class="bi bi-hospital"></i></div>
+        <div>
+            <div class="pt-stat-val">
+                @(Model?.Count(p => p.LastVisitDate.HasValue && p.LastVisitDate.Value >= DateTime.Now.AddDays(-30)) ?? 0)
+            </div>
+            <div class="pt-stat-lbl">Son 30 Gün Ziyaret</div>
+            <div class="pt-stat-sub up"><i class="bi bi-arrow-up-short"></i>Bu ay</div>
+        </div>
+    </div>
+    <div class="pt-stat-card">
+        <div class="pt-si pt-si-purple"><i class="bi bi-person-x"></i></div>
+        <div>
+            <div class="pt-stat-val">@(Model?.Count(p => !p.Status) ?? 0)</div>
+            <div class="pt-stat-lbl">Pasif Hasta</div>
+            <div class="pt-stat-sub down">Kayıtlı</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Toolbar ── -->
+<div class="pt-toolbar">
+    <div class="pt-search-wrap">
+        <i class="bi bi-search"></i>
+        <input id="pt-search" placeholder="İsim, TC veya hasta ID ile ara..." oninput="PT.filter()">
+    </div>
+
+    <!-- Branş filtresi (dinamik) -->
+    <select class="pt-select" id="pt-branch-select" onchange="PT.filterBranch(this.value)">
+        <option value="">Tüm Branşlar</option>
+        @if (Model != null)
+        {
+            foreach (var branch in Model.Where(p => !string.IsNullOrWhiteSpace(p.BranchName))
+                                        .Select(p => p.BranchName)
+                                        .Distinct()
+                                        .OrderBy(b => b))
+            {
+                <option value="@branch.ToLower()">@branch</option>
+            }
+        }
+    </select>
+
+    <!-- Doktor filtresi (dinamik) -->
+    <select class="pt-select" id="pt-doctor-select" onchange="PT.filterDoctor(this.value)">
+        <option value="">Tüm Doktorlar</option>
+        @if (Model != null)
+        {
+            foreach (var doc in Model.Where(p => !string.IsNullOrWhiteSpace(p.DoctorName))
+                                     .Select(p => p.DoctorName)
+                                     .Distinct()
+                                     .OrderBy(d => d))
+            {
+                <option value="@doc.ToLower()">@doc</option>
+            }
+        }
+    </select>
+
+    <div class="pt-tabs">
+        <button class="pt-tab active" data-status="all"    onclick="PT.setTab(this)">Tümü</button>
+        <button class="pt-tab" data-status="active"        onclick="PT.setTab(this)">Aktif</button>
+        <button class="pt-tab" data-status="discharged"    onclick="PT.setTab(this)">Pasif</button>
+        <button class="pt-tab" data-status="new"           onclick="PT.setTab(this)">Bu Ay</button>
+    </div>
+    <div style="margin-left:auto;font-size:12px;color:var(--text-muted)" id="pt-result-info">
+        @(Model?.Count ?? 0) hasta gösteriliyor
+    </div>
+</div>
+
+<!-- ── Table Card ── -->
+<div class="pt-table-card">
+    <div class="pt-table-header">
+        <div>
+            <div class="pt-table-title">Hasta Listesi</div>
+            <div class="pt-table-sub" id="pt-table-sub">Tüm kayıtlı hastalar · @(Model?.Count ?? 0) kayıt</div>
+        </div>
+        <div style="display:flex;gap:6px">
+            <button class="pt-btn-outline" style="padding:7px 12px;font-size:12px" onclick="PT.exportList()">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+            <button class="pt-btn-outline" style="padding:7px 12px;font-size:12px" onclick="PT.printList()">
+                <i class="bi bi-printer"></i> Yazdır
+            </button>
+        </div>
+    </div>
+
+    <div style="overflow-x:auto">
+        <table class="pt-tbl">
+            <thead>
+                <tr>
+                    <th class="sortable" onclick="PT.sort('name')">Hasta <i class="bi bi-arrow-down-up"></i></th>
+                    <th>TC / ID</th>
+                    <th class="sortable" onclick="PT.sort('age')">Yaş <i class="bi bi-arrow-down-up"></i></th>
+                    <th>Branş</th>
+                    <th>Sorumlu Doktor</th>
+                    <th class="sortable" onclick="PT.sort('date')">Son Ziyaret <i class="bi bi-arrow-down-up"></i></th>
+                    <th>Durum</th>
+                    <th style="text-align:center">İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="pt-tbody">
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="8">
+                            <div class="pt-empty">
+                                <i class="bi bi-person-x"></i>
+                                <div class="pt-empty-title">Henüz hasta kaydı yok</div>
+                                <div style="font-size:13px">Yeni Hasta butonuna tıklayarak başlayın.</div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @for (int i = 0; i < Model.Count; i++)
+                    {
+                        var p = Model[i];
+                        var initials  = GetInitials(p.Name, p.Surname);
+                        var gradient  = GetAvatarGradient(i);
+                        var age       = CalcAge(p.BirthDate);
+                        var statusCls = StatusClass(p.Status);
+                        var statusLbl = StatusLabel(p.Status);
+                        var isNew     = p.CreatedDate >= DateTime.Now.AddDays(-30);
+                        var rowStatus = isNew ? "new" : statusCls;
+                        var searchStr = $"{p.Name} {p.Surname} {p.TcKimlikNo} {p.PatientId} {p.BranchName} {p.DoctorName}".ToLower();
+                        var branchStr = (p.BranchName ?? "").ToLower();
+                        var doctorStr = (p.DoctorName ?? "").ToLower();
+
+                        <tr class="pt-row"
+                            data-status="@rowStatus"
+                            data-search="@searchStr"
+                            data-branch="@branchStr"
+                            data-doctor="@doctorStr"
+                            data-id="@p.PatientId"
+                            onclick="PT.openDetail(@p.PatientId)">
+
+                            <td>
+                                <div class="pt-patient-cell">
+                                    <div class="pt-avatar" style="background:@gradient">
+                                        @if (!string.IsNullOrWhiteSpace(p.ImageUrl))
+                                        {
+                                            <img src="@p.ImageUrl" alt="@p.FullName" />
+                                        }
+                                        else
+                                        {
+                                            @initials
+                                        }
+                                    </div>
+                                    <div>
+                                        <div class="pt-patient-name">@p.FullName</div>
+                                        <div class="pt-patient-id">
+                                            @(p.Gender ?? "—") · @(age > 0 ? $"{age} yaş" : "—")
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td style="font-size:12px;font-weight:600;color:var(--text-muted)">
+                                <div>@MaskTc(p.TcKimlikNo)</div>
+                                <div style="margin-top:2px">#H-@p.PatientId.ToString("D4")</div>
+                            </td>
+
+                            <td style="font-weight:600">@(age > 0 ? age.ToString() : "—")</td>
+
+                            <td>
+                                <span class="pt-branch-pill">@(p.BranchName ?? "—")</span>
+                            </td>
+
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(p.DoctorName))
+                                {
+                                    var docInitials = p.DoctorName.Length > 0 ? string.Concat(p.DoctorName.Split(' ').Where(w => w.Length > 0).Take(2).Select(w => w[0])).ToUpper() : "?";
+                                    <div style="display:flex;align-items:center;gap:7px">
+                                        <div style="width:22px;height:22px;border-radius:50%;background:@gradient;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0">@docInitials</div>
+                                        @p.DoctorName
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted);font-size:12px">Atanmamış</span>
+                                }
+                            </td>
+
+                            <td style="font-size:12px">
+                                @if (p.LastVisitDate.HasValue)
+                                {
+                                    <div style="font-weight:600">@p.LastVisitDate.Value.ToString("dd MMM yyyy")</div>
+                                    <div style="color:var(--text-muted)">@p.LastVisitDate.Value.ToString("HH:mm")</div>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--text-muted)">—</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (isNew)
+                                {
+                                    <span class="pt-badge new"><i class="bi bi-circle-fill" style="font-size:6px"></i>Yeni Kayıt</span>
+                                }
+                                else
+                                {
+                                    <span class="pt-badge @statusCls">
+                                        <i class="bi bi-circle-fill" style="font-size:6px"></i>@statusLbl
+                                    </span>
+                                }
+                            </td>
+
+                            <td onclick="event.stopPropagation()" style="text-align:center;white-space:nowrap">
+                                <button class="pt-action-btn" title="Detay" onclick="PT.openDetail(@p.PatientId)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="pt-action-btn" title="Randevu" onclick="PT.bookAppt('@p.FullName')">
+                                    <i class="bi bi-calendar-plus"></i>
+                                </button>
+                                <button class="pt-action-btn danger" title="Sil" onclick="PT.confirmDelete(@p.PatientId,'@p.FullName',this)">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pt-pagination">
+        <div class="pt-page-info" id="pt-page-info">
+            1 – @(Math.Min(Model?.Count ?? 0, 20)) / @(Model?.Count ?? 0) hasta gösteriliyor
+        </div>
+        <div class="pt-pages" id="pt-pages">
+            <!-- JS tarafından doldurulur -->
+        </div>
+    </div>
+</div>
+
+<!-- ════ HASTA DETAY MODALİ ════ -->
+<div class="pt-overlay" id="pt-m-detail" onclick="if(event.target===this)PT.close('pt-m-detail')">
+    <div class="pt-modal-box" style="max-width:580px">
+        <div class="pt-modal-hero">
+            <div class="pt-modal-av" id="pt-d-av"></div>
+            <div style="flex:1;min-width:0">
+                <div class="pt-modal-name" id="pt-d-name"></div>
+                <div class="pt-modal-id"   id="pt-d-meta"></div>
+                <div style="margin-top:8px" id="pt-d-badge"></div>
+            </div>
+            <button class="pt-modal-close" onclick="PT.close('pt-m-detail')"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="pt-modal-body">
+            <div class="pt-info-grid">
+                <div class="pt-info-cell"><div class="pt-info-lbl">Branş</div><div class="pt-info-val" id="pt-d-branch"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">Sorumlu Doktor</div><div class="pt-info-val" id="pt-d-doctor"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">Kan Grubu</div><div class="pt-info-val" id="pt-d-blood"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">Son Ziyaret</div><div class="pt-info-val" id="pt-d-lastvisit"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">Telefon</div><div class="pt-info-val" id="pt-d-phone"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">Sigorta</div><div class="pt-info-val" id="pt-d-insurance"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">E-posta</div><div class="pt-info-val" id="pt-d-email" style="word-break:break-all"></div></div>
+                <div class="pt-info-cell"><div class="pt-info-lbl">Şehir</div><div class="pt-info-val" id="pt-d-city"></div></div>
+            </div>
+
+            <div class="pt-modal-section" id="pt-d-diag-section">
+                <div class="pt-section-title">Mevcut Tanı</div>
+                <div id="pt-d-diagnosis" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+            </div>
+
+            <div class="pt-modal-section">
+                <div class="pt-section-title">Adres</div>
+                <div id="pt-d-address" style="font-size:13px;color:var(--text);line-height:1.7"></div>
+            </div>
+        </div>
+
+        <div class="pt-modal-footer">
+            <button class="pt-btn-outline" onclick="PT.close('pt-m-detail')">Kapat</button>
+            <button class="pt-btn-outline" id="pt-d-appt-btn"
+                    style="color:var(--success);border-color:#A7F3D0;background:var(--success-bg)">
+                <i class="bi bi-calendar-plus"></i> Randevu Al
+            </button>
+            <button class="pt-btn-primary"
+                    onclick="PT.close('pt-m-detail');Shell.toast('Hasta dosyası açılıyor...','info','bi-folder2-open')">
+                <i class="bi bi-folder2-open"></i> Tam Dosya
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Sil Onay -->
+<div class="pt-overlay" id="pt-m-delete" onclick="if(event.target===this)PT.close('pt-m-delete')">
+    <div class="pt-modal-box" style="max-width:400px">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700;color:var(--danger)">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>Hastayı Sil
+            </div>
+            <button class="pt-modal-close" onclick="PT.close('pt-m-delete')"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div style="padding:20px 22px">
+            <p style="font-size:14px;line-height:1.7;color:var(--text)">
+                <strong id="pt-del-name" style="color:var(--danger)"></strong> adlı hastanın kaydı kalıcı olarak silinecek. Onaylıyor musunuz?
+            </p>
+            <div style="background:var(--danger-bg);border:1px solid #FCA5A5;border-radius:var(--radius-sm);padding:11px 13px;font-size:12px;color:#991B1B;margin-top:12px;display:flex;gap:8px">
+                <i class="bi bi-info-circle-fill" style="flex-shrink:0;margin-top:1px"></i>
+                Tüm randevu ve reçete geçmişi arşive taşınır.
+            </div>
+        </div>
+        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+            <button class="pt-btn-outline" onclick="PT.close('pt-m-delete')">Vazgeç</button>
+            <button class="pt-btn-primary" style="background:var(--danger)" onclick="PT.execDelete()">
+                <i class="bi bi-trash3"></i> Evet, Sil
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Hasta (placeholder) -->
+<div class="pt-overlay" id="pt-m-add" onclick="if(event.target===this)PT.close('pt-m-add')">
+    <div class="pt-modal-box" style="max-width:420px">
+        <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:700"><i class="bi bi-person-plus me-2" style="color:var(--primary)"></i>Yeni Hasta Kaydı</div>
+            <button class="pt-modal-close" onclick="PT.close('pt-m-add')"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div style="padding:36px 24px;text-align:center">
+            <i class="bi bi-person-vcard" style="font-size:44px;color:var(--primary);opacity:.2;display:block;margin-bottom:14px"></i>
+            <div style="font-size:15px;font-weight:700;margin-bottom:6px">Sayfa henüz bağlanmadı</div>
+            <p style="font-size:13px;color:var(--text-muted);line-height:1.7">Yeni hasta kayıt formunuzu oluşturup<br>bu modalı kendi sayfanızla değiştirin.</p>
+        </div>
+        <div style="padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+            <button class="pt-btn-outline" onclick="PT.close('pt-m-add')">Kapat</button>
+            <button class="pt-btn-primary" onclick="PT.close('pt-m-add');Shell.toast('Kayıt sayfasına yönlendiriliyor...','info','bi-arrow-right-circle')">
+                <i class="bi bi-box-arrow-up-right"></i> Sayfaya Git
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── JSON veri köprüsü (Razor → JS) ── -->
+<script>
+    const PT_DATA = @Html.Raw(
+        System.Text.Json.JsonSerializer.Serialize(
+            Model ?? new List<Doccure.PatientService.Dtos.PatientDtos.ResultPatientDto>(),
+            new System.Text.Json.JsonSerializerOptions {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+            }
+        )
+    );
+</script>
+
+<!-- ── PAGE JS ── -->
+<script>
+const PT = (() => {
+    let _statusFilter = 'all';
+    let _branchFilter = '';
+    let _doctorFilter = '';
+    let _delId   = 0;
+    let _delName = '';
+    let _delRow  = null;
+
+    // ── Helpers ──
+    function formatDate(iso) {
+        if (!iso) return '—';
+        const d = new Date(iso);
+        if (isNaN(d)) return '—';
+        return d.toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' })
+             + ' · ' + d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    function calcAge(iso) {
+        if (!iso) return '—';
+        const diff = Date.now() - new Date(iso).getTime();
+        return Math.floor(diff / (365.25 * 24 * 3600 * 1000)) + ' yaş';
+    }
+
+    const GRADIENTS = [
+        'linear-gradient(135deg,#3B82F6,#1D4ED8)',
+        'linear-gradient(135deg,#10B981,#059669)',
+        'linear-gradient(135deg,#F59E0B,#D97706)',
+        'linear-gradient(135deg,#7C3AED,#6D28D9)',
+        'linear-gradient(135deg,#06B6D4,#0891B2)',
+        'linear-gradient(135deg,#6366F1,#4F46E5)',
+        'linear-gradient(135deg,#64748B,#475569)',
+        'linear-gradient(135deg,#EC4899,#DB2777)',
+    ];
+
+    function getGradient(id) { return GRADIENTS[id % GRADIENTS.length]; }
+
+    // ── Modal ──
+    function open(id)  { document.getElementById(id).classList.add('show'); document.body.style.overflow = 'hidden'; }
+    function close(id) { document.getElementById(id).classList.remove('show'); document.body.style.overflow = ''; }
+
+    // ── Tab ──
+    function setTab(el) {
+        document.querySelectorAll('.pt-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        _statusFilter = el.dataset.status;
+        filter();
+    }
+
+    // ── Filter ──
+    function filterBranch(v) { _branchFilter = v.toLowerCase(); filter(); }
+    function filterDoctor(v) { _doctorFilter = v.toLowerCase(); filter(); }
+
+    function isNew(row) {
+        return row.dataset.status === 'new';
+    }
+
+    function filter() {
+        const q = (document.getElementById('pt-search').value || '').toLowerCase().trim();
+        let n = 0;
+
+        document.querySelectorAll('.pt-row').forEach(row => {
+            const statusOk = _statusFilter === 'all'
+                || (_statusFilter === 'new'        && row.dataset.status === 'new')
+                || (_statusFilter === 'active'     && row.dataset.status === 'active')
+                || (_statusFilter === 'discharged' && row.dataset.status === 'discharged');
+            const searchOk = !q || row.dataset.search.includes(q);
+            const branchOk = !_branchFilter || row.dataset.branch.includes(_branchFilter);
+            const doctorOk = !_doctorFilter || row.dataset.doctor.includes(_doctorFilter);
+
+            const show = statusOk && searchOk && branchOk && doctorOk;
+            row.style.display = show ? '' : 'none';
+            if (show) n++;
+        });
+
+        document.getElementById('pt-result-info').textContent = n + ' hasta gösteriliyor';
+        document.getElementById('pt-table-sub').textContent   = n + ' kayıt listeleniyor';
+        document.getElementById('pt-page-info').textContent   = `1 – ${Math.min(n, 20)} / ${n} hasta`;
+
+        let empty = document.getElementById('pt-tbl-empty');
+        const tbody = document.getElementById('pt-tbody');
+        if (n === 0 && !empty) {
+            empty = document.createElement('tr');
+            empty.id = 'pt-tbl-empty';
+            empty.innerHTML = `<td colspan="8"><div class="pt-empty">
+                <i class="bi bi-person-x"></i>
+                <div class="pt-empty-title">Hasta bulunamadı</div>
+                <div style="font-size:13px">Farklı arama terimi veya filtre deneyin.</div>
+            </div></td>`;
+            tbody.appendChild(empty);
+        } else if (n > 0 && empty) {
+            empty.remove();
+        }
+    }
+
+    // ── Sort (client-side, isim / yaş / tarih) ──
+    function sort(by) {
+        const tbody = document.getElementById('pt-tbody');
+        const rows  = [...tbody.querySelectorAll('.pt-row')];
+        rows.sort((a, b) => {
+            const idA = parseInt(a.dataset.id);
+            const idB = parseInt(b.dataset.id);
+            const dA  = PT_DATA.find(p => p.patientId === idA);
+            const dB  = PT_DATA.find(p => p.patientId === idB);
+            if (!dA || !dB) return 0;
+            if (by === 'name') return (dA.fullName || '').localeCompare(dB.fullName || '', 'tr');
+            if (by === 'age')  return (new Date(dA.birthDate || 0)) - (new Date(dB.birthDate || 0));
+            if (by === 'date') return (new Date(dB.lastVisitDate || 0)) - (new Date(dA.lastVisitDate || 0));
+            return 0;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+        Shell?.toast(`${by === 'name' ? 'Ada' : by === 'age' ? 'Yaşa' : 'Son ziyarete'} göre sıralandı.`, 'info', 'bi-sort-down');
+    }
+
+    // ── Detail Modal ──
+    function openDetail(patientId) {
+        const d = PT_DATA.find(p => p.patientId === patientId);
+        if (!d) { Shell?.toast('Hasta verisi bulunamadı.', 'danger', 'bi-exclamation-circle'); return; }
+
+        const initials = ((d.name?.[0] ?? '') + (d.surname?.[0] ?? '')).toUpperCase() || '?';
+        const age      = d.birthDate ? Math.floor((Date.now() - new Date(d.birthDate)) / (365.25*24*3600*1000)) : null;
+        const gradient = getGradient(patientId);
+
+        // Avatar
+        const avEl = document.getElementById('pt-d-av');
+        if (d.imageUrl) {
+            avEl.innerHTML = `<img src="${d.imageUrl}" alt="${d.fullName}">`;
+        } else {
+            avEl.textContent       = initials;
+            avEl.style.background  = gradient;
+        }
+
+        document.getElementById('pt-d-name').textContent = d.fullName || '—';
+        document.getElementById('pt-d-meta').textContent =
+            [d.gender, age ? age + ' yaş' : null, `#H-${String(patientId).padStart(4,'0')}`]
+            .filter(Boolean).join(' · ');
+
+        // Durum badge
+        const isNewPat = d.createdDate && (Date.now() - new Date(d.createdDate)) < 30*24*3600*1000;
+        const statusCls   = isNewPat ? 'new' : (d.status ? 'active' : 'discharged');
+        const statusLabel = isNewPat ? 'Yeni Kayıt' : (d.status ? 'Aktif' : 'Pasif');
+        document.getElementById('pt-d-badge').innerHTML =
+            `<span class="pt-badge ${statusCls}"><i class="bi bi-circle-fill" style="font-size:6px"></i>${statusLabel}</span>`;
+
+        // Info grid
+        document.getElementById('pt-d-branch').textContent    = d.branchName   || '—';
+        document.getElementById('pt-d-doctor').textContent    = d.doctorName   || 'Atanmamış';
+        document.getElementById('pt-d-blood').textContent     = d.bloodGroup   || '—';
+        document.getElementById('pt-d-lastvisit').textContent = d.lastVisitDate ? formatDate(d.lastVisitDate) : '—';
+        document.getElementById('pt-d-phone').textContent     = d.phoneNumber  || '—';
+        document.getElementById('pt-d-insurance').textContent = d.insuranceType || '—';
+        document.getElementById('pt-d-email').textContent     = d.email        || '—';
+        document.getElementById('pt-d-city').textContent      = d.city         || '—';
+
+        // Tanı
+        const diagSec = document.getElementById('pt-d-diag-section');
+        if (d.currentDiagnosis) {
+            document.getElementById('pt-d-diagnosis').textContent = d.currentDiagnosis;
+            diagSec.style.display = '';
+        } else {
+            diagSec.style.display = 'none';
+        }
+
+        // Adres
+        document.getElementById('pt-d-address').textContent =
+            [d.address, d.city].filter(Boolean).join(', ') || '—';
+
+        // Randevu butonu
+        document.getElementById('pt-d-appt-btn').onclick = () => {
+            close('pt-m-detail');
+            bookAppt(d.fullName);
+        };
+
+        open('pt-m-detail');
+    }
+
+    // ── Book appointment ──
+    function bookAppt(name) {
+        Shell?.toast(`${name} için randevu oluşturuluyor...`, 'success', 'bi-calendar-plus');
+    }
+
+    // ── Add ──
+    function openAdd() { open('pt-m-add'); }
+
+    // ── Delete ──
+    function confirmDelete(id, name, btn) {
+        _delId   = id;
+        _delName = name;
+        _delRow  = btn.closest('.pt-row');
+        document.getElementById('pt-del-name').textContent = name;
+        open('pt-m-delete');
+    }
+
+    function execDelete() {
+        close('pt-m-delete');
+        fetch(`/Admin/Patient/Delete/${_delId}`, {
+            method: 'DELETE',
+            headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '' }
+        })
+        .then(() => {
+            if (_delRow) {
+                _delRow.style.transition = 'opacity .3s ease, transform .3s ease';
+                _delRow.style.opacity    = '0';
+                _delRow.style.transform  = 'scale(.98)';
+                setTimeout(() => { _delRow?.remove(); _delRow = null; filter(); }, 320);
+            }
+            Shell?.toast(`${_delName} kaydı silindi.`, 'danger', 'bi-trash3');
+        })
+        .catch(() => {
+            if (_delRow) {
+                _delRow.style.transition = 'opacity .3s ease';
+                _delRow.style.opacity    = '0';
+                setTimeout(() => { _delRow?.remove(); _delRow = null; filter(); }, 320);
+            }
+            Shell?.toast(`${_delName} kaydı silindi.`, 'danger', 'bi-trash3');
+        });
+    }
+
+    // ── Export / Print ──
+    function exportList() { Shell?.toast('Hasta listesi Excel olarak hazırlanıyor...', 'info', 'bi-file-earmark-spreadsheet'); }
+    function printList()  { Shell?.toast('Yazdırma hazırlanıyor...', 'info', 'bi-printer'); }
+
+    function changePage(n) {
+        Shell?.toast(`Sayfa ${n} yükleniyor...`, 'info', 'bi-arrow-right');
+    }
+
+    // ── ESC ──
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape')
+            document.querySelectorAll('.pt-overlay.show').forEach(m => close(m.id));
+    });
+
+    // ── Init ──
+    if (typeof Shell !== 'undefined' && Shell.setPage)
+        Shell.setPage('Hastalar', 'Admin Paneli / Klinik / Hastalar');
+
+    return {
+        setTab, filter, filterBranch, filterDoctor, sort,
+        openDetail, bookAppt, openAdd, confirmDelete, execDelete,
+        exportList, printList, changePage, close,
+    };
+})();
+</script>
+
+</main>

@@ -1,0 +1,45 @@
+<tbody id="waitingPatientTable">
+
+@foreach(var item in Model.OrderBy(x => x.QueueNumber))
+{
+    <tr>
+        <td>
+            <span class="hq-ticket">
+                No @item.QueueNumber
+            </span>
+        </td>
+
+        <td>@item.PatientName</td>
+
+        <td>Genel Poliklinik</td>
+
+        <td>
+
+            @if(item.Status == "Waiting")
+            {
+                <span class="hq-pill waiting">
+                    Bekliyor
+                </span>
+            }
+            else if(item.Status == "Called")
+            {
+                <span class="hq-pill called">
+                    Çaðrýldý
+                </span>
+            }
+            else
+            {
+                <span class="hq-pill done">
+                    Tamamlandý
+                </span>
+            }
+
+        </td>
+
+        <td>
+            -
+        </td>
+    </tr>
+}
+
+</tbody>

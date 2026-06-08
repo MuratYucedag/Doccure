@@ -53,5 +53,12 @@ namespace Doccure.DoctorService.Controllers
             await _doctorService.DeleteAsync(id);
             return Ok("Doctor deleted successfully");
         }
+
+        [HttpGet("{id}/summary")]
+        public async Task<IActionResult> GetDoctorNameAndSurnameById(string id)
+        {
+            var value = await _doctorService.GetDoctorByIdAsync(id);
+            return Ok(value);
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace Doccure.DoctorService.Services.DoctorServices
         Task CreateAsync(CreateDoctorDto dto);
         Task UpdateAsync(UpdateDoctorDto dto);
         Task DeleteAsync(string id);
+        Task<GetDoctorNameAndSurnameByIdDto> GetDoctorByIdAsync(string id);
     }
 }

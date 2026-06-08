@@ -1,0 +1,114 @@
+public class ResultPatientDto
+{
+    public int PatientId { get; set; }
+
+    // Patient Service
+    public string TcKimlikNo { get; set; }
+
+    public string InsuranceType { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public bool Status { get; set; }
+
+    // Identity Service
+    public string FullName { get; set; }
+
+    public string Name { get; set; }
+
+    public string Surname { get; set; }
+
+    public string ImageUrl { get; set; }
+
+    public string Address { get; set; }
+
+    public string City { get; set; }
+
+    public DateTime BirthDate { get; set; }
+
+    public int Age { get; set; }
+
+    public string Gender { get; set; }
+
+    public string BloodGroup { get; set; }
+
+    public string Email { get; set; }
+
+    public string PhoneNumber { get; set; }
+
+    // UI Ýçin
+    public string PatientCode { get; set; }
+
+    public string StatusText { get; set; }
+
+    public string StatusColor { get; set; }
+
+    public string AvatarText { get; set; }
+
+    // Doctor Service
+    public string DoctorName { get; set; }
+
+    public string DoctorAvatarText { get; set; }
+
+    // Branch Service
+    public string BranchName { get; set; }
+
+    public string BranchColor { get; set; }
+
+    // Appointment Service
+    public DateTime? LastVisitDate { get; set; }
+
+    public string LastVisitTime { get; set; }
+
+    // Medical / Examination
+    public string CurrentDiagnosis { get; set; }
+
+    public bool IsCritical { get; set; }
+
+    public bool IsActiveTreatment { get; set; }
+
+    // Prescription Service
+    public List<string> ActivePrescriptions { get; set; }
+}
+
+
+--------------------------------------------------
+
+
+public class ResultPatientDto
+{
+    public int PatientId { get; set; }
+
+    public string AppUserId { get; set; }
+
+    public string TcKimlikNo { get; set; }
+
+    public string InsuranceType { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public bool Status { get; set; }
+
+    // Identity Service
+    public string Name { get; set; }
+
+    public string Surname { get; set; }
+
+    public string FullName { get; set; }
+
+    public string Email { get; set; }
+
+    public string PhoneNumber { get; set; }
+
+    public string Gender { get; set; }
+
+    public DateTime BirthDate { get; set; }
+
+    public string BloodGroup { get; set; }
+
+    public string ImageUrl { get; set; }
+
+    public string City { get; set; }
+
+    public string Address { get; set; }
+}

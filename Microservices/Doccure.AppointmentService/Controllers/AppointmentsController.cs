@@ -51,5 +51,16 @@ namespace Doccure.AppointmentService.Controllers
             await _service.DeleteAsync(id);
             return Ok("Randevu başarıyla silindi");
         }
+
+        [HttpGet("patient/{patientId}/last")]
+        public async Task<IActionResult> GetLastAppointmentByPatientId(string patientId)
+        {
+            var value = await _service.GetLastAppointmentByPatientIdAsync(patientId);
+
+            if (value == null)
+                return NotFound();
+
+            return Ok(value);
+        }
     }
 }

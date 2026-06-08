@@ -1,0 +1,86 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+
+<script>
+
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("https://localhost:7012/queuehub")
+    .withAutomaticReconnect()
+    .build();
+
+window._queueConnection = connection;
+
+const connBadge = document.getElementById("hq-conn-badge");
+const connText = document.getElementById("hq-conn-text");
+
+async function startConnection() {
+
+    try {
+
+        await connection.start();
+
+        connBadge.classList.remove("disconnected");
+        connBadge.classList.add("connected");
+
+        connText.textContent = "Baðlandý";
+
+        console.log("SignalR Connected");
+
+    }
+    catch (err) {
+
+        console.error(err);
+
+        connBadge.classList.remove("connected");
+        connBadge.classList.add("disconnected");
+
+        connText.textContent = "Baðlantý Hatasý";
+
+        setTimeout(startConnection, 3000);
+    }
+}
+
+connection.on("PatientCalled", function (queueNumber, patientName) {
+
+    console.log("PatientCalled Event");
+
+    console.log(queueNumber);
+    console.log(patientName);
+
+    document.getElementById("currentQueueNumber")
+        .textContent = String(queueNumber).padStart(3, '0');
+
+    document.getElementById("currentPatientName")
+        .textContent = patientName;
+
+    const card = document.querySelector(".hq-num-box");
+
+    card.style.transform = "scale(1.08)";
+
+    setTimeout(() => {
+        card.style.transform = "scale(1)";
+    }, 400);
+
+});
+
+connection.onreconnecting(() => {
+
+    connBadge.classList.remove("connected");
+    connBadge.classList.add("disconnected");
+
+    connText.textContent = "Yeniden Baðlanýyor";
+});
+
+connection.onreconnected(() => {
+
+    connBadge.classList.remove("disconnected");
+    connBadge.classList.add("connected");
+
+    connText.textContent = "Baðlandý";
+});
+
+startConnection();
+
+</script>
+
+-----------------------------------
+

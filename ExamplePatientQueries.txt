@@ -1,0 +1,31 @@
+INSERT INTO PatientQueues
+(
+    PatientName,
+    QueueNumber,
+    Status,
+    AppointmentTime,
+    BranchName
+)
+VALUES
+('Ahmet Yýlmaz', 101, 'Waiting', '2026-06-05 09:00', 'Kardiyoloji'),
+('Ayþe Demir', 102, 'Waiting', '2026-06-05 09:05', 'Dahiliye'),
+('Mehmet Kaya', 103, 'Waiting', '2026-06-05 09:10', 'Nöroloji'),
+('Fatma Þahin', 104, 'Waiting', '2026-06-05 09:15', 'Ortopedi'),
+('Mustafa Çelik', 105, 'Waiting', '2026-06-05 09:20', 'Dermatoloji'),
+('Elif Arslan', 106, 'Waiting', '2026-06-05 09:25', 'Kardiyoloji'),
+('Hasan Koç', 107, 'Waiting', '2026-06-05 09:30', 'Dahiliye'),
+('Zeynep Öztürk', 108, 'Waiting', '2026-06-05 09:35', 'Nöroloji'),
+('Ýbrahim Demir', 109, 'Waiting', '2026-06-05 09:40', 'Ortopedi'),
+('Seda Kara', 110, 'Waiting', '2026-06-05 09:45', 'Dermatoloji'),
+
+('Cem Yýldýz', 111, 'Called', '2026-06-05 09:50', 'Kardiyoloji'),
+('Merve Aydýn', 112, 'Called', '2026-06-05 09:55', 'Dahiliye'),
+('Burak Can', 113, 'Called', '2026-06-05 10:00', 'Nöroloji'),
+('Esra Kurt', 114, 'Called', '2026-06-05 10:05', 'Ortopedi'),
+('Ali Vural', 115, 'Called', '2026-06-05 10:10', 'Dermatoloji'),
+
+('Gamze Aksoy', 116, 'Completed', '2026-06-05 08:30', 'Kardiyoloji'),
+('Emre Polat', 117, 'Completed', '2026-06-05 08:35', 'Dahiliye'),
+('Buse Kýlýç', 118, 'Completed', '2026-06-05 08:40', 'Nöroloji'),
+('Onur Yýlmaz', 119, 'Completed', '2026-06-05 08:45', 'Ortopedi'),
+('Derya Ateþ', 120, 'Completed', '2026-06-05 08:50', 'Dermatoloji');

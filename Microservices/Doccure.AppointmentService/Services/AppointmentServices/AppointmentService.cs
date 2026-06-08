@@ -38,6 +38,29 @@ namespace Doccure.AppointmentService.Services.AppointmentServices
             var value = await _context.Appointments.FindAsync(id);
             return _mapper.Map<GetAppointmentByIdDto>(value);
         }
+
+        public async Task<LastAppointmentDto> GetLastAppointmentByPatientIdAsync(string patientId)
+        {
+            var value = await _context.Appointments
+         .Include(x => x.AppointmentDetail)
+         .Where(x => x.PatientId == patientId)
+         .OrderByDescending(x => x.AppointmentDate)
+         .FirstOrDefaultAsync();
+
+            if (value == null)
+                return null;
+
+            return new LastAppointmentDto
+            {
+                AppointmentId = value.AppointmentId,
+                DoctorId = value.DoctorId,
+                BranchId = value.BranchId,
+                AppointmentDate = value.AppointmentDate,
+                Diagnosis = value.AppointmentDetail?.Diagnosis,
+                Status = value.Status
+            };
+        }
+
         public async Task UpdateAsync(UpdateAppointmentDto dto)
         {
             var value = await _context.Appointments.FindAsync(dto.AppointmentId);

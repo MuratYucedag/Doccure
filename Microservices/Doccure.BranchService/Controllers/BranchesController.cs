@@ -8,7 +8,7 @@ namespace Doccure.BranchService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class BranchesController : ControllerBase
     {
         private readonly IBranchService _branchService;

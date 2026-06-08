@@ -1,0 +1,692 @@
+﻿@{
+    ViewData["Title"] = "Kuyruk Yönetim Sistemi";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+<main id="app-content">
+<style>
+@@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+    --q-blue-950:#020F2B; --q-blue-900:#041433; --q-blue-800:#0A2149;
+    --q-blue-600:#1A4598; --q-blue-500:#1E56C8; --q-blue-400:#3B7DE8;
+    --q-blue-300:#6FA3F5; --q-blue-200:#A8C8FA;
+    --q-cyan:#00D4FF; --q-mint:#00E8B5; --q-amber:#FFB020;
+    --q-red:#FF4D6A; --q-white:#F4F8FF;
+    --q-glass:rgba(255,255,255,.07);
+    --q-gb:rgba(255,255,255,.13);
+    --q-fm:'Space Mono',monospace;
+    --q-fb:'DM Sans',sans-serif;
+    --q-fs:'Instrument Serif',serif;
+}
+
+/* ── Reset & canvas ── */
+#app-content {
+    font-family: var(--q-fb);
+    background: var(--q-blue-950);
+    min-height: 100vh;
+    padding: 0; margin: 0;
+    position: relative;
+    overflow-x: hidden;
+}
+#app-content::before {
+    content:''; position:fixed; inset:0;
+    background:
+        radial-gradient(ellipse 80% 50% at 20% 10%,rgba(26,69,152,.45) 0%,transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%,rgba(0,212,255,.12) 0%,transparent 55%),
+        radial-gradient(ellipse 50% 60% at 50% 50%,rgba(2,15,43,1) 0%,transparent 100%);
+    z-index:0; pointer-events:none;
+}
+#app-content::after {
+    content:''; position:fixed; inset:0;
+    background-image:linear-gradient(rgba(59,125,232,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(59,125,232,.04) 1px,transparent 1px);
+    background-size:48px 48px;
+    z-index:0; pointer-events:none;
+}
+.q-wrap { position:relative; z-index:1; }
+
+/* ── HEADER ── */
+.q-header {
+    background:rgba(4,20,51,.92);
+    backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--q-gb);
+    padding:0 16px; height:52px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100;
+    box-shadow:0 4px 24px rgba(0,0,0,.45);
+}
+.q-hl { display:flex; align-items:center; gap:10px; }
+.q-logo {
+    width:32px; height:32px; border-radius:9px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--q-blue-500),var(--q-cyan));
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+    box-shadow:0 0 14px rgba(0,212,255,.3);
+}
+.q-htitle { font-size:13px; font-weight:700; color:var(--q-white); letter-spacing:-.02em; line-height:1.2; }
+.q-htitle span { display:block; font-size:9.5px; font-weight:400; color:var(--q-blue-300); letter-spacing:.1em; text-transform:uppercase; }
+.q-hr { display:flex; align-items:center; gap:12px; }
+.q-clock-time { font-family:var(--q-fm); font-size:16px; font-weight:700; color:var(--q-white); letter-spacing:.04em; line-height:1; }
+.q-clock-date { font-size:9.5px; color:var(--q-blue-300); margin-top:2px; }
+.q-live-badge {
+    display:flex; align-items:center; gap:5px;
+    background:rgba(0,232,181,.1); border:1px solid rgba(0,232,181,.25);
+    border-radius:18px; padding:4px 10px;
+    font-size:9.5px; font-weight:700; color:var(--q-mint);
+    letter-spacing:.1em; text-transform:uppercase;
+}
+.q-live-dot {
+    width:6px; height:6px; border-radius:50%;
+    background:var(--q-mint); box-shadow:0 0 7px var(--q-mint);
+    animation:qPulse 1.6s ease-in-out infinite; flex-shrink:0;
+}
+@@keyframes qPulse {
+    0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 7px var(--q-mint);}
+    50%{opacity:.6;transform:scale(.7);box-shadow:0 0 3px var(--q-mint);}
+}
+.q-conn {
+    display:flex; align-items:center; gap:6px;
+    background:rgba(0,0,0,.3); border:1px solid var(--q-gb);
+    border-radius:9px; padding:5px 10px;
+    font-size:9.5px; font-weight:600; color:var(--q-blue-300);
+}
+.q-cdot { width:6px; height:6px; border-radius:50%; background:var(--q-blue-400); transition:background .3s,box-shadow .3s; }
+.q-cdot.connected    { background:var(--q-mint); box-shadow:0 0 7px var(--q-mint); animation:qPulse 2s infinite; }
+.q-cdot.disconnected { background:var(--q-red);  box-shadow:0 0 7px var(--q-red); }
+.q-cdot.connecting   { background:var(--q-amber); box-shadow:0 0 7px var(--q-amber); animation:qPulse .8s infinite; }
+
+/* ════════════════════════════════════
+   MAIN GRID — 3 sütun, px değil fr+px
+   Sol kart: 1fr (esnek, küçülebilir)
+   Orta istat: 180px sabit
+   Sağ tablo: 1.8fr (en geniş)
+════════════════════════════════════ */
+.q-grid {
+    display:grid;
+    grid-template-columns: 1fr 180px 1.8fr;
+    gap:12px;
+    padding:12px 12px 0;
+    align-items:start;
+}
+
+/* ── SOL KART: yatay kompakt layout ── */
+.q-cur {
+    background:linear-gradient(145deg,rgba(10,33,73,.92) 0%,rgba(26,69,152,.4) 100%);
+    border:1px solid rgba(59,125,232,.35);
+    border-radius:16px; padding:18px 16px;
+    backdrop-filter:blur(20px);
+    position:relative; overflow:hidden;
+    box-shadow:0 0 48px rgba(30,86,200,.2),inset 0 1px 0 rgba(255,255,255,.07);
+    transition:all .5s cubic-bezier(.34,1.56,.64,1);
+}
+.q-cur.q-flash {
+    border-color:var(--q-cyan);
+    box-shadow:0 0 64px rgba(0,212,255,.4),inset 0 1px 0 rgba(0,212,255,.15);
+    animation:qFlash .8s ease;
+}
+@@keyframes qFlash {
+    0%  {background:linear-gradient(145deg,rgba(0,212,255,.25) 0%,rgba(30,86,200,.5) 100%);}
+    100%{background:linear-gradient(145deg,rgba(10,33,73,.92) 0%,rgba(26,69,152,.4) 100%);}
+}
+.q-cur::before {
+    content:''; position:absolute;
+    width:220px; height:220px; border-radius:50%;
+    border:1px solid rgba(59,125,232,.1);
+    top:-60px; right:-60px; pointer-events:none;
+}
+.q-scanline {
+    position:absolute; left:0; right:0; height:2px;
+    background:linear-gradient(90deg,transparent,var(--q-cyan),transparent);
+    opacity:.3; animation:qScan 3s linear infinite; pointer-events:none;
+}
+@@keyframes qScan {
+    0%{top:0;opacity:0;} 5%{opacity:.3;} 95%{opacity:.3;} 100%{top:100%;opacity:0;}
+}
+
+.q-cur-label {
+    font-size:9px; font-weight:700; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--q-cyan);
+    display:flex; align-items:center; gap:6px; margin-bottom:12px;
+}
+.q-cur-label::before {
+    content:''; display:inline-block; width:14px; height:2px;
+    background:var(--q-cyan); border-radius:2px;
+}
+
+/* Sıra numarası — px sabit, vw yok */
+.q-num {
+    font-family:var(--q-fm);
+    font-size:64px;          /* sabit px */
+    font-weight:700; color:var(--q-white);
+    line-height:1; letter-spacing:-.02em;
+    display:inline-block;
+    text-shadow:0 0 24px rgba(0,212,255,.55),0 0 48px rgba(30,86,200,.4);
+    animation:qNumIn .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@@keyframes qNumIn {
+    from{opacity:0;transform:scale(.75) translateY(14px);}
+    to{opacity:1;transform:scale(1) translateY(0);}
+}
+.q-num-pfx {
+    font-size:22px; color:var(--q-blue-300);
+    vertical-align:top; margin-top:6px;
+    display:inline-block; font-weight:400;
+}
+.q-pname {
+    font-family:var(--q-fs);
+    font-size:20px; font-style:italic;
+    color:var(--q-white); margin-top:4px; opacity:.92;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.q-room {
+    display:inline-flex; align-items:center; gap:6px;
+    background:rgba(0,212,255,.1); border:1px solid rgba(0,212,255,.25);
+    border-radius:20px; padding:7px 14px;
+    font-size:11.5px; font-weight:600; color:var(--q-cyan);
+    margin-top:12px; flex-wrap:wrap;
+}
+.q-room i { font-size:13px; flex-shrink:0; }
+
+.q-prev {
+    margin-top:14px; padding-top:12px;
+    border-top:1px solid rgba(255,255,255,.07);
+}
+.q-prev-lbl { font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--q-blue-300); font-weight:700; margin-bottom:6px; }
+
+/* ── ORTA: stat kartları ── */
+.q-sc { display:flex; flex-direction:column; gap:9px; }
+.q-sk {
+    background:var(--q-glass); border:1px solid var(--q-gb);
+    border-radius:12px; padding:13px 14px;
+    backdrop-filter:blur(16px);
+    position:relative; overflow:hidden;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.q-sk:hover { transform:translateY(-2px) scale(1.02); }
+.q-sk::before {
+    content:''; position:absolute;
+    bottom:0; left:0; right:0; height:2px; border-radius:0 0 12px 12px;
+}
+.q-sk.waiting::before { background:linear-gradient(90deg,var(--q-amber),transparent); }
+.q-sk.called::before  { background:linear-gradient(90deg,var(--q-cyan),transparent); }
+.q-sk.done::before    { background:linear-gradient(90deg,var(--q-mint),transparent); }
+
+.q-sn { font-family:var(--q-fm); font-size:28px; font-weight:700; line-height:1; color:var(--q-white); }
+.q-sk.waiting .q-sn { text-shadow:0 0 16px rgba(255,176,32,.5); }
+.q-sk.called  .q-sn { text-shadow:0 0 16px rgba(0,212,255,.5); }
+.q-sk.done    .q-sn { text-shadow:0 0 16px rgba(0,232,181,.5); }
+
+.q-sl { font-size:9px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; margin-top:3px; }
+.q-sk.waiting .q-sl { color:var(--q-amber); }
+.q-sk.called  .q-sl { color:var(--q-cyan); }
+.q-sk.done    .q-sl { color:var(--q-mint); }
+
+.q-si { position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:22px; opacity:.1; }
+.q-sk.waiting .q-si { color:var(--q-amber); }
+.q-sk.called  .q-si { color:var(--q-cyan); }
+.q-sk.done    .q-si { color:var(--q-mint); }
+
+.q-sb { height:2px; border-radius:2px; background:rgba(255,255,255,.08); margin-top:9px; overflow:hidden; }
+.q-sbf { height:100%; border-radius:2px; transition:width 1s ease; }
+.q-sk.waiting .q-sbf { background:var(--q-amber); }
+.q-sk.called  .q-sbf { background:var(--q-cyan); }
+.q-sk.done    .q-sbf { background:var(--q-mint); }
+
+.q-doc {
+    background:var(--q-glass); border:1px solid var(--q-gb);
+    border-radius:12px; padding:12px 14px;
+    backdrop-filter:blur(16px);
+}
+.q-doc-lbl { font-size:8.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--q-blue-300); margin-bottom:7px; }
+
+/* ── SAĞ: tablo ── */
+.q-wc {
+    background:var(--q-glass); border:1px solid var(--q-gb);
+    border-radius:16px; backdrop-filter:blur(16px);
+    overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.2);
+}
+.q-ch {
+    padding:11px 16px 10px;
+    border-bottom:1px solid var(--q-gb);
+    display:flex; align-items:center; gap:8px;
+}
+.q-ci {
+    width:26px; height:26px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;
+    background:rgba(255,176,32,.15); color:var(--q-amber);
+}
+.q-ct { font-size:10.5px; font-weight:700; color:var(--q-blue-200); letter-spacing:.1em; text-transform:uppercase; }
+
+.q-tbl { width:100%; border-collapse:collapse; }
+.q-tbl thead th {
+    padding:8px 13px;
+    font-size:9px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+    color:var(--q-blue-300); background:rgba(255,255,255,.03);
+    border-bottom:1px solid var(--q-gb); white-space:nowrap;
+}
+.q-tbl tbody tr {
+    border-bottom:1px solid rgba(255,255,255,.04);
+    transition:background .2s ease;
+    animation:qRowIn .4s ease both;
+}
+.q-tbl tbody tr:last-child { border-bottom:none; }
+.q-tbl tbody tr:hover { background:rgba(255,255,255,.04); }
+@@keyframes qRowIn { from{opacity:0;transform:translateX(8px);} to{opacity:1;transform:translateX(0);} }
+.q-tbl td { padding:9px 13px; font-size:12px; color:var(--q-white); vertical-align:middle; }
+
+.q-tbl tbody tr:nth-child(1){animation-delay:.04s;}
+.q-tbl tbody tr:nth-child(2){animation-delay:.08s;}
+.q-tbl tbody tr:nth-child(3){animation-delay:.12s;}
+.q-tbl tbody tr:nth-child(4){animation-delay:.16s;}
+.q-tbl tbody tr:nth-child(5){animation-delay:.20s;}
+.q-tbl tbody tr:nth-child(6){animation-delay:.24s;}
+.q-tbl tbody tr:nth-child(7){animation-delay:.28s;}
+.q-tbl tbody tr:nth-child(8){animation-delay:.32s;}
+.q-tbl tbody tr:nth-child(9){animation-delay:.36s;}
+.q-tbl tbody tr:nth-child(10){animation-delay:.40s;}
+
+.q-tn {
+    font-family:var(--q-fm); font-size:11.5px; font-weight:700;
+    color:var(--q-blue-300);
+    background:rgba(59,125,232,.1); border:1px solid rgba(59,125,232,.2);
+    border-radius:5px; padding:2px 7px; display:inline-block;
+}
+.q-tn.active {
+    color:var(--q-cyan); background:rgba(0,212,255,.1);
+    border-color:rgba(0,212,255,.3); box-shadow:0 0 8px rgba(0,212,255,.2);
+}
+.q-pl {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px; border-radius:18px;
+    font-size:9.5px; font-weight:700; letter-spacing:.04em;
+}
+.q-pl::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.q-pl.waiting { background:rgba(255,176,32,.12); color:var(--q-amber); border:1px solid rgba(255,176,32,.25); }
+.q-pl.waiting::before { background:var(--q-amber); box-shadow:0 0 5px var(--q-amber); animation:qPulse 2s infinite; }
+.q-pl.called  { background:rgba(0,212,255,.12);  color:var(--q-cyan);  border:1px solid rgba(0,212,255,.25); }
+.q-pl.called::before  { background:var(--q-cyan); }
+.q-pl.done    { background:rgba(0,232,181,.12);  color:var(--q-mint);  border:1px solid rgba(0,232,181,.25); }
+.q-pl.done::before    { background:var(--q-mint); }
+
+/* ── TICKER ── */
+.q-ticker {
+    background:rgba(4,20,51,.92); border-top:1px solid var(--q-gb);
+    padding:0 16px; height:36px;
+    display:flex; align-items:center; gap:16px;
+    margin-top:12px; overflow:hidden;
+}
+.q-tlbl {
+    font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--q-cyan); white-space:nowrap;
+    display:flex; align-items:center; gap:6px; flex-shrink:0;
+}
+.q-tlbl::after { content:''; display:block; width:1px; height:14px; background:var(--q-gb); }
+.q-ttrack { overflow:hidden; flex:1; mask-image:linear-gradient(90deg,transparent 0%,black 4%,black 96%,transparent 100%); }
+.q-tinner { display:flex; gap:40px; white-space:nowrap; animation:qTick 30s linear infinite; }
+@@keyframes qTick { 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+.q-titem { font-size:11px; font-weight:500; color:var(--q-blue-200); display:inline-flex; align-items:center; gap:8px; }
+.q-titem i { color:var(--q-blue-400); font-size:10px; }
+
+/* ── counter anim ── */
+@@keyframes qCountUp { from{opacity:0;transform:translateY(5px);} to{opacity:1;transform:translateY(0);} }
+.q-ca { animation:qCountUp .4s cubic-bezier(.34,1.56,.64,1) both; }
+</style>
+
+<div class="q-wrap">
+
+<!-- HEADER -->
+<header class="q-header">
+    <div class="q-hl">
+        <div class="q-logo"><i class="bi bi-hospital" style="color:#fff"></i></div>
+        <div class="q-htitle">
+            Hastane Sıra Yönetim Sistemi
+            <span>Poliklinik Sıra Takip Ekranı</span>
+        </div>
+    </div>
+    <div class="q-hr">
+        <div class="q-conn">
+            <div class="q-cdot connecting" id="q-conn-dot"></div>
+            <span id="q-conn-text">Bağlanıyor...</span>
+        </div>
+        <div class="q-live-badge"><div class="q-live-dot"></div>Canlı</div>
+        <div>
+            <div class="q-clock-time" id="q-time">--:--:--</div>
+            <div class="q-clock-date" id="q-date">—</div>
+        </div>
+    </div>
+</header>
+
+<!-- MAIN GRID -->
+<div class="q-grid">
+
+    <!-- SOL: Şu Anki Hasta -->
+    <div>
+        <div class="q-cur" id="q-current-card">
+            <div class="q-scanline"></div>
+            <div class="q-cur-label">Şu An Çağrılan Hasta</div>
+            <div class="q-num" id="q-queue-num">
+                <span class="q-num-pfx">No</span><span id="q-queue-num-val">042</span>
+            </div>
+            <div class="q-pname" id="q-patient-name">Ayşe Fatma Kaya</div>
+            <div class="q-room" id="q-room-badge">
+                <i class="bi bi-door-open"></i>
+                Lütfen <strong style="margin:0 4px">3 Numaralı Muayene Odası</strong>'na geçiniz
+            </div>
+            <div class="q-prev">
+                <div class="q-prev-lbl">Önceki Çağrı</div>
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-family:var(--q-fm);font-size:16px;font-weight:700;color:rgba(255,255,255,.38)" id="q-prev-num">No 039</span>
+                    <span style="font-size:11.5px;color:rgba(255,255,255,.38);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="q-prev-name">Mehmet Ali Demir</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORTA: İstatistikler -->
+    <div class="q-sc">
+        <div class="q-sk waiting">
+            <div class="q-sn" id="q-stat-waiting">14</div>
+            <div class="q-sl">Bekleyen Hasta</div>
+            <div class="q-sb"><div class="q-sbf" id="q-bar-waiting" style="width:56%"></div></div>
+            <div class="q-si"><i class="bi bi-hourglass-split"></i></div>
+        </div>
+        <div class="q-sk called">
+            <div class="q-sn" id="q-stat-called">7</div>
+            <div class="q-sl">Çağrılan Hasta</div>
+            <div class="q-sb"><div class="q-sbf" id="q-bar-called" style="width:28%"></div></div>
+            <div class="q-si"><i class="bi bi-megaphone"></i></div>
+        </div>
+        <div class="q-sk done">
+            <div class="q-sn" id="q-stat-done">21</div>
+            <div class="q-sl">Tamamlanan</div>
+            <div class="q-sb"><div class="q-sbf" id="q-bar-done" style="width:84%"></div></div>
+            <div class="q-si"><i class="bi bi-check2-all"></i></div>
+        </div>
+        <div class="q-doc">
+            <div class="q-doc-lbl">Nöbetçi Doktor</div>
+            <div style="font-size:12.5px;font-weight:700;color:var(--q-white)">Dr. Selin Arslan</div>
+            <div style="font-size:10px;color:var(--q-blue-300);margin-top:2px">Kardiyoloji Uzmanı</div>
+            <div style="display:flex;align-items:center;gap:5px;margin-top:8px;font-size:10px;color:var(--q-mint)">
+                <div class="q-live-dot" style="width:5px;height:5px"></div>Aktif Nöbet
+            </div>
+        </div>
+    </div>
+
+    <!-- SAĞ: Sıra Listesi -->
+    <div>
+        <div class="q-wc">
+            <div class="q-ch">
+                <div class="q-ci"><i class="bi bi-list-ol"></i></div>
+                <div class="q-ct">Sıra Listesi</div>
+                <div style="margin-left:auto;font-size:10px;font-weight:600;color:var(--q-blue-300)">
+                    Bugün · <span id="q-tbl-count">10</span> kayıt
+                </div>
+            </div>
+            <div style="overflow-y:auto;max-height:380px">
+                <table class="q-tbl">
+                    <thead>
+                        <tr>
+                            <th>Sıra No</th>
+                            <th>Hasta Adı</th>
+                            <th>Branş</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="q-tbody">
+                        <tr>
+                            <td><span class="q-tn active">No 042</span></td>
+                            <td style="font-weight:600">Ayşe Fatma Kaya</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Kardiyoloji</td>
+                            <td><span class="q-pl called">Çağrıldı</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 043</span></td>
+                            <td style="font-weight:600">Mustafa Çelik</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Dahiliye</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 044</span></td>
+                            <td style="font-weight:600">Zeynep Arslan</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Nöroloji</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 045</span></td>
+                            <td style="font-weight:600">Hasan Yıldız</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Ortopedi</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 046</span></td>
+                            <td style="font-weight:600">Fatma Nur Öztürk</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Kardiyoloji</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 047</span></td>
+                            <td style="font-weight:600">İbrahim Koç</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Dahiliye</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 048</span></td>
+                            <td style="font-weight:600">Elif Şahin</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Dermatoloji</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 049</span></td>
+                            <td style="font-weight:600">Ahmet Berk Demir</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Nöroloji</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 050</span></td>
+                            <td style="font-weight:600">Seda Kara</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Ortopedi</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="q-tn">No 051</span></td>
+                            <td style="font-weight:600">Cem Yılmaz</td>
+                            <td style="font-size:10.5px;color:var(--q-blue-300)">Dahiliye</td>
+                            <td><span class="q-pl waiting">Bekliyor</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /.q-grid -->
+
+<!-- TICKER -->
+<div class="q-ticker">
+    <div class="q-tlbl"><i class="bi bi-broadcast"></i>Duyuru</div>
+    <div class="q-ttrack">
+        <div class="q-tinner" id="q-ticker-inner">
+            <span class="q-titem"><i class="bi bi-heart-pulse"></i>Acil durumlarda lütfen görevli personele başvurunuz.</span>
+            <span class="q-titem"><i class="bi bi-clock"></i>Randevu saatinizden 15 dakika önce kayıt yaptırmanız gerekmektedir.</span>
+            <span class="q-titem"><i class="bi bi-telephone"></i>İletişim: 0 212 XXX XX XX</span>
+            <span class="q-titem"><i class="bi bi-wifi"></i>Hastane misafir Wi-Fi: HealthNet_Guest</span>
+            <span class="q-titem"><i class="bi bi-info-circle"></i>Çocuklu aileler için öncelikli sıra alımı danışma masasından yapılabilir.</span>
+            <span class="q-titem"><i class="bi bi-calendar-check"></i>Online randevu için hastane uygulamasını indirin.</span>
+        </div>
+    </div>
+</div>
+
+</div><!-- /.q-wrap -->
+
+<!-- SignalR CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- Saat & Tarih -->
+<script>
+(function(){
+    const te=document.getElementById('q-time'),de=document.getElementById('q-date');
+    const MO=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    const DY=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    function tick(){
+        const n=new Date();
+        te.textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+        de.textContent=`${DY[n.getDay()]}, ${n.getDate()} ${MO[n.getMonth()]} ${n.getFullYear()}`;
+    }
+    tick(); setInterval(tick,1000);
+})();
+</script>
+
+<!-- Ticker sonsuz döngü -->
+<script>
+(function(){
+    const i=document.getElementById('q-ticker-inner');
+    if(i) i.innerHTML+=i.innerHTML;
+})();
+</script>
+
+<!-- Queue UI Controller -->
+<script>
+const QueueUI=(()=>{
+    const e={
+        card:document.getElementById('q-current-card'),
+        num:document.getElementById('q-queue-num-val'),
+        name:document.getElementById('q-patient-name'),
+        room:document.getElementById('q-room-badge'),
+        pn:document.getElementById('q-prev-num'),
+        pp:document.getElementById('q-prev-name'),
+        sw:document.getElementById('q-stat-waiting'),
+        sc:document.getElementById('q-stat-called'),
+        sd:document.getElementById('q-stat-done'),
+        bw:document.getElementById('q-bar-waiting'),
+        bc:document.getElementById('q-bar-called'),
+        bd:document.getElementById('q-bar-done'),
+        tb:document.getElementById('q-tbody'),
+        cd:document.getElementById('q-conn-dot'),
+        ct:document.getElementById('q-conn-text'),
+    };
+    let s={num:'042',name:'Ayşe Fatma Kaya',room:'3',waiting:14,called:7,done:21};
+
+    function updateCurrentPatient(d){
+        const pn=s.num,pp=s.name;
+        s.num=d.queueNumber??s.num; s.name=d.patientName??s.name;
+        s.room=d.roomNumber??s.room; s.waiting=d.waiting??s.waiting;
+        s.called=d.called??s.called; s.done=d.done??s.done;
+        // Queue Number update
+        e.num.textContent=String(s.num).padStart(3,'0');
+        // Patient Name update
+        e.name.textContent=s.name;
+        e.room.innerHTML=`<i class="bi bi-door-open"></i> Lütfen <strong style="margin:0 4px">${s.room} Numaralı Muayene Odası</strong>'na geçiniz`;
+        e.pn.textContent='No '+String(pn).padStart(3,'0');
+        e.pp.textContent=pp;
+        // Statistics update
+        updateStats(s.waiting,s.called,s.done);
+        // Card highlight animation
+        highlight();
+        updateRow(s.num);
+    }
+
+    function updateStats(w,c,d){
+        const t=w+c+d;
+        ac(e.sw,w); ac(e.sc,c); ac(e.sd,d);
+        e.bw.style.width=t?Math.round((w/t)*100)+'%':'0%';
+        e.bc.style.width=t?Math.round((c/t)*100)+'%':'0%';
+        e.bd.style.width=t?Math.round((d/t)*100)+'%':'0%';
+    }
+
+    function ac(el,target){
+        if(!el)return;
+        const start=parseInt(el.textContent)||0,diff=target-start,steps=20;
+        let step=0;
+        el.classList.remove('q-ca'); void el.offsetWidth; el.classList.add('q-ca');
+        const tm=setInterval(()=>{step++;el.textContent=Math.round(start+diff*(step/steps));if(step>=steps){el.textContent=target;clearInterval(tm);}},30);
+    }
+
+    function highlight(){
+        e.card.classList.remove('q-flash'); void e.card.offsetWidth; e.card.classList.add('q-flash');
+        setTimeout(()=>e.card.classList.remove('q-flash'),2000);
+    }
+
+    function updateRow(num){
+        if(!e.tb)return;
+        const f='No '+String(num).padStart(3,'0');
+        e.tb.querySelectorAll('.q-pl.called').forEach(p=>{
+            p.className='q-pl done'; p.textContent='Tamamlandı';
+            p.closest('tr')?.querySelector('.q-tn')?.classList.remove('active');
+        });
+        e.tb.querySelectorAll('.q-tn').forEach(t=>{
+            if(t.textContent.trim()===f){
+                t.classList.add('active');
+                const p=t.closest('tr')?.querySelector('.q-pl');
+                if(p){p.className='q-pl called';p.textContent='Çağrıldı';}
+            }
+        });
+    }
+
+    function setConnectionStatus(st){
+        if(!e.cd||!e.ct)return;
+        e.cd.className='q-cdot '+st;
+        e.ct.textContent=st==='connected'?'Bağlı':st==='disconnected'?'Bağlantı Kesildi':'Bağlanıyor...';
+    }
+
+    return{updateCurrentPatient,updateStats,setConnectionStatus,highlight};
+})();
+</script>
+
+<!-- SignalR Bağlantısı -->
+<script>
+(function(){
+    // SignalR Hub URL will be added here
+    const HUB_URL="https://localhost:7012/queuehub";
+
+    const connection=new signalR.HubConnectionBuilder()
+        .withUrl(HUB_URL)
+        .withAutomaticReconnect({nextRetryDelayInMilliseconds:ctx=>{
+            if(ctx.elapsedMilliseconds<10000)return 2000;
+            if(ctx.elapsedMilliseconds<60000)return 5000;
+            return 10000;
+        }})
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+    // PatientCalled event
+    connection.on("PatientCalled",function(queueNumber,patientName){
+        // Queue Number update
+        // Patient Name update
+        QueueUI.updateCurrentPatient({queueNumber:queueNumber,patientName:patientName});
+    });
+
+    // StatisticsUpdated event
+    connection.on("StatisticsUpdated",function(data){
+        QueueUI.updateStats(data.waiting,data.called,data.done);
+    });
+
+    connection.onreconnecting(()=>QueueUI.setConnectionStatus('connecting'));
+    connection.onreconnected(()=>QueueUI.setConnectionStatus('connected'));
+    connection.onclose(()=>QueueUI.setConnectionStatus('disconnected'));
+
+    async function startConnection(){
+        try{
+            QueueUI.setConnectionStatus('connecting');
+            await connection.start();
+            QueueUI.setConnectionStatus('connected');
+            console.log("[Queue] SignalR bağlandı:",HUB_URL);
+        }catch(err){
+            QueueUI.setConnectionStatus('disconnected');
+            console.error("[Queue] Bağlantı hatası:",err);
+            setTimeout(startConnection,5000);
+        }
+    }
+    startConnection();
+    window._queueConnection=connection;
+})();
+</script>
+
+<!-- Demo timeout -->
+<script>
+setTimeout(function(){
+    if(window._queueConnection&&window._queueConnection.state!==signalR.HubConnectionState.Connected)
+        QueueUI.setConnectionStatus('disconnected');
+},8000);
+</script>
+
+</main>

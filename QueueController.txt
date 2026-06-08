@@ -1,0 +1,40 @@
+  [HttpGet]
+        public async Task<IActionResult> GetQueueList()
+        {
+            var values = await _context.Queues
+                .OrderBy(x => x.QueueNumber)
+                .ToListAsync();
+
+            return Ok(values);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateQueue(Queue queue)
+        {
+            queue.Status = "Waiting";
+
+            await _context.Queues.AddAsync(queue);
+            await _context.SaveChangesAsync();
+
+            return Ok("Hasta sýraya eklendi");
+        }
+
+        [HttpPost("call/{id}")]
+        public async Task<IActionResult> CallPatient(int id)
+        {
+            var patient = await _context.Queues.FindAsync(id);
+
+            if (patient == null)
+                return NotFound();
+
+            patient.Status = "Called";
+
+            await _context.SaveChangesAsync();
+
+            await _hubContext.Clients.All.SendAsync(
+                "PatientCalled",
+                patient.QueueNumber,
+                patient.PatientName);
+
+            return Ok("Hasta çaðrýldý");
+        }

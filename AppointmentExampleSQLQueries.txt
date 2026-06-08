@@ -1,0 +1,46 @@
+INSERT INTO Appointments
+(DoctorId, PatientId, AppointmentDate, Status, Price, BranchId)
+VALUES
+-- PATIENT 1
+('DOC101', 'a6838845-078d-40f6-a7d6-10ec1f409a48', '2026-01-05 09:00:00', 'Completed', 1500, 'BR001'),
+('DOC102', 'a6838845-078d-40f6-a7d6-10ec1f409a48', '2026-02-11 10:30:00', 'Completed', 1750, 'BR002'),
+('DOC103', 'a6838845-078d-40f6-a7d6-10ec1f409a48', '2026-03-18 14:00:00', 'Completed', 2100, 'BR003'),
+('DOC101', 'a6838845-078d-40f6-a7d6-10ec1f409a48', '2026-04-22 11:15:00', 'Completed', 1600, 'BR001'),
+('DOC104', 'a6838845-078d-40f6-a7d6-10ec1f409a48', '2026-05-27 16:00:00', 'Approved', 2400, 'BR004'),
+
+-- PATIENT 2
+('DOC102', 'b31c6cc3-dde8-4623-8887-db11e0f4927c', '2026-01-08 13:00:00', 'Completed', 1800, 'BR002'),
+('DOC103', 'b31c6cc3-dde8-4623-8887-db11e0f4927c', '2026-02-14 15:30:00', 'Completed', 2200, 'BR003'),
+('DOC104', 'b31c6cc3-dde8-4623-8887-db11e0f4927c', '2026-03-21 09:45:00', 'Cancelled', 2500, 'BR004'),
+('DOC101', 'b31c6cc3-dde8-4623-8887-db11e0f4927c', '2026-04-28 10:00:00', 'Completed', 1700, 'BR001'),
+('DOC105', 'b31c6cc3-dde8-4623-8887-db11e0f4927c', '2026-05-30 17:30:00', 'Approved', 2600, 'BR005');
+
+
+
+-- APPOINTMENT DETAILS
+
+INSERT INTO AppointmentDetails
+(AppointmentId, Complaint, Notes, Diagnosis, Prescription, IsFirstVisit, CompletedDate)
+VALUES
+
+(1, 'Göðüs aðrýsý', 'Efor sonrasý aðrý artýyor', 'Koroner arter hastalýðý þüphesi', 'Beloc 50mg', 1, '2026-01-05 09:40:00'),
+
+(2, 'Baþ dönmesi', 'Tansiyon dalgalanmasý mevcut', 'Hipertansiyon', 'Norvasc 5mg', 0, '2026-02-11 11:05:00'),
+
+(3, 'Mide yanmasý', 'Asit reflüsü gözlemlendi', 'Gastrit', 'Gaviscon Þurup', 0, '2026-03-18 14:35:00'),
+
+(4, 'Çarpýntý', 'EKG önerildi', 'Sinüs taþikardisi', 'Concor 2.5mg', 0, '2026-04-22 11:50:00'),
+
+(5, 'Nefes darlýðý', 'Akciðer filmi istendi', 'Astým baþlangýcý', 'Ventolin Sprey', 0, NULL),
+
+
+
+(6, 'Boyun aðrýsý', 'Kas spazmý mevcut', 'Servikal disk problemi', 'Muscoflex', 1, '2026-01-08 13:30:00'),
+
+(7, 'Migren ataðý', 'Iþýk hassasiyeti mevcut', 'Migren', 'Arveles', 0, '2026-02-14 16:00:00'),
+
+(8, 'Diz aðrýsý', 'MR önerildi', 'Menisküs þüphesi', 'Voltaren Jel', 0, NULL),
+
+(9, 'Yüksek ateþ', 'Kan testi yapýldý', 'Üst solunum yolu enfeksiyonu', 'Augmentin 1000mg', 0, '2026-04-28 10:40:00'),
+
+(10, 'Alerjik reaksiyon', 'Cilt döküntüsü mevcut', 'Alerjik dermatit', 'Zyrtec', 0, NULL);
