@@ -1,0 +1,36 @@
+connection.on("PatientCalled", function (queueNumber, patientName, branchName, appointmentTime) {
+
+    console.log("PatientCalled Event");
+    console.log(queueNumber, patientName, branchName, appointmentTime);
+
+    document.getElementById("currentQueueNumber").textContent =
+        String(queueNumber).padStart(3, '0');
+
+    document.getElementById("currentPatientName").textContent =
+        patientName;
+
+    const branchElement = document.getElementById("currentBranchName");
+    if (branchElement) {
+        branchElement.textContent = branchName;
+    }
+
+    const timeElement = document.getElementById("hq-call-time");
+    if (timeElement && appointmentTime) {
+        const date = new Date(appointmentTime);
+        timeElement.textContent = date.toLocaleTimeString("tr-TR", {
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    const card = document.querySelector(".hq-num-box");
+
+    if (card) {
+        card.style.transition = "transform .25s ease";
+        card.style.transform = "scale(1.08)";
+
+        setTimeout(() => {
+            card.style.transform = "scale(1)";
+        }, 400);
+    }
+});

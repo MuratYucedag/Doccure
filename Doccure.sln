@@ -135,7 +135,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Queue", "Queue", "{0E43B7A3
 		QueueList3.txt = QueueList3.txt
 		QueueList4.txt = QueueList4.txt
 		SignalR.txt = SignalR.txt
+		SignalRIndexUI.txt = SignalRIndexUI.txt
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.PharmacyService", "Microservices\Doccure.PharmacyService\Doccure.PharmacyService.csproj", "{F21A4BEF-5111-495E-9240-87ECEA475414}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{F01012D9-6CE7-4786-B481-FC6AEDC6B039}"
+	ProjectSection(SolutionItems) = preProject
+		PortainerOnWindowsShell.txt = PortainerOnWindowsShell.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Medicine", "Medicine", "{F6A85474-5F1D-44C3-9A41-C1D2F803AD43}"
+	ProjectSection(SolutionItems) = preProject
+		CreateMedicine.txt = CreateMedicine.txt
+		MedicineController.txt = MedicineController.txt
+		MedicineExampleSQLQuery.txt = MedicineExampleSQLQuery.txt
+		MedicineListUI.txt = MedicineListUI.txt
+		MedicineService.txt = MedicineService.txt
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doccure.MarketService", "Microservices\Doccure.MarketService\Doccure.MarketService.csproj", "{212D72F6-7365-40F6-9A74-AD703C0C0191}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -183,6 +202,14 @@ Global
 		{A83C9399-0F1B-4FF5-B749-ECF2AE02CD4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A83C9399-0F1B-4FF5-B749-ECF2AE02CD4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A83C9399-0F1B-4FF5-B749-ECF2AE02CD4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F21A4BEF-5111-495E-9240-87ECEA475414}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F21A4BEF-5111-495E-9240-87ECEA475414}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F21A4BEF-5111-495E-9240-87ECEA475414}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F21A4BEF-5111-495E-9240-87ECEA475414}.Release|Any CPU.Build.0 = Release|Any CPU
+		{212D72F6-7365-40F6-9A74-AD703C0C0191}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{212D72F6-7365-40F6-9A74-AD703C0C0191}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{212D72F6-7365-40F6-9A74-AD703C0C0191}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{212D72F6-7365-40F6-9A74-AD703C0C0191}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -212,6 +239,10 @@ Global
 		{B80CE158-F485-4D54-9FDE-E0DDBF8AB7B2} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
 		{A83C9399-0F1B-4FF5-B749-ECF2AE02CD4E} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
 		{0E43B7A3-1014-48B6-9441-8254B0FBF639} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{F21A4BEF-5111-495E-9240-87ECEA475414} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
+		{F01012D9-6CE7-4786-B481-FC6AEDC6B039} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{F6A85474-5F1D-44C3-9A41-C1D2F803AD43} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{212D72F6-7365-40F6-9A74-AD703C0C0191} = {F951A47C-3A2E-4F8F-BC42-98D0C1961008}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6794892D-F830-403C-AFC1-D9269F669C31}

@@ -1,6 +1,7 @@
 using Doccure.WebUI.Services.BranchServices;
 using Doccure.WebUI.Services.DoctorServices;
 using Doccure.WebUI.Services.LoginServices;
+using Doccure.WebUI.Services.MedicineServices;
 using Doccure.WebUI.Services.PatientServices;
 using Doccure.WebUI.Services.RegisterServices;
 
@@ -12,6 +13,7 @@ builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IMedicineService, MedicineService>();
 builder.Services.AddHttpClient();
 builder.Services.AddSession();
 builder.Services.AddHttpContextAccessor();

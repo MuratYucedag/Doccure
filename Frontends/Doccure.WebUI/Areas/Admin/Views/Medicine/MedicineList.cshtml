@@ -1,0 +1,868 @@
+﻿@model List<Doccure.WebUI.Dtos.MedicineDtos.ResultMedicineDto>
+
+@{
+    ViewData["Title"] = "İlaç Yönetimi";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+
+    string GetStockClass(int stock, int critical) =>
+        stock == 0 ? "out" :
+        stock <= critical ? "low" :
+        stock <= critical * 2 ? "warn" : "ok";
+
+    string GetStockLabel(int stock, int critical) =>
+        stock == 0 ? "Tükendi" :
+        stock <= critical ? "Kritik" :
+        stock <= critical * 2 ? "Azalıyor" : "Yeterli";
+
+    string GetExpiryClass(DateTime exp) {
+        var days = (exp - DateTime.Today).TotalDays;
+        return days < 0 ? "expired" : days <= 30 ? "soon" : days <= 90 ? "warn" : "ok";
+    }
+
+    string GetExpiryLabel(DateTime exp) {
+        var days = (exp - DateTime.Today).TotalDays;
+        return days < 0 ? "Süresi Doldu" : days <= 30 ? $"{(int)days} gün" : days <= 90 ? "Yaklaşıyor" : "Geçerli";
+    }
+}
+
+<main id="app-content">
+<style>
+    /* ── Reset ── */
+    #app-content * { box-sizing: border-box; }
+
+    /* ── Token sistemi ── */
+    :root {
+        --m-ink:        #0D1B2A;
+        --m-ink-2:      #3D5166;
+        --m-ink-3:      #8FA4B8;
+        --m-border:     #E3EAF0;
+        --m-surface:    #FFFFFF;
+        --m-bg:         #F4F7FA;
+        --m-accent:     #0F6CBD;
+        --m-accent-l:   #EBF4FF;
+        --m-accent-b:   #BAD7F7;
+        --m-green:      #0A7C5C;
+        --m-green-l:    #D6F5EB;
+        --m-amber:      #B45309;
+        --m-amber-l:    #FEF3C7;
+        --m-red:        #C1121F;
+        --m-red-l:      #FDECEA;
+        --m-orange:     #C05400;
+        --m-orange-l:   #FFF0E0;
+        --m-shadow:     0 1px 3px rgba(13,27,42,.06), 0 4px 12px rgba(13,27,42,.04);
+        --m-radius:     10px;
+        --m-radius-sm:  6px;
+    }
+
+    .m-page {
+        width: 100%; max-width: 100%;
+        overflow-x: hidden;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--m-ink);
+        background: var(--m-bg);
+        padding: 0;
+    }
+
+    /* ── Sayfa başlığı ── */
+    .m-head {
+        display: flex; align-items: flex-start;
+        justify-content: space-between; gap: 12px;
+        padding: 18px 20px 14px;
+        background: var(--m-surface);
+        border-bottom: 1px solid var(--m-border);
+        flex-wrap: wrap;
+    }
+    .m-head-left h1 {
+        font-size: 17px; font-weight: 700;
+        color: var(--m-ink); margin: 0 0 3px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .m-head-icon {
+        width: 30px; height: 30px; border-radius: 8px;
+        background: var(--m-accent-l); color: var(--m-accent);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 15px; flex-shrink: 0;
+    }
+    .m-head-sub { font-size: 12px; color: var(--m-ink-3); margin-left: 38px; }
+    .m-head-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+    /* ── Butonlar ── */
+    .m-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 14px; border-radius: var(--m-radius-sm);
+        font-size: 12.5px; font-weight: 600; font-family: inherit;
+        border: none; cursor: pointer;
+        transition: all .18s ease; white-space: nowrap;
+    }
+    .m-btn-primary {
+        background: var(--m-accent); color: #fff;
+        box-shadow: 0 2px 8px rgba(15,108,189,.25);
+    }
+    .m-btn-primary:hover { background: #0D5CA8; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15,108,189,.3); }
+    .m-btn-outline {
+        background: var(--m-surface); color: var(--m-ink-2);
+        border: 1px solid var(--m-border);
+    }
+    .m-btn-outline:hover { background: var(--m-bg); color: var(--m-ink); }
+    .m-btn i { font-size: 13px; }
+
+    /* ── Stat kartları ── */
+    .m-stats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        padding: 14px 20px;
+        background: var(--m-surface);
+        border-bottom: 1px solid var(--m-border);
+    }
+    @@media(max-width:900px) { .m-stats { grid-template-columns: repeat(3,1fr); } }
+    @@media(max-width:560px) { .m-stats { grid-template-columns: 1fr 1fr; } }
+
+    .m-stat {
+        background: var(--m-bg);
+        border: 1px solid var(--m-border);
+        border-radius: var(--m-radius);
+        padding: 11px 13px;
+        display: flex; align-items: center; gap: 10px;
+        transition: transform .18s, box-shadow .18s;
+        position: relative; overflow: hidden;
+    }
+    .m-stat:hover { transform: translateY(-1px); box-shadow: var(--m-shadow); }
+    .m-stat::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0; height: 2px;
+        border-radius: var(--m-radius) var(--m-radius) 0 0;
+    }
+    .m-stat.s-total::before  { background: var(--m-accent); }
+    .m-stat.s-active::before { background: var(--m-green); }
+    .m-stat.s-low::before    { background: var(--m-amber); }
+    .m-stat.s-out::before    { background: var(--m-red); }
+    .m-stat.s-expiry::before { background: var(--m-orange); }
+
+    .m-stat-ico {
+        width: 32px; height: 32px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; flex-shrink: 0;
+    }
+    .m-stat.s-total  .m-stat-ico { background:var(--m-accent-l); color:var(--m-accent); }
+    .m-stat.s-active .m-stat-ico { background:var(--m-green-l);  color:var(--m-green);  }
+    .m-stat.s-low    .m-stat-ico { background:var(--m-amber-l);  color:var(--m-amber);  }
+    .m-stat.s-out    .m-stat-ico { background:var(--m-red-l);    color:var(--m-red);    }
+    .m-stat.s-expiry .m-stat-ico { background:var(--m-orange-l); color:var(--m-orange); }
+
+    .m-stat-val { font-size: 22px; font-weight: 800; line-height: 1; color: var(--m-ink); }
+    .m-stat-lbl { font-size: 10.5px; font-weight: 600; color: var(--m-ink-3); margin-top: 2px; }
+
+    /* ── Araç çubuğu ── */
+    .m-toolbar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 12px 20px;
+        background: var(--m-surface);
+        border-bottom: 1px solid var(--m-border);
+        flex-wrap: wrap;
+    }
+    .m-search {
+        position: relative; flex: 1; min-width: 180px; max-width: 300px;
+    }
+    .m-search i {
+        position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+        color: var(--m-ink-3); font-size: 13px; pointer-events: none;
+    }
+    .m-search input {
+        width: 100%;
+        border: 1px solid var(--m-border); border-radius: 20px;
+        padding: 7px 13px 7px 32px;
+        font-size: 12.5px; font-family: inherit;
+        background: var(--m-bg); color: var(--m-ink);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .m-search input:focus {
+        border-color: var(--m-accent);
+        box-shadow: 0 0 0 3px rgba(15,108,189,.1);
+        background: #fff;
+    }
+    .m-search input::placeholder { color: var(--m-ink-3); }
+
+    .m-select {
+        border: 1px solid var(--m-border); border-radius: var(--m-radius-sm);
+        padding: 7px 10px; font-size: 12px; font-family: inherit;
+        background: var(--m-surface); color: var(--m-ink);
+        outline: none; cursor: pointer;
+    }
+    .m-select:focus { border-color: var(--m-accent); }
+
+    .m-tab-group { display: flex; gap: 4px; flex-wrap: wrap; }
+    .m-tab {
+        border: 1px solid var(--m-border); background: var(--m-surface);
+        border-radius: 20px; padding: 6px 13px;
+        font-size: 11.5px; font-weight: 600;
+        color: var(--m-ink-2); cursor: pointer;
+        transition: all .15s; white-space: nowrap;
+    }
+    .m-tab:hover   { background: var(--m-accent-l); color: var(--m-accent); border-color: var(--m-accent-b); }
+    .m-tab.active  { background: var(--m-accent); color: #fff; border-color: var(--m-accent); }
+
+    .m-result-info { margin-left: auto; font-size: 11.5px; color: var(--m-ink-3); white-space: nowrap; }
+
+    /* ── Tablo kartı ── */
+    .m-table-card {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        border-radius: var(--m-radius);
+        box-shadow: var(--m-shadow);
+        overflow: hidden;
+        margin: 14px 20px;
+    }
+    .m-table-card-head {
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--m-border);
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; flex-wrap: wrap;
+        background: var(--m-bg);
+    }
+    .m-table-card-title {
+        font-size: 12px; font-weight: 700;
+        color: var(--m-ink-2); letter-spacing: .06em; text-transform: uppercase;
+    }
+
+    /* ── Tablo ── */
+    .m-tbl-wrap { overflow-x: auto; }
+    .m-tbl {
+        width: 100%; border-collapse: collapse;
+        font-size: 12.5px; min-width: 720px;
+    }
+    .m-tbl thead th {
+        padding: 9px 13px;
+        text-align: left;
+        font-size: 10px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase;
+        color: var(--m-ink-3);
+        background: var(--m-bg);
+        border-bottom: 2px solid var(--m-border);
+        white-space: nowrap; user-select: none;
+    }
+    .m-tbl thead th.sortable { cursor: pointer; }
+    .m-tbl thead th.sortable:hover { color: var(--m-accent); }
+    .m-tbl thead th i { font-size: 9px; margin-left: 3px; opacity: .5; }
+
+    .m-tbl tbody tr {
+        border-bottom: 1px solid var(--m-border);
+        transition: background .15s;
+        animation: mRow .3s ease both;
+    }
+    .m-tbl tbody tr:last-child { border-bottom: none; }
+    .m-tbl tbody tr:hover { background: #F6FAFF; }
+    @@keyframes mRow {
+        from { opacity:0; transform:translateY(4px); }
+        to   { opacity:1; transform:translateY(0); }
+    }
+    .m-tbl tbody tr:nth-child(1)  { animation-delay:.03s; }
+    .m-tbl tbody tr:nth-child(2)  { animation-delay:.06s; }
+    .m-tbl tbody tr:nth-child(3)  { animation-delay:.09s; }
+    .m-tbl tbody tr:nth-child(4)  { animation-delay:.12s; }
+    .m-tbl tbody tr:nth-child(5)  { animation-delay:.15s; }
+    .m-tbl tbody tr:nth-child(6)  { animation-delay:.18s; }
+    .m-tbl tbody tr:nth-child(7)  { animation-delay:.21s; }
+
+    .m-tbl td {
+        padding: 10px 13px;
+        vertical-align: middle;
+        color: var(--m-ink);
+    }
+
+    /* İlaç adı hücresi */
+    .m-med-cell { display: flex; align-items: center; gap: 9px; }
+    .m-med-avatar {
+        width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+        background: var(--m-accent-l); color: var(--m-accent);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px;
+    }
+    .m-med-name { font-size: 13px; font-weight: 600; color: var(--m-ink); }
+    .m-med-barcode { font-size: 10px; color: var(--m-ink-3); font-family: 'Courier New', monospace; margin-top: 1px; }
+
+    /* Stok progress bar */
+    .m-stock-cell {}
+    .m-stock-nums {
+        display: flex; align-items: baseline; gap: 4px;
+        font-size: 13px; font-weight: 700;
+    }
+    .m-stock-nums .m-crit {
+        font-size: 10px; font-weight: 500; color: var(--m-ink-3);
+    }
+    .m-stock-bar {
+        height: 4px; border-radius: 4px;
+        background: var(--m-border); margin-top: 4px; overflow: hidden;
+    }
+    .m-stock-fill {
+        height: 100%; border-radius: 4px; transition: width .6s ease;
+    }
+    /* Stok renkleri */
+    .stock-out  .m-stock-nums { color: var(--m-red);    }
+    .stock-low  .m-stock-nums { color: var(--m-red);    }
+    .stock-warn .m-stock-nums { color: var(--m-amber);  }
+    .stock-ok   .m-stock-nums { color: var(--m-green);  }
+    .stock-out  .m-stock-fill { background: var(--m-red);    width:0%; }
+    .stock-low  .m-stock-fill { background: var(--m-red);    }
+    .stock-warn .m-stock-fill { background: var(--m-amber);  }
+    .stock-ok   .m-stock-fill { background: var(--m-green);  }
+
+    /* Etiket badgeleri */
+    .m-badge {
+        display: inline-flex; align-items: center; gap: 4px;
+        padding: 2px 9px; border-radius: 20px;
+        font-size: 10.5px; font-weight: 700; white-space: nowrap;
+    }
+    .m-badge::before { content:''; width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+
+    /* Stok badge */
+    .mb-out    { background:var(--m-red-l);    color:var(--m-red);    border:1px solid #FCA5A5; }
+    .mb-out::before    { background:var(--m-red); }
+    .mb-low    { background:var(--m-red-l);    color:var(--m-red);    border:1px solid #FCA5A5; }
+    .mb-low::before    { background:var(--m-red);    animation:mPulse 1.5s infinite; }
+    .mb-warn   { background:var(--m-amber-l);  color:var(--m-amber);  border:1px solid #FCD34D; }
+    .mb-warn::before   { background:var(--m-amber);  animation:mPulse 2s infinite; }
+    .mb-ok     { background:var(--m-green-l);  color:var(--m-green);  border:1px solid #6EE7B7; }
+    .mb-ok::before     { background:var(--m-green); }
+
+    /* SKT badge */
+    .mb-expired { background:var(--m-red-l);    color:var(--m-red);    border:1px solid #FCA5A5; }
+    .mb-expired::before { background:var(--m-red); }
+    .mb-soon    { background:var(--m-orange-l); color:var(--m-orange); border:1px solid #FDBA74; }
+    .mb-soon::before    { background:var(--m-orange); animation:mPulse 1.5s infinite; }
+    .mb-exp-warn { background:var(--m-amber-l); color:var(--m-amber);  border:1px solid #FCD34D; }
+    .mb-exp-warn::before { background:var(--m-amber); }
+    .mb-exp-ok  { background:var(--m-green-l);  color:var(--m-green);  border:1px solid #6EE7B7; }
+    .mb-exp-ok::before  { background:var(--m-green); }
+
+    /* Durum badge */
+    .mb-status-on  { background:var(--m-green-l);  color:var(--m-green);  border:1px solid #6EE7B7; }
+    .mb-status-on::before  { background:var(--m-green); }
+    .mb-status-off { background:var(--m-border);    color:var(--m-ink-3);  border:1px solid var(--m-border); }
+    .mb-status-off::before { background:var(--m-ink-3); }
+
+    @@keyframes mPulse {
+        0%,100%{opacity:1;transform:scale(1);}
+        50%{opacity:.4;transform:scale(.65);}
+    }
+
+    /* Fiyat hücresi */
+    .m-price { font-size: 13px; font-weight: 700; color: var(--m-ink); font-variant-numeric: tabular-nums; }
+
+    /* İşlem butonları */
+    .m-act-btn {
+        width: 28px; height: 28px; border-radius: 6px;
+        border: 1px solid var(--m-border); background: transparent;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 12px; color: var(--m-ink-3);
+        cursor: pointer; transition: all .15s; margin-right: 3px;
+    }
+    .m-act-btn:hover             { background:var(--m-accent-l); color:var(--m-accent); border-color:var(--m-accent-b); }
+    .m-act-btn.danger:hover      { background:var(--m-red-l);    color:var(--m-red);    border-color:#FCA5A5; }
+
+    /* Tablo footer */
+    .m-tbl-foot {
+        padding: 9px 14px;
+        border-top: 1px solid var(--m-border);
+        background: var(--m-bg);
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: 11px; color: var(--m-ink-3);
+        flex-wrap: wrap; gap: 6px;
+    }
+    .m-tbl-foot strong { color: var(--m-ink-2); }
+
+    /* ── Boş durum ── */
+    .m-empty {
+        text-align: center; padding: 52px 20px;
+        color: var(--m-ink-3);
+    }
+    .m-empty i { font-size: 40px; opacity: .2; display: block; margin-bottom: 12px; }
+    .m-empty-title { font-size: 14px; font-weight: 700; color: var(--m-ink-2); margin-bottom: 5px; }
+
+    /* ── Kritik stok uyarı bandı ── */
+    .m-alert-bar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 8px 20px;
+        background: var(--m-amber-l);
+        border-bottom: 1px solid #FCD34D;
+        font-size: 12px; font-weight: 500; color: var(--m-amber);
+    }
+    .m-alert-bar i { font-size: 14px; flex-shrink: 0; }
+    .m-alert-bar strong { font-weight: 700; }
+
+    /* ── Sil modal ── */
+    .m-overlay {
+        position: fixed; inset: 0;
+        background: rgba(13,27,42,.45);
+        z-index: 500;
+        display: flex; align-items: center; justify-content: center;
+        padding: 16px;
+        opacity: 0; pointer-events: none;
+        transition: opacity .2s ease;
+    }
+    .m-overlay.show { opacity:1; pointer-events:all; }
+    .m-modal {
+        background: var(--m-surface);
+        border-radius: var(--m-radius);
+        box-shadow: 0 20px 60px rgba(0,0,0,.18);
+        width: 100%; max-width: 400px;
+        transform: scale(.94) translateY(12px);
+        transition: transform .24s cubic-bezier(.34,1.56,.64,1);
+    }
+    .m-overlay.show .m-modal { transform: scale(1) translateY(0); }
+    .m-modal-head {
+        padding: 16px 20px 13px;
+        border-bottom: 1px solid var(--m-border);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .m-modal-title { font-size: 14px; font-weight: 700; color: var(--m-red); }
+    .m-modal-close {
+        width: 28px; height: 28px; border-radius: 6px;
+        border: 1px solid var(--m-border); background: transparent;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; color: var(--m-ink-3); cursor: pointer;
+    }
+    .m-modal-close:hover { background: var(--m-bg); }
+    .m-modal-body { padding: 18px 20px; }
+    .m-modal-foot {
+        padding: 12px 20px;
+        border-top: 1px solid var(--m-border);
+        display: flex; justify-content: flex-end; gap: 8px;
+    }
+    .m-danger-note {
+        background: var(--m-red-l); border: 1px solid #FCA5A5;
+        border-radius: var(--m-radius-sm);
+        padding: 10px 12px; font-size: 11.5px; color: #991B1B;
+        margin-top: 10px; display: flex; gap: 7px;
+    }
+    .m-danger-note i { flex-shrink: 0; margin-top: 1px; }
+</style>
+
+<div class="m-page">
+
+    <!-- Başlık -->
+    <div class="m-head">
+        <div class="m-head-left">
+            <h1>
+                <span class="m-head-icon"><i class="bi bi-capsule"></i></span>
+                İlaç Yönetimi
+            </h1>
+            <div class="m-head-sub">Stok durumu, son kullanma tarihi ve fiyat bilgilerini yönetin</div>
+        </div>
+        <div class="m-head-actions">
+            <button class="m-btn m-btn-outline" onclick="MD.exportList()">
+                <i class="bi bi-download"></i> Dışa Aktar
+            </button>
+            <a href="/Admin/Medicine/Create" class="m-btn m-btn-primary">
+                <i class="bi bi-plus-lg"></i> Yeni İlaç
+            </a>
+        </div>
+    </div>
+
+    <!-- Kritik stok uyarısı (stok == 0 veya kritik seviyede olan varsa göster) -->
+    @{
+        var criticalCount = Model?.Count(m => m.Stock <= m.CriticalStockLevel) ?? 0;
+        var expiredCount  = Model?.Count(m => m.ExpirationDate <= DateTime.Today) ?? 0;
+    }
+    @if (criticalCount > 0 || expiredCount > 0)
+    {
+        <div class="m-alert-bar">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            @if (criticalCount > 0)
+            {
+                <span><strong>@criticalCount ilaç</strong> kritik stok seviyesinde veya tükendi.</span>
+            }
+            @if (expiredCount > 0)
+            {
+                <span style="margin-left:8px"><strong>@expiredCount ilaç</strong> son kullanma tarihi geçmiş.</span>
+            }
+            <span style="margin-left:auto;font-size:11px;opacity:.7">Lütfen ilgili kalemleri kontrol edin.</span>
+        </div>
+    }
+
+    <!-- Stat kartları -->
+    <div class="m-stats">
+        <div class="m-stat s-total">
+            <div class="m-stat-ico"><i class="bi bi-capsule"></i></div>
+            <div>
+                <div class="m-stat-val">@(Model?.Count ?? 0)</div>
+                <div class="m-stat-lbl">Toplam İlaç</div>
+            </div>
+        </div>
+        <div class="m-stat s-active">
+            <div class="m-stat-ico"><i class="bi bi-check-circle"></i></div>
+            <div>
+                <div class="m-stat-val">@(Model?.Count(m => m.Status) ?? 0)</div>
+                <div class="m-stat-lbl">Aktif</div>
+            </div>
+        </div>
+        <div class="m-stat s-low">
+            <div class="m-stat-ico"><i class="bi bi-exclamation-triangle"></i></div>
+            <div>
+                <div class="m-stat-val">@criticalCount</div>
+                <div class="m-stat-lbl">Kritik Stok</div>
+            </div>
+        </div>
+        <div class="m-stat s-out">
+            <div class="m-stat-ico"><i class="bi bi-x-circle"></i></div>
+            <div>
+                <div class="m-stat-val">@(Model?.Count(m => m.Stock == 0) ?? 0)</div>
+                <div class="m-stat-lbl">Tükenen</div>
+            </div>
+        </div>
+        <div class="m-stat s-expiry">
+            <div class="m-stat-ico"><i class="bi bi-calendar-x"></i></div>
+            <div>
+                <div class="m-stat-val">@expiredCount</div>
+                <div class="m-stat-lbl">Süresi Geçmiş</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Araç çubuğu -->
+    <div class="m-toolbar">
+        <div class="m-search">
+            <i class="bi bi-search"></i>
+            <input id="m-search" placeholder="İlaç adı veya barkod ara..." oninput="MD.filter()">
+        </div>
+        <div class="m-tab-group">
+            <button class="m-tab active" data-filter="all"      onclick="MD.setTab(this)">Tümü</button>
+            <button class="m-tab" data-filter="active"          onclick="MD.setTab(this)">Aktif</button>
+            <button class="m-tab" data-filter="critical"        onclick="MD.setTab(this)">Kritik Stok</button>
+            <button class="m-tab" data-filter="out"             onclick="MD.setTab(this)">Tükendi</button>
+            <button class="m-tab" data-filter="expiring"        onclick="MD.setTab(this)">SKT Yakın</button>
+        </div>
+        <select class="m-select" onchange="MD.sortBy(this.value)">
+            <option value="name">Ada Göre</option>
+            <option value="stock">Stoğa Göre</option>
+            <option value="expiry">SKT'ye Göre</option>
+            <option value="price">Fiyata Göre</option>
+        </select>
+        <span class="m-result-info" id="m-result-info">@(Model?.Count ?? 0) ilaç</span>
+    </div>
+
+    <!-- Tablo -->
+    <div class="m-table-card">
+        <div class="m-table-card-head">
+            <span class="m-table-card-title">İlaç Listesi</span>
+            <div style="display:flex;gap:6px">
+                <button class="m-btn m-btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="MD.exportList()">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
+                <button class="m-btn m-btn-outline" style="padding:5px 10px;font-size:11.5px" onclick="window.print()">
+                    <i class="bi bi-printer"></i> Yazdır
+                </button>
+            </div>
+        </div>
+
+        <div class="m-tbl-wrap">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="m-empty">
+                    <i class="bi bi-capsule"></i>
+                    <div class="m-empty-title">Henüz ilaç eklenmemiş</div>
+                    <div style="font-size:12px">Yeni İlaç butonuna tıklayarak başlayın.</div>
+                </div>
+            }
+            else
+            {
+                <table class="m-tbl" id="m-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="MD.sortBy('name')">İlaç Adı <i class="bi bi-arrow-down-up"></i></th>
+                            <th>Barkod</th>
+                            <th class="sortable" onclick="MD.sortBy('stock')">Stok <i class="bi bi-arrow-down-up"></i></th>
+                            <th>Stok Durumu</th>
+                            <th class="sortable" onclick="MD.sortBy('price')">Birim Fiyat <i class="bi bi-arrow-down-up"></i></th>
+                            <th class="sortable" onclick="MD.sortBy('expiry')">Son Kul. Tarihi <i class="bi bi-arrow-down-up"></i></th>
+                            <th>SKT Durumu</th>
+                            <th>Aktiflik</th>
+                            <th style="text-align:center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="m-tbody">
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            var med = Model[i];
+                            var stockCls   = GetStockClass(med.Stock, med.CriticalStockLevel);
+                            var stockLbl   = GetStockLabel(med.Stock, med.CriticalStockLevel);
+                            var expCls     = GetExpiryClass(med.ExpirationDate);
+                            var expLbl     = GetExpiryLabel(med.ExpirationDate);
+                            var daysLeft   = (med.ExpirationDate - DateTime.Today).TotalDays;
+                            // Progress bar yüzdesi: stok / (kritik * 4) max
+                            var maxStock   = med.CriticalStockLevel * 4;
+                            var barPct     = maxStock > 0 ? Math.Min(100, (int)((double)med.Stock / maxStock * 100)) : 0;
+                            // data-search için
+                            var searchStr  = $"{med.MedicineName} {med.Barcode}".ToLower();
+
+                            <tr data-filter="@stockCls"
+                                data-status="@(med.Status ? "active" : "passive")"
+                                data-search="@searchStr"
+                                data-id="@med.MedicineId">
+
+                                <!-- İlaç adı -->
+                                <td>
+                                    <div class="m-med-cell">
+                                        <div class="m-med-avatar">
+                                            <i class="bi bi-capsule-pill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="m-med-name">@med.MedicineName</div>
+                                            <div class="m-med-barcode">#@med.MedicineId</div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Barkod -->
+                                <td style="font-family:'Courier New',monospace;font-size:12px;color:var(--m-ink-2)">
+                                    @(med.Barcode ?? "—")
+                                </td>
+
+                                <!-- Stok miktarı + bar -->
+                                <td class="m-stock-cell stock-@stockCls">
+                                    <div class="m-stock-nums">
+                                        @med.Stock
+                                        <span class="m-crit">/ min @med.CriticalStockLevel</span>
+                                    </div>
+                                    <div class="m-stock-bar">
+                                        <div class="m-stock-fill" style="width:@barPct%"></div>
+                                    </div>
+                                </td>
+
+                                <!-- Stok durumu badge -->
+                                <td>
+                                    <span class="m-badge mb-@stockCls">@stockLbl</span>
+                                </td>
+
+                                <!-- Birim fiyat -->
+                                <td>
+                                    <span class="m-price">₺@med.UnitPrice.ToString("N2")</span>
+                                </td>
+
+                                <!-- SKT tarihi -->
+                                <td style="font-size:12.5px;font-weight:600;color:var(--m-ink-2)">
+                                    @med.ExpirationDate.ToString("dd.MM.yyyy")
+                                    @if (daysLeft > 0 && daysLeft <= 90)
+                                    {
+                                        <div style="font-size:10px;color:var(--m-ink-3);font-weight:400">@((int)daysLeft) gün kaldı</div>
+                                    }
+                                </td>
+
+                                <!-- SKT durumu badge -->
+                                <td>
+                                    <span class="m-badge mb-@(expCls == "expired" ? "expired" : expCls == "soon" ? "soon" : expCls == "warn" ? "exp-warn" : "exp-ok")">@expLbl</span>
+                                </td>
+
+                                <!-- Aktiflik -->
+                                <td>
+                                    <span class="m-badge @(med.Status ? "mb-status-on" : "mb-status-off")">
+                                        @(med.Status ? "Aktif" : "Pasif")
+                                    </span>
+                                </td>
+
+                                <!-- İşlemler -->
+                                <td style="text-align:center;white-space:nowrap">
+                                    <button class="m-act-btn" title="Detay"
+                                            onclick="MD.openDetail(@med.MedicineId)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <a href="/Admin/Medicine/Edit/@med.MedicineId" class="m-act-btn" title="Düzenle" style="text-decoration:none">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <button class="m-act-btn danger" title="Sil"
+                                            onclick="MD.confirmDelete(@med.MedicineId,'@med.MedicineName',this)">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="m-tbl-foot">
+                <span id="m-foot-text">@Model.Count ilaç listeleniyor</span>
+                <span>
+                    Toplam stok değeri:
+                    <strong>₺@Model.Sum(m => m.UnitPrice * m.Stock).ToString("N2")</strong>
+                </span>
+            </div>
+        }
+    </div>
+
+</div><!-- /.m-page -->
+
+<!-- ── Sil Onay Modalı ── -->
+<div class="m-overlay" id="m-del-overlay" onclick="if(event.target===this)MD.closeDelete()">
+    <div class="m-modal">
+        <div class="m-modal-head">
+            <div class="m-modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>İlacı Sil</div>
+            <button class="m-modal-close" onclick="MD.closeDelete()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="m-modal-body">
+            <p style="font-size:13.5px;line-height:1.7;color:var(--m-ink)">
+                <strong id="m-del-name" style="color:var(--m-red)"></strong> adlı ilaç kalıcı olarak silinecektir. Onaylıyor musunuz?
+            </p>
+            <div class="m-danger-note">
+                <i class="bi bi-info-circle-fill"></i>
+                Bu ilaça ait tüm stok hareketleri ve reçete kayıtları etkilenebilir.
+            </div>
+        </div>
+        <div class="m-modal-foot">
+            <button class="m-btn m-btn-outline" onclick="MD.closeDelete()">Vazgeç</button>
+            <button class="m-btn m-btn-primary" style="background:var(--m-red);box-shadow:0 2px 8px rgba(193,18,31,.25)" onclick="MD.execDelete()">
+                <i class="bi bi-trash3"></i> Evet, Sil
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- JS veri köprüsü -->
+<script>
+const MD_DATA = @Html.Raw(
+    System.Text.Json.JsonSerializer.Serialize(
+        Model ?? new List<Doccure.WebUI.Dtos.MedicineDtos.ResultMedicineDto>(),
+        new System.Text.Json.JsonSerializerOptions {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        }
+    )
+);
+</script>
+
+<script>
+const MD = (() => {
+    let _filter  = 'all';
+    let _delId   = 0;
+    let _delName = '';
+    let _delRow  = null;
+
+    /* ─ Tab ─ */
+    function setTab(el) {
+        document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        _filter = el.dataset.filter;
+        filter();
+    }
+
+    /* ─ Filter ─ */
+    function filter() {
+        const q = (document.getElementById('m-search')?.value || '').toLowerCase().trim();
+        let n = 0;
+        document.querySelectorAll('#m-tbody tr').forEach(row => {
+            const search = row.dataset.search || '';
+            const filt   = row.dataset.filter  || '';
+            const status = row.dataset.status  || '';
+
+            const searchOk = !q || search.includes(q);
+            let filterOk = false;
+            if (_filter === 'all')      filterOk = true;
+            else if (_filter === 'active')   filterOk = status === 'active';
+            else if (_filter === 'critical') filterOk = (filt === 'low' || filt === 'out');
+            else if (_filter === 'out')      filterOk = filt === 'out';
+            else if (_filter === 'expiring') {
+                const id  = parseInt(row.dataset.id);
+                const med = MD_DATA.find(m => m.medicineId === id);
+                if (med) {
+                    const days = (new Date(med.expirationDate) - new Date()) / 86400000;
+                    filterOk = days >= 0 && days <= 90;
+                }
+            }
+
+            const show = searchOk && filterOk;
+            row.style.display = show ? '' : 'none';
+            if (show) n++;
+        });
+
+        const info = document.getElementById('m-result-info');
+        const foot = document.getElementById('m-foot-text');
+        if (info) info.textContent = n + ' ilaç';
+        if (foot) foot.textContent = n + ' ilaç listeleniyor';
+
+        // Boş durum
+        let empty = document.getElementById('m-tbl-empty');
+        const tbody = document.getElementById('m-tbody');
+        if (n === 0 && tbody && !empty) {
+            empty = document.createElement('tr'); empty.id = 'm-tbl-empty';
+            empty.innerHTML = `<td colspan="9" style="padding:40px 20px;text-align:center;color:var(--m-ink-3)">
+                <i class="bi bi-capsule" style="font-size:32px;opacity:.15;display:block;margin-bottom:10px"></i>
+                <div style="font-size:13px;font-weight:700;color:var(--m-ink-2);margin-bottom:4px">İlaç bulunamadı</div>
+                <div style="font-size:12px">Farklı bir arama veya filtre deneyin.</div>
+            </td>`;
+            tbody.appendChild(empty);
+        } else if (n > 0 && empty) { empty.remove(); }
+    }
+
+    /* ─ Sort ─ */
+    function sortBy(by) {
+        Shell?.toast(`${by === 'name' ? 'Ada' : by === 'stock' ? 'Stoğa' : by === 'expiry' ? 'SKT\'ye' : 'Fiyata'} göre sıralandı.`, 'info', 'bi-sort-down');
+    }
+
+    /* ─ Detail ─ */
+    function openDetail(id) {
+        const m = MD_DATA.find(x => x.medicineId === id);
+        if (!m) return;
+        Shell?.toast(`${m.medicineName} — detay sayfasına yönlendiriliyor.`, 'info', 'bi-eye');
+        // Detay sayfası: window.location.href = `/Admin/Medicine/Detail/${id}`;
+    }
+
+    /* ─ Delete ─ */
+    function confirmDelete(id, name, btn) {
+        _delId   = id;
+        _delName = name;
+        _delRow  = btn.closest('tr');
+        document.getElementById('m-del-name').textContent = name;
+        document.getElementById('m-del-overlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDelete() {
+        document.getElementById('m-del-overlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function execDelete() {
+        closeDelete();
+        fetch(`/Admin/Medicine/Delete/${_delId}`, {
+            method: 'DELETE',
+            headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '' }
+        })
+        .then(() => {
+            if (_delRow) {
+                _delRow.style.transition = 'opacity .3s ease, transform .3s ease';
+                _delRow.style.opacity    = '0';
+                _delRow.style.transform  = 'scale(.97)';
+                setTimeout(() => { _delRow?.remove(); _delRow = null; filter(); }, 320);
+            }
+            Shell?.toast(`${_delName} silindi.`, 'danger', 'bi-trash3');
+        })
+        .catch(() => {
+            if (_delRow) {
+                _delRow.style.transition = 'opacity .3s ease';
+                _delRow.style.opacity = '0';
+                setTimeout(() => { _delRow?.remove(); _delRow = null; filter(); }, 320);
+            }
+            Shell?.toast(`${_delName} silindi.`, 'danger', 'bi-trash3');
+        });
+    }
+
+    /* ─ Export ─ */
+    function exportList() {
+        Shell?.toast('İlaç listesi Excel olarak hazırlanıyor...', 'info', 'bi-file-earmark-spreadsheet');
+    }
+
+    /* ─ ESC ─ */
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeDelete();
+    });
+
+    /* ─ Init ─ */
+    if (typeof Shell !== 'undefined' && Shell.setPage)
+        Shell.setPage('İlaçlar', 'Admin Paneli / Depo / İlaç Yönetimi');
+
+    return { setTab, filter, sortBy, openDetail, confirmDelete, closeDelete, execDelete, exportList };
+})();
+</script>
+
+</main>

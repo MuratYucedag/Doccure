@@ -1,0 +1,56 @@
+  private readonly MedicineContext _context;
+        private readonly IMapper _mapper;
+
+        public MedicineService(MedicineContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
+        public async Task<List<ResultMedicineDto>> GetAllMedicineAsync()
+        {
+            var values = await _context.Medicines.ToListAsync();
+            return _mapper.Map<List<ResultMedicineDto>>(values);
+        }
+
+        public async Task<GetByIdMedicineDto> GetByIdMedicineAsync(int id)
+        {
+            var value = await _context.Medicines.FindAsync(id);
+
+            if (value == null)
+                return null;
+
+            return _mapper.Map<GetByIdMedicineDto>(value);
+        }
+
+        public async Task CreateMedicineAsync(CreateMedicineDto createMedicineDto)
+        {
+            var value = _mapper.Map<Medicine>(createMedicineDto);
+
+            await _context.Medicines.AddAsync(value);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task UpdateMedicineAsync(UpdateMedicineDto updateMedicineDto)
+        {
+            var value = await _context.Medicines
+                .FirstOrDefaultAsync(x => x.MedicineId == updateMedicineDto.MedicineId);
+
+            if (value == null)
+                return;
+
+            _mapper.Map(updateMedicineDto, value);
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteMedicineAsync(int id)
+        {
+            var value = await _context.Medicines.FindAsync(id);
+
+            if (value == null)
+                return;
+
+            _context.Medicines.Remove(value);
+            await _context.SaveChangesAsync();
+        }

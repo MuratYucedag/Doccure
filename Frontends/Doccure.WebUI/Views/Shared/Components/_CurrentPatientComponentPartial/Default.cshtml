@@ -1,0 +1,35 @@
+﻿@model ResultPatientQueueDto
+
+<div class="hq-card">
+    <div class="hq-card-head">
+        <div class="hq-ched-icon blue"><i class="bi bi-megaphone-fill"></i></div>
+        <span class="hq-card-label">Şu An Çağrılan Hasta</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--hq-text-3)" id="hq-call-time-badge">—</span>
+    </div>
+
+    <div class="hq-cur-body">
+        <div class="hq-num-box">
+            <div class="hq-num-label">Sıra No</div>
+            <div class="hq-num-val" id="currentQueueNumber">@Model.QueueNumber</div>
+            <div class="hq-num-time" id="hq-call-time">@Model.AppointmentTime</div>
+        </div>
+        <div class="hq-cur-info">
+            <div class="hq-cur-name" id="currentPatientName">@Model.PatientName</div>
+            <div class="hq-cur-meta">
+                <div class="hq-meta-row"><i class="bi bi-person-vcard"></i><span id="currentBranchName">@Model.BranchName</span></div>
+                <div class="hq-meta-row"><i class="bi bi-clock"></i><span>Bekleme süresi: <strong>~8 dk</strong></span></div>
+            </div>
+            <div class="hq-room-badge" id="currentRoomNumber">
+                <i class="bi bi-door-open"></i>
+                Lütfen <strong style="margin:0 3px">3 Numaralı Muayene Odası</strong>'na geçiniz
+            </div>
+        </div>
+    </div>
+
+    <div class="hq-cur-prev">
+        <i class="bi bi-arrow-left-short" style="font-size:13px"></i>
+        Önceki: <strong>No 039</strong>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px">Mehmet Ali Demir</span>
+        <span style="margin-left:auto">08:58</span>
+    </div>
+</div>

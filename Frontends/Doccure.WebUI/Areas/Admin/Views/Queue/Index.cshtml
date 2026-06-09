@@ -713,39 +713,8 @@
             <div class="hq-row1">
 
                 <!-- SOL: Aktif hasta -->
-                <div class="hq-card">
-                    <div class="hq-card-head">
-                        <div class="hq-ched-icon blue"><i class="bi bi-megaphone-fill"></i></div>
-                        <span class="hq-card-label">Şu An Çağrılan Hasta</span>
-                        <span style="margin-left:auto;font-size:10px;color:var(--hq-text-3)" id="hq-call-time-badge">—</span>
-                    </div>
+                @await Component.InvokeAsync("_CurrentPatientComponentPartial")
 
-                    <div class="hq-cur-body">
-                        <div class="hq-num-box">
-                            <div class="hq-num-label">Sıra No</div>
-                            <div class="hq-num-val" id="currentQueueNumber">042</div>
-                            <div class="hq-num-time" id="hq-call-time">09:14</div>
-                        </div>
-                        <div class="hq-cur-info">
-                            <div class="hq-cur-name" id="currentPatientName">Ayşe Fatma Kaya</div>
-                            <div class="hq-cur-meta">
-                                <div class="hq-meta-row"><i class="bi bi-person-vcard"></i><span>Kardiyoloji Polikliniği</span></div>
-                                <div class="hq-meta-row"><i class="bi bi-clock"></i><span>Bekleme süresi: <strong>~8 dk</strong></span></div>
-                            </div>
-                            <div class="hq-room-badge" id="currentRoomNumber">
-                                <i class="bi bi-door-open"></i>
-                                Lütfen <strong style="margin:0 3px">3 Numaralı Muayene Odası</strong>'na geçiniz
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hq-cur-prev">
-                        <i class="bi bi-arrow-left-short" style="font-size:13px"></i>
-                        Önceki: <strong>No 039</strong>
-                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px">Mehmet Ali Demir</span>
-                        <span style="margin-left:auto">08:58</span>
-                    </div>
-                </div>
 
                 <!-- SAĞ: İstatistikler -->
                 <div class="hq-stats-col">
@@ -800,7 +769,7 @@
                                 <th>Saat</th>
                             </tr>
                         </thead>
-                        
+
                         <tbody id="waitingPatientTable">
 
                             @foreach (var item in Model.OrderBy(x => x.QueueNumber))
@@ -836,7 +805,7 @@
                                     </td>
 
                                     <td>
-                                       @item.AppointmentTime
+                                        @item.AppointmentTime
                                     </td>
                                 </tr>
                             }
@@ -942,27 +911,41 @@
             }
         }
 
-        connection.on("PatientCalled", function (queueNumber, patientName) {
+         connection.on("PatientCalled", function (queueNumber, patientName, branchName, appointmentTime) {
 
             console.log("PatientCalled Event");
+            console.log(queueNumber, patientName, branchName, appointmentTime);
 
-            console.log(queueNumber);
-            console.log(patientName);
+            document.getElementById("currentQueueNumber").textContent =
+                String(queueNumber).padStart(3, '0');
 
-            document.getElementById("currentQueueNumber")
-                .textContent = String(queueNumber).padStart(3, '0');
+            document.getElementById("currentPatientName").textContent =
+                patientName;
 
-            document.getElementById("currentPatientName")
-                .textContent = patientName;
+            const branchElement = document.getElementById("currentBranchName");
+            if (branchElement) {
+                branchElement.textContent = branchName;
+            }
+
+            const timeElement = document.getElementById("hq-call-time");
+            if (timeElement && appointmentTime) {
+                const date = new Date(appointmentTime);
+                timeElement.textContent = date.toLocaleTimeString("tr-TR", {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                });
+            }
 
             const card = document.querySelector(".hq-num-box");
 
-            card.style.transform = "scale(1.08)";
+            if (card) {
+                card.style.transition = "transform .25s ease";
+                card.style.transform = "scale(1.08)";
 
-            setTimeout(() => {
-                card.style.transform = "scale(1)";
-            }, 400);
-
+                setTimeout(() => {
+                    card.style.transform = "scale(1)";
+                }, 400);
+            }
         });
 
         connection.onreconnecting(() => {

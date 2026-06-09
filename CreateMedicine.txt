@@ -1,0 +1,782 @@
+﻿@model Doccure.WebUI.Dtos.MedicineDtos.CreateMedicineDto
+
+@{
+    ViewData["Title"] = "Yeni İlaç Ekle";
+    Layout = "~/Areas/Admin/Views/AdminLayout/Index.cshtml";
+}
+
+<main id="app-content">
+<style>
+    #app-content * { box-sizing: border-box; }
+
+    :root {
+        --m-ink:        #0D1B2A;
+        --m-ink-2:      #3D5166;
+        --m-ink-3:      #8FA4B8;
+        --m-border:     #E3EAF0;
+        --m-surface:    #FFFFFF;
+        --m-bg:         #F4F7FA;
+        --m-accent:     #0F6CBD;
+        --m-accent-l:   #EBF4FF;
+        --m-accent-b:   #BAD7F7;
+        --m-green:      #0A7C5C;
+        --m-green-l:    #D6F5EB;
+        --m-amber:      #B45309;
+        --m-amber-l:    #FEF3C7;
+        --m-red:        #C1121F;
+        --m-red-l:      #FDECEA;
+        --m-shadow:     0 1px 3px rgba(13,27,42,.06), 0 4px 12px rgba(13,27,42,.04);
+        --m-radius:     10px;
+        --m-radius-sm:  6px;
+    }
+
+    .mc-page {
+        width: 100%; max-width: 100%;
+        overflow-x: hidden;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--m-ink);
+        background: var(--m-bg);
+    }
+
+    /* ── Sayfa başlığı ── */
+    .mc-head {
+        display: flex; align-items: center;
+        justify-content: space-between; gap: 12px;
+        padding: 14px 20px;
+        background: var(--m-surface);
+        border-bottom: 1px solid var(--m-border);
+        flex-wrap: wrap;
+    }
+    .mc-head-title {
+        font-size: 15px; font-weight: 700; color: var(--m-ink);
+        display: flex; align-items: center; gap: 8px; margin: 0;
+    }
+    .mc-head-icon {
+        width: 28px; height: 28px; border-radius: 7px;
+        background: var(--m-accent-l); color: var(--m-accent);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; flex-shrink: 0;
+    }
+    .mc-head-sub { font-size: 11.5px; color: var(--m-ink-3); margin-top: 2px; margin-left: 36px; }
+
+    /* ── Butonlar ── */
+    .mc-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 16px; border-radius: var(--m-radius-sm);
+        font-size: 12.5px; font-weight: 600; font-family: inherit;
+        border: none; cursor: pointer;
+        transition: all .18s ease; white-space: nowrap; text-decoration: none;
+    }
+    .mc-btn-primary {
+        background: var(--m-accent); color: #fff;
+        box-shadow: 0 2px 8px rgba(15,108,189,.25);
+    }
+    .mc-btn-primary:hover { background: #0D5CA8; transform: translateY(-1px); color: #fff; }
+    .mc-btn-primary:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .mc-btn-success {
+        background: var(--m-green); color: #fff;
+        box-shadow: 0 2px 8px rgba(10,124,92,.25);
+    }
+    .mc-btn-success:hover { background: #086B4F; transform: translateY(-1px); color: #fff; }
+    .mc-btn-outline {
+        background: var(--m-surface); color: var(--m-ink-2);
+        border: 1px solid var(--m-border);
+    }
+    .mc-btn-outline:hover { background: var(--m-bg); color: var(--m-ink); }
+
+    /* ── Ana layout: form sol, önizleme sağ ── */
+    .mc-body { padding: 16px 20px; }
+    .mc-layout {
+        display: grid;
+        grid-template-columns: 1fr 280px;
+        gap: 16px;
+        align-items: start;
+    }
+    @@media(max-width:960px) { .mc-layout { grid-template-columns: 1fr; } }
+
+    /* ── Kart ── */
+    .mc-card {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        border-radius: var(--m-radius);
+        box-shadow: var(--m-shadow);
+        overflow: hidden;
+        margin-bottom: 14px;
+    }
+    .mc-card:last-child { margin-bottom: 0; }
+    .mc-card-head {
+        padding: 11px 16px;
+        border-bottom: 1px solid var(--m-border);
+        display: flex; align-items: center; gap: 8px;
+        background: var(--m-bg);
+    }
+    .mc-card-head-icon {
+        width: 26px; height: 26px; border-radius: 6px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; flex-shrink: 0;
+    }
+    .mc-card-head-icon.blue   { background:var(--m-accent-l); color:var(--m-accent); }
+    .mc-card-head-icon.green  { background:var(--m-green-l);  color:var(--m-green); }
+    .mc-card-head-icon.amber  { background:var(--m-amber-l);  color:var(--m-amber); }
+    .mc-card-label {
+        font-size: 11px; font-weight: 700;
+        color: var(--m-ink-2); letter-spacing: .06em; text-transform: uppercase;
+    }
+    .mc-card-body { padding: 18px; }
+
+    /* ── Form elemanları ── */
+    .mc-form-label {
+        display: block;
+        font-size: 11px; font-weight: 700;
+        letter-spacing: .05em; text-transform: uppercase;
+        color: var(--m-ink-2); margin-bottom: 5px;
+    }
+    .mc-form-label .mc-req { color: var(--m-red); margin-left: 2px; }
+    .mc-form-label .mc-hint {
+        font-size: 10px; font-weight: 400; text-transform: none;
+        letter-spacing: 0; color: var(--m-ink-3); margin-left: 4px;
+    }
+
+    .mc-input {
+        width: 100%;
+        border: 1px solid var(--m-border);
+        border-radius: var(--m-radius-sm);
+        padding: 9px 12px;
+        font-size: 13px; font-family: inherit;
+        color: var(--m-ink); background: var(--m-bg);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s, background .15s;
+    }
+    .mc-input:focus {
+        border-color: var(--m-accent);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(15,108,189,.1);
+    }
+    .mc-input::placeholder { color: var(--m-ink-3); }
+    .mc-input.has-error    { border-color: var(--m-red); box-shadow: 0 0 0 3px rgba(193,18,31,.08); }
+    .mc-input.has-success  { border-color: var(--m-green); }
+
+    /* Input prefix/suffix wrapper */
+    .mc-input-wrap { position: relative; }
+    .mc-input-prefix {
+        position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+        font-size: 12px; font-weight: 600; color: var(--m-ink-3);
+        pointer-events: none; user-select: none;
+    }
+    .mc-input-wrap .mc-input.with-prefix { padding-left: 26px; }
+    .mc-input-suffix {
+        position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+        font-size: 11px; color: var(--m-ink-3);
+        pointer-events: none; user-select: none;
+    }
+    .mc-input-wrap .mc-input.with-suffix { padding-right: 52px; }
+
+    .mc-form-group  { margin-bottom: 14px; }
+    .mc-form-group:last-child { margin-bottom: 0; }
+    .mc-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mc-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @@media(max-width:600px) { .mc-grid-2, .mc-grid-3 { grid-template-columns: 1fr; } }
+
+    /* Validation mesajı */
+    .mc-err {
+        font-size: 11px; color: var(--m-red); margin-top: 4px;
+        display: none; align-items: center; gap: 4px;
+    }
+    .mc-err.show { display: flex; }
+
+    /* ── Stok göstergesi (canlı) ── */
+    .mc-stock-indicator {
+        margin-top: 8px;
+        height: 5px; border-radius: 5px;
+        background: var(--m-border); overflow: hidden;
+    }
+    .mc-stock-bar {
+        height: 100%; border-radius: 5px;
+        transition: width .4s ease, background .4s ease;
+        width: 0%;
+    }
+    .mc-stock-hint {
+        font-size: 11px; margin-top: 5px; font-weight: 600;
+        display: flex; align-items: center; gap: 4px;
+    }
+
+    /* ── Toggle: Durum ── */
+    .mc-toggle-wrap {
+        display: flex; align-items: center; gap: 10px; padding: 10px 0;
+    }
+    .mc-toggle {
+        position: relative; width: 44px; height: 24px; flex-shrink: 0;
+    }
+    .mc-toggle input { opacity: 0; width: 0; height: 0; }
+    .mc-toggle-slider {
+        position: absolute; inset: 0;
+        background: var(--m-border); border-radius: 24px;
+        cursor: pointer;
+        transition: background .2s ease;
+    }
+    .mc-toggle-slider::before {
+        content: ''; position: absolute;
+        width: 18px; height: 18px; border-radius: 50%;
+        background: #fff; left: 3px; top: 3px;
+        transition: transform .2s ease;
+        box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    }
+    .mc-toggle input:checked + .mc-toggle-slider { background: var(--m-green); }
+    .mc-toggle input:checked + .mc-toggle-slider::before { transform: translateX(20px); }
+    .mc-toggle-label { font-size: 13px; font-weight: 600; color: var(--m-ink-2); }
+    .mc-toggle-sub   { font-size: 11px; color: var(--m-ink-3); }
+
+    /* ── Önizleme kartı (sağ sütun) ── */
+    .mc-preview {
+        background: var(--m-surface);
+        border: 1px solid var(--m-border);
+        border-radius: var(--m-radius);
+        box-shadow: var(--m-shadow);
+        overflow: hidden;
+        position: sticky;
+        top: 80px;
+    }
+    .mc-preview-hero {
+        padding: 18px 16px 14px;
+        background: linear-gradient(135deg, var(--m-accent-l), #fff);
+        border-bottom: 1px solid var(--m-border);
+        text-align: center;
+    }
+    .mc-preview-icon {
+        width: 56px; height: 56px; border-radius: 14px;
+        background: var(--m-accent); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 24px; margin: 0 auto 10px;
+        box-shadow: 0 4px 14px rgba(15,108,189,.3);
+    }
+    .mc-preview-name {
+        font-size: 14px; font-weight: 700; color: var(--m-ink);
+        word-break: break-word; min-height: 20px;
+    }
+    .mc-preview-barcode {
+        font-size: 10.5px; color: var(--m-ink-3);
+        font-family: 'Courier New', monospace; margin-top: 4px;
+        min-height: 16px;
+    }
+
+    .mc-preview-stats {
+        display: grid; grid-template-columns: 1fr 1fr;
+        border-bottom: 1px solid var(--m-border);
+    }
+    .mc-prev-stat {
+        padding: 12px 10px; text-align: center;
+        border-right: 1px solid var(--m-border);
+    }
+    .mc-prev-stat:nth-child(even) { border-right: none; }
+    .mc-prev-stat:nth-child(3),
+    .mc-prev-stat:nth-child(4)   { border-top: 1px solid var(--m-border); }
+    .mc-prev-stat-val { font-size: 16px; font-weight: 800; color: var(--m-ink); }
+    .mc-prev-stat-lbl { font-size: 9.5px; font-weight: 600; color: var(--m-ink-3); margin-top: 2px; }
+
+    /* Checklist */
+    .mc-preview-checks { padding: 14px 16px; }
+    .mc-checks-title {
+        font-size: 9.5px; font-weight: 700;
+        letter-spacing: .08em; text-transform: uppercase;
+        color: var(--m-ink-3); margin-bottom: 10px;
+    }
+    .mc-check-list { display: flex; flex-direction: column; gap: 7px; }
+    .mc-check-item {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 12px; color: var(--m-ink-3);
+        transition: color .2s;
+    }
+    .mc-check-item.done { color: var(--m-green); }
+    .mc-check-dot {
+        width: 18px; height: 18px; border-radius: 50%;
+        border: 2px solid var(--m-border);
+        background: var(--m-bg);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 9px; flex-shrink: 0;
+        transition: all .2s;
+    }
+    .mc-check-item.done .mc-check-dot {
+        background: var(--m-green); border-color: var(--m-green); color: #fff;
+    }
+
+    /* ── Bottom action bar ── */
+    .mc-action-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; flex-wrap: wrap;
+        padding: 14px 20px;
+        background: var(--m-surface);
+        border-top: 1px solid var(--m-border);
+        position: sticky; bottom: 0; z-index: 10;
+        box-shadow: 0 -4px 16px rgba(13,27,42,.06);
+    }
+    .mc-action-left  { display: flex; gap: 8px; }
+    .mc-action-right { display: flex; gap: 8px; }
+
+    /* ── SKT renk ipucu ── */
+    .mc-date-hint {
+        font-size: 11px; margin-top: 5px; font-weight: 600;
+        display: none; align-items: center; gap: 4px;
+    }
+    .mc-date-hint.show { display: flex; }
+    .mc-date-hint.ok     { color: var(--m-green); }
+    .mc-date-hint.warn   { color: var(--m-amber); }
+    .mc-date-hint.danger { color: var(--m-red);   }
+</style>
+
+<div class="mc-page">
+
+    <!-- Başlık -->
+    <div class="mc-head">
+        <div>
+            <h1 class="mc-head-title">
+                <span class="mc-head-icon"><i class="bi bi-plus-circle"></i></span>
+                Yeni İlaç Ekle
+            </h1>
+            <div class="mc-head-sub">İlaç bilgilerini doldurarak stok kaydı oluşturun</div>
+        </div>
+        <a href="/Admin/Medicine/List" class="mc-btn mc-btn-outline">
+            <i class="bi bi-arrow-left"></i> Listeye Dön
+        </a>
+    </div>
+
+    <!-- Form -->
+    <form id="mc-form" asp-action="Create" asp-controller="Medicine" asp-area="Admin"
+          method="post" novalidate>
+        @Html.AntiForgeryToken()
+
+        <div class="mc-body">
+            <div class="mc-layout">
+
+                <!-- ════ SOL: Form alanları ════ -->
+                <div>
+
+                    <!-- 1. Temel Bilgiler -->
+                    <div class="mc-card">
+                        <div class="mc-card-head">
+                            <div class="mc-card-head-icon blue"><i class="bi bi-capsule"></i></div>
+                            <span class="mc-card-label">Temel Bilgiler</span>
+                        </div>
+                        <div class="mc-card-body">
+
+                            <div class="mc-form-group">
+                                <label class="mc-form-label" for="MedicineName">
+                                    İlaç Adı <span class="mc-req">*</span>
+                                </label>
+                                <input class="mc-input" type="text" id="MedicineName" name="MedicineName"
+                                       placeholder="Örn: Amoksisilin 500mg Kapsül"
+                                       asp-for="MedicineName"
+                                       oninput="MC.updatePreview()"
+                                       autocomplete="off" required>
+                                <div class="mc-err" id="err-name">
+                                    <i class="bi bi-exclamation-circle"></i> İlaç adı zorunludur.
+                                </div>
+                            </div>
+
+                            <div class="mc-form-group">
+                                <label class="mc-form-label" for="Barcode">
+                                    Barkod
+                                    <span class="mc-hint">(opsiyonel)</span>
+                                </label>
+                                <div class="mc-input-wrap">
+                                    <span class="mc-input-prefix"><i class="bi bi-upc-scan"></i></span>
+                                    <input class="mc-input with-prefix" type="text" id="Barcode" name="Barcode"
+                                           placeholder="Örn: 8699539870012"
+                                           asp-for="Barcode"
+                                           oninput="MC.updatePreview()"
+                                           autocomplete="off">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 2. Stok Bilgileri -->
+                    <div class="mc-card">
+                        <div class="mc-card-head">
+                            <div class="mc-card-head-icon amber"><i class="bi bi-boxes"></i></div>
+                            <span class="mc-card-label">Stok Bilgileri</span>
+                        </div>
+                        <div class="mc-card-body">
+
+                            <div class="mc-grid-2">
+                                <div class="mc-form-group">
+                                    <label class="mc-form-label" for="Stock">
+                                        Mevcut Stok <span class="mc-req">*</span>
+                                    </label>
+                                    <div class="mc-input-wrap">
+                                        <input class="mc-input with-suffix" type="number" id="Stock" name="Stock"
+                                               placeholder="0" min="0"
+                                               asp-for="Stock"
+                                               oninput="MC.updateStockBar(); MC.updatePreview()"
+                                               required>
+                                        <span class="mc-input-suffix">adet</span>
+                                    </div>
+                                    <div class="mc-err" id="err-stock">
+                                        <i class="bi bi-exclamation-circle"></i> Geçerli bir stok girin.
+                                    </div>
+                                </div>
+
+                                <div class="mc-form-group">
+                                    <label class="mc-form-label" for="CriticalStockLevel">
+                                        Kritik Stok Seviyesi <span class="mc-req">*</span>
+                                    </label>
+                                    <div class="mc-input-wrap">
+                                        <input class="mc-input with-suffix" type="number" id="CriticalStockLevel" name="CriticalStockLevel"
+                                               placeholder="10" min="1"
+                                               asp-for="CriticalStockLevel"
+                                               oninput="MC.updateStockBar(); MC.updatePreview()"
+                                               required>
+                                        <span class="mc-input-suffix">adet</span>
+                                    </div>
+                                    <div class="mc-err" id="err-critical">
+                                        <i class="bi bi-exclamation-circle"></i> Kritik seviye zorunludur.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Canlı stok bar -->
+                            <div class="mc-stock-indicator">
+                                <div class="mc-stock-bar" id="mc-stock-bar"></div>
+                            </div>
+                            <div class="mc-stock-hint" id="mc-stock-hint" style="color:var(--m-ink-3)">
+                                Stok miktarını girerek durumu görebilirsiniz.
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 3. Fiyat & Tarih -->
+                    <div class="mc-card">
+                        <div class="mc-card-head">
+                            <div class="mc-card-head-icon green"><i class="bi bi-tag"></i></div>
+                            <span class="mc-card-label">Fiyat & Son Kullanma Tarihi</span>
+                        </div>
+                        <div class="mc-card-body">
+
+                            <div class="mc-grid-2">
+                                <div class="mc-form-group">
+                                    <label class="mc-form-label" for="UnitPrice">
+                                        Birim Fiyat <span class="mc-req">*</span>
+                                    </label>
+                                    <div class="mc-input-wrap">
+                                        <span class="mc-input-prefix">₺</span>
+                                        <input class="mc-input with-prefix" type="number" id="UnitPrice" name="UnitPrice"
+                                               placeholder="0.00" min="0" step="0.01"
+                                               asp-for="UnitPrice"
+                                               oninput="MC.updatePreview()"
+                                               required>
+                                    </div>
+                                    <div class="mc-err" id="err-price">
+                                        <i class="bi bi-exclamation-circle"></i> Geçerli bir fiyat girin.
+                                    </div>
+                                </div>
+
+                                <div class="mc-form-group">
+                                    <label class="mc-form-label" for="ExpirationDate">
+                                        Son Kullanma Tarihi <span class="mc-req">*</span>
+                                    </label>
+                                    <input class="mc-input" type="date" id="ExpirationDate" name="ExpirationDate"
+                                           asp-for="ExpirationDate"
+                                           oninput="MC.updateDateHint(); MC.updatePreview()"
+                                           required>
+                                    <!-- Tarih ipucu -->
+                                    <div class="mc-date-hint" id="mc-date-hint"></div>
+                                    <div class="mc-err" id="err-date">
+                                        <i class="bi bi-exclamation-circle"></i> Geçerli bir tarih girin.
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 4. Durum -->
+                    <div class="mc-card">
+                        <div class="mc-card-head">
+                            <div class="mc-card-head-icon green"><i class="bi bi-toggle-on"></i></div>
+                            <span class="mc-card-label">Kayıt Durumu</span>
+                        </div>
+                        <div class="mc-card-body">
+                            <div class="mc-toggle-wrap">
+                                <label class="mc-toggle">
+                                    <input type="checkbox" id="Status" name="Status" value="true"
+                                           asp-for="Status"
+                                           onchange="MC.updatePreview()" checked>
+                                    <span class="mc-toggle-slider"></span>
+                                </label>
+                                <!-- hidden fallback: unchecked durumunda false gönderilsin -->
+                                <input type="hidden" name="Status" value="false">
+                                <div>
+                                    <div class="mc-toggle-label" id="mc-status-label">Aktif</div>
+                                    <div class="mc-toggle-sub">İlaç aktif olduğunda sipariş ve reçetelerde görünür.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /sol -->
+
+                <!-- ════ SAĞ: Önizleme + Checklist ════ -->
+                <div>
+                    <div class="mc-preview">
+                        <!-- Hero -->
+                        <div class="mc-preview-hero">
+                            <div class="mc-preview-icon">
+                                <i class="bi bi-capsule-pill"></i>
+                            </div>
+                            <div class="mc-preview-name" id="prev-name">İlaç adı girilmedi</div>
+                            <div class="mc-preview-barcode" id="prev-barcode">Barkod girilmedi</div>
+                        </div>
+
+                        <!-- Mini stat grid -->
+                        <div class="mc-preview-stats">
+                            <div class="mc-prev-stat">
+                                <div class="mc-prev-stat-val" id="prev-stock">—</div>
+                                <div class="mc-prev-stat-lbl">Stok</div>
+                            </div>
+                            <div class="mc-prev-stat">
+                                <div class="mc-prev-stat-val" id="prev-critical">—</div>
+                                <div class="mc-prev-stat-lbl">Kritik Seviye</div>
+                            </div>
+                            <div class="mc-prev-stat">
+                                <div class="mc-prev-stat-val" id="prev-price">—</div>
+                                <div class="mc-prev-stat-lbl">Birim Fiyat</div>
+                            </div>
+                            <div class="mc-prev-stat">
+                                <div class="mc-prev-stat-val" id="prev-expiry">—</div>
+                                <div class="mc-prev-stat-lbl">SKT</div>
+                            </div>
+                        </div>
+
+                        <!-- Tamamlama checklist -->
+                        <div class="mc-preview-checks">
+                            <div class="mc-checks-title">Form Tamamlama</div>
+                            <div class="mc-check-list">
+                                <div class="mc-check-item" id="chk-name">
+                                    <div class="mc-check-dot"><i class="bi bi-check-lg"></i></div>
+                                    İlaç adı girildi
+                                </div>
+                                <div class="mc-check-item" id="chk-stock">
+                                    <div class="mc-check-dot"><i class="bi bi-check-lg"></i></div>
+                                    Stok miktarı girildi
+                                </div>
+                                <div class="mc-check-item" id="chk-critical">
+                                    <div class="mc-check-dot"><i class="bi bi-check-lg"></i></div>
+                                    Kritik seviye belirlendi
+                                </div>
+                                <div class="mc-check-item" id="chk-price">
+                                    <div class="mc-check-dot"><i class="bi bi-check-lg"></i></div>
+                                    Birim fiyat girildi
+                                </div>
+                                <div class="mc-check-item" id="chk-date">
+                                    <div class="mc-check-dot"><i class="bi bi-check-lg"></i></div>
+                                    Son kullanma tarihi girildi
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /sağ -->
+
+            </div><!-- /.mc-layout -->
+        </div><!-- /.mc-body -->
+
+        <!-- ── Action Bar ── -->
+        <div class="mc-action-bar">
+            <div class="mc-action-left">
+                <a href="/Admin/Medicine/List" class="mc-btn mc-btn-outline">
+                    <i class="bi bi-arrow-left"></i> İptal
+                </a>
+                <button type="button" class="mc-btn mc-btn-outline" onclick="MC.resetForm()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Sıfırla
+                </button>
+            </div>
+            <div class="mc-action-right">
+                <button type="submit" class="mc-btn mc-btn-success" id="mc-submit-btn" onclick="return MC.validate()">
+                    <i class="bi bi-check2-circle"></i> İlacı Kaydet
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div><!-- /.mc-page -->
+
+<script>
+const MC = (() => {
+
+    /* ── Önizleme güncelle ── */
+    function updatePreview() {
+        const name     = v('MedicineName');
+        const barcode  = v('Barcode');
+        const stock    = parseInt(v('Stock'))             || 0;
+        const critical = parseInt(v('CriticalStockLevel')) || 0;
+        const price    = parseFloat(v('UnitPrice'))       || 0;
+        const expDate  = v('ExpirationDate');
+        const isActive = document.getElementById('Status')?.checked;
+
+        // İsim
+        set('prev-name',    name    || 'İlaç adı girilmedi');
+        set('prev-barcode', barcode ? `Barkod: ${barcode}` : 'Barkod girilmedi');
+
+        // Stats
+        set('prev-stock',    stock    > 0  ? stock + ' adet'                    : '—');
+        set('prev-critical', critical > 0  ? critical + ' adet'                 : '—');
+        set('prev-price',    price    > 0  ? '₺' + price.toFixed(2)             : '—');
+
+        // SKT
+        if (expDate) {
+            const d = new Date(expDate);
+            set('prev-expiry', d.toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric'}));
+        } else {
+            set('prev-expiry', '—');
+        }
+
+        // Durum label
+        const lbl = document.getElementById('mc-status-label');
+        if (lbl) lbl.textContent = isActive ? 'Aktif' : 'Pasif';
+
+        // Checklist
+        chk('chk-name',     !!name);
+        chk('chk-stock',    stock > 0);
+        chk('chk-critical', critical > 0);
+        chk('chk-price',    price > 0);
+        chk('chk-date',     !!expDate);
+    }
+
+    /* ── Stok durumu bar ── */
+    function updateStockBar() {
+        const stock    = parseInt(v('Stock'))             || 0;
+        const critical = parseInt(v('CriticalStockLevel')) || 0;
+        const bar      = document.getElementById('mc-stock-bar');
+        const hint     = document.getElementById('mc-stock-hint');
+        if (!bar || !hint) return;
+
+        if (critical <= 0) {
+            bar.style.width = '0%';
+            hint.textContent = 'Kritik seviye girilince stok durumu gösterilir.';
+            hint.style.color = 'var(--m-ink-3)';
+            return;
+        }
+
+        const max = critical * 4;
+        const pct = Math.min(100, Math.round((stock / max) * 100));
+        bar.style.width = pct + '%';
+
+        if (stock === 0) {
+            bar.style.background = 'var(--m-red)';
+            hint.innerHTML = '<i class="bi bi-x-circle-fill"></i> Stok tükendi!';
+            hint.style.color = 'var(--m-red)';
+        } else if (stock <= critical) {
+            bar.style.background = 'var(--m-red)';
+            hint.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Kritik seviyede! Hemen sipariş verin.';
+            hint.style.color = 'var(--m-red)';
+        } else if (stock <= critical * 2) {
+            bar.style.background = 'var(--m-amber)';
+            hint.innerHTML = '<i class="bi bi-exclamation-circle"></i> Stok azalıyor, yakında sipariş gerekebilir.';
+            hint.style.color = 'var(--m-amber)';
+        } else {
+            bar.style.background = 'var(--m-green)';
+            hint.innerHTML = '<i class="bi bi-check-circle"></i> Stok seviyesi yeterli.';
+            hint.style.color = 'var(--m-green)';
+        }
+    }
+
+    /* ── SKT ipucu ── */
+    function updateDateHint() {
+        const val  = v('ExpirationDate');
+        const hint = document.getElementById('mc-date-hint');
+        if (!hint) return;
+        if (!val) { hint.classList.remove('show'); return; }
+
+        const days = (new Date(val) - new Date()) / 86400000;
+        hint.classList.add('show');
+        hint.className = hint.className.replace(/\b(ok|warn|danger)\b/g, '');
+
+        if (days < 0) {
+            hint.classList.add('danger');
+            hint.innerHTML = '<i class="bi bi-x-circle-fill"></i> Bu tarihin süresi zaten geçmiş!';
+        } else if (days <= 30) {
+            hint.classList.add('danger');
+            hint.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Sadece ${Math.floor(days)} gün geçerli — çok kısa!`;
+        } else if (days <= 90) {
+            hint.classList.add('warn');
+            hint.innerHTML = `<i class="bi bi-exclamation-circle"></i> ${Math.floor(days)} gün geçerli — yakın vadeli.`;
+        } else {
+            hint.classList.add('ok');
+            hint.innerHTML = `<i class="bi bi-check-circle"></i> ${Math.floor(days)} gün geçerli.`;
+        }
+    }
+
+    /* ── Validasyon ── */
+    function validate() {
+        let ok = true;
+
+        const checks = [
+            ['MedicineName', 'err-name',     val => !!val.trim()],
+            ['Stock',        'err-stock',    val => parseInt(val) >= 0 && val !== ''],
+            ['CriticalStockLevel', 'err-critical', val => parseInt(val) > 0],
+            ['UnitPrice',    'err-price',    val => parseFloat(val) > 0],
+            ['ExpirationDate','err-date',    val => !!val],
+        ];
+
+        checks.forEach(([id, errId, test]) => {
+            const el  = document.getElementById(id);
+            const err = document.getElementById(errId);
+            if (!el || !err) return;
+            const pass = test(el.value);
+            el.classList.toggle('has-error',   !pass);
+            el.classList.toggle('has-success',  pass);
+            err.classList.toggle('show', !pass);
+            if (!pass) ok = false;
+        });
+
+        if (!ok) {
+            // İlk hatalı alana scroll
+            const firstErr = document.querySelector('.mc-input.has-error');
+            if (firstErr) firstErr.scrollIntoView({ behavior:'smooth', block:'center' });
+            Shell?.toast('Lütfen zorunlu alanları doldurun.', 'danger', 'bi-exclamation-circle');
+        }
+        return ok;
+    }
+
+    /* ── Formu sıfırla ── */
+    function resetForm() {
+        document.getElementById('mc-form')?.reset();
+        document.querySelectorAll('.mc-input').forEach(el => {
+            el.classList.remove('has-error', 'has-success');
+        });
+        document.querySelectorAll('.mc-err').forEach(el => el.classList.remove('show'));
+        document.getElementById('mc-date-hint')?.classList.remove('show');
+        updatePreview();
+        updateStockBar();
+        Shell?.toast('Form sıfırlandı.', 'info', 'bi-arrow-counterclockwise');
+    }
+
+    /* ── Input temizleme: has-error ── */
+    document.querySelectorAll('.mc-input').forEach(el => {
+        el.addEventListener('input', () => {
+            el.classList.remove('has-error');
+            const errId = 'err-' + el.id.toLowerCase().replace('medicinename','name')
+                                                       .replace('criticalstocklevel','critical')
+                                                       .replace('unitprice','price')
+                                                       .replace('expirationdate','date');
+            document.getElementById(errId)?.classList.remove('show');
+        });
+    });
+
+    /* ── Shell setPage ── */
+    if (typeof Shell !== 'undefined' && Shell.setPage)
+        Shell.setPage('Yeni İlaç', 'Admin Paneli / Depo / İlaç Yönetimi / Ekle');
+
+    /* ── Yardımcılar ── */
+    function v(id)      { return document.getElementById(id)?.value ?? ''; }
+    function set(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+    function chk(id, done) {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('done', done);
+    }
+
+    return { updatePreview, updateStockBar, updateDateHint, validate, resetForm };
+})();
+</script>
+
+</main>
