@@ -1,0 +1,995 @@
+﻿
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hastane Market</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <style>
+        /* ─── Root Tokens ─────────────────────────────── */
+        :root {
+            --hm-primary:      #1A7F64;
+            --hm-primary-dk:   #145F4B;
+            --hm-primary-lt:   #E8F5F1;
+            --hm-accent:       #2EBFA5;
+            --hm-accent-lt:    #D4F5EF;
+            --hm-warning:      #F59E0B;
+            --hm-surface:      #F8FAFB;
+            --hm-border:       #E5EAF0;
+            --hm-text:         #1B2332;
+            --hm-muted:        #7B8FA6;
+            --hm-white:        #FFFFFF;
+            --hm-card-radius:  16px;
+            --hm-hero-h:       220px;
+            --shadow-card:     0 2px 8px rgba(0,0,0,.06);
+            --shadow-hover:    0 12px 32px rgba(26,127,100,.18);
+            --transition:      .22s cubic-bezier(.4,0,.2,1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--hm-surface);
+            color: var(--hm-text);
+            margin: 0;
+        }
+
+        /* ─── Top Bar ─────────────────────────────────── */
+        .top-bar {
+            background: var(--hm-white);
+            border-bottom: 1px solid var(--hm-border);
+            padding: 10px 0;
+            font-size: .82rem;
+            color: var(--hm-muted);
+        }
+        .top-bar .bi { margin-right: 4px; color: var(--hm-primary); }
+
+        /* ─── Hero / Header ───────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, #0D5C48 0%, #1A7F64 55%, #2EBFA5 100%);
+            min-height: var(--hm-hero-h);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 40px 0 56px;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            right: -80px; top: -80px;
+            width: 420px; height: 420px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            right: 60px; bottom: -140px;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.04);
+            pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,.18);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.28);
+            color: #fff;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            border-radius: 50px;
+            padding: 5px 14px;
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            font-size: clamp(1.9rem, 4vw, 2.9rem);
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.15;
+            margin: 0 0 12px;
+        }
+        .hero p {
+            color: rgba(255,255,255,.82);
+            font-size: 1rem;
+            max-width: 480px;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Cart FAB on hero */
+        .cart-btn {
+            position: relative;
+            background: rgba(255,255,255,.15);
+            backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(255,255,255,.35);
+            color: #fff;
+            border-radius: 14px;
+            padding: 12px 22px;
+            font-size: .92rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .cart-btn:hover {
+            background: rgba(255,255,255,.28);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.18);
+        }
+        .cart-count {
+            background: var(--hm-warning);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 700;
+            border-radius: 50px;
+            padding: 2px 7px;
+            min-width: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        /* Stats row inside hero */
+        .hero-stats {
+            display: flex;
+            gap: 28px;
+            margin-top: 28px;
+        }
+        .hero-stat { color: rgba(255,255,255,.9); }
+        .hero-stat strong { display: block; font-size: 1.25rem; font-weight: 700; color: #fff; }
+        .hero-stat span { font-size: .78rem; opacity: .75; }
+
+        /* ─── Sticky Filter Bar ───────────────────────── */
+        .filter-bar {
+            background: var(--hm-white);
+            border-bottom: 1px solid var(--hm-border);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,.05);
+        }
+        .filter-bar .form-control,
+        .filter-bar .form-select {
+            border-radius: 12px;
+            border: 1.5px solid var(--hm-border);
+            font-size: .9rem;
+            padding: 10px 16px;
+            transition: var(--transition);
+            background: var(--hm-surface);
+        }
+        .filter-bar .form-control:focus,
+        .filter-bar .form-select:focus {
+            border-color: var(--hm-primary);
+            box-shadow: 0 0 0 3px rgba(26,127,100,.12);
+            background: var(--hm-white);
+        }
+        .search-wrap { position: relative; }
+        .search-wrap .bi {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--hm-muted);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        .search-wrap .form-control { padding-left: 40px; }
+
+        /* Category chips */
+        .cat-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            scrollbar-width: none;
+        }
+        .cat-chips::-webkit-scrollbar { display: none; }
+        .cat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            border: 1.5px solid var(--hm-border);
+            background: var(--hm-white);
+            color: var(--hm-text);
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-size: .82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
+        }
+        .cat-chip:hover, .cat-chip.active {
+            background: var(--hm-primary-lt);
+            border-color: var(--hm-primary);
+            color: var(--hm-primary);
+        }
+        .cat-chip .bi { font-size: .9rem; }
+
+        /* ─── Product Section ─────────────────────────── */
+        .products-section { padding: 32px 0 60px; }
+
+        .section-label {
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--hm-primary);
+            margin-bottom: 4px;
+        }
+        .section-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--hm-text);
+            margin-bottom: 24px;
+        }
+
+        /* ─── Product Card ────────────────────────────── */
+        .product-card {
+            background: var(--hm-white);
+            border-radius: var(--hm-card-radius);
+            border: 1px solid var(--hm-border);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            transition: var(--transition);
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-4px);
+            border-color: rgba(26,127,100,.2);
+        }
+        .product-card .img-wrap {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            background: var(--hm-surface);
+            position: relative;
+        }
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .35s ease;
+        }
+        .product-card:hover img { transform: scale(1.06); }
+
+        /* favourite button */
+        .fav-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(255,255,255,.9);
+            border: none;
+            border-radius: 50%;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .9rem;
+            color: var(--hm-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 2;
+        }
+        .fav-btn:hover { color: #E53E3E; background: #fff; transform: scale(1.1); }
+
+        .product-body {
+            padding: 14px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .product-cat {
+            display: inline-block;
+            font-size: .7rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            border-radius: 50px;
+            padding: 3px 10px;
+            margin-bottom: 8px;
+        }
+        .product-name {
+            font-size: .93rem;
+            font-weight: 600;
+            color: var(--hm-text);
+            line-height: 1.35;
+            margin-bottom: 10px;
+            flex: 1;
+        }
+        .product-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--hm-primary-dk);
+            margin-bottom: 12px;
+        }
+        .product-price small {
+            font-size: .72rem;
+            color: var(--hm-muted);
+            font-weight: 400;
+            margin-left: 3px;
+        }
+
+        /* Add to cart btn */
+        .btn-add {
+            background: var(--hm-primary);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 0;
+            font-size: .85rem;
+            font-weight: 600;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-add:hover {
+            background: var(--hm-primary-dk);
+            transform: scale(1.03);
+            box-shadow: 0 6px 18px rgba(26,127,100,.32);
+        }
+        .btn-add:active { transform: scale(.98); }
+
+        /* ─── Category badge colour map ───────────────── */
+        .badge-atistirmalik  { background: #FEF3C7; color: #B45309; }
+        .badge-icecek        { background: #DBEAFE; color: #1D4ED8; }
+        .badge-kahvaltilik   { background: #FCE7F3; color: #9D174D; }
+        .badge-meyve         { background: #D1FAE5; color: #065F46; }
+        .badge-temizlik      { background: #EDE9FE; color: #5B21B6; }
+        .badge-kisisel       { background: #FEE2E2; color: #991B1B; }
+        .badge-default       { background: #F3F4F6; color: #374151; }
+
+        /* ─── Skeleton ────────────────────────────────── */
+        .skeleton-card {
+            background: var(--hm-white);
+            border-radius: var(--hm-card-radius);
+            border: 1px solid var(--hm-border);
+            overflow: hidden;
+            height: 340px;
+        }
+        .skeleton-img {
+            width: 100%; height: 180px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+        }
+        .skeleton-body { padding: 14px 16px; }
+        .skeleton-line {
+            border-radius: 6px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ─── Empty State ─────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+        }
+        .empty-icon {
+            width: 100px; height: 100px;
+            background: var(--hm-primary-lt);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 2.8rem;
+            color: var(--hm-primary);
+        }
+        .empty-state h4 { font-weight: 700; color: var(--hm-text); margin-bottom: 8px; }
+        .empty-state p  { color: var(--hm-muted); font-size: .95rem; }
+
+        /* ─── Modal ───────────────────────────────────── */
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+        }
+        .modal-header {
+            background: var(--hm-primary-lt);
+            border-bottom: 1px solid var(--hm-border);
+            padding: 16px 24px;
+        }
+        .modal-title { font-weight: 700; font-size: 1rem; color: var(--hm-primary-dk); }
+        .modal-img-wrap {
+            height: 260px;
+            overflow: hidden;
+            border-radius: 14px;
+        }
+        .modal-img-wrap img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .modal-price {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--hm-primary-dk);
+        }
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            border: 1.5px solid var(--hm-border);
+            border-radius: 10px;
+            overflow: hidden;
+            width: fit-content;
+        }
+        .qty-btn {
+            background: var(--hm-surface);
+            border: none;
+            padding: 8px 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--hm-primary);
+            transition: var(--transition);
+        }
+        .qty-btn:hover { background: var(--hm-primary-lt); }
+        .qty-val {
+            padding: 8px 18px;
+            font-weight: 700;
+            font-size: 1rem;
+            border-left: 1.5px solid var(--hm-border);
+            border-right: 1.5px solid var(--hm-border);
+            min-width: 50px;
+            text-align: center;
+        }
+        .total-price-box {
+            background: var(--hm-primary-lt);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-modal-add {
+            background: var(--hm-primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-size: .95rem;
+            font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            justify-content: center;
+        }
+        .btn-modal-add:hover {
+            background: var(--hm-primary-dk);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(26,127,100,.3);
+        }
+
+        /* ─── Toast ───────────────────────────────────── */
+        .toast-container { z-index: 9999; }
+        .toast {
+            border-radius: 14px;
+            border: none;
+            box-shadow: 0 8px 32px rgba(0,0,0,.14);
+            min-width: 280px;
+        }
+        .toast-header {
+            background: var(--hm-primary);
+            color: #fff;
+            border-radius: 14px 14px 0 0;
+            border: none;
+        }
+        .toast-header .btn-close { filter: invert(1); opacity: .85; }
+
+        /* ─── Footer ──────────────────────────────────── */
+        .site-footer {
+            background: var(--hm-white);
+            border-top: 1px solid var(--hm-border);
+            padding: 28px 0;
+            color: var(--hm-muted);
+            font-size: .83rem;
+        }
+        .footer-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700;
+            color: var(--hm-primary);
+            font-size: 1rem;
+        }
+
+        /* ─── Utility ─────────────────────────────────── */
+        .divider-wave {
+            background: var(--hm-white);
+            height: 28px;
+            margin-top: -1px;
+            clip-path: ellipse(55% 100% at 50% 100%);
+        }
+        .fade-in {
+            animation: fadeUp .35s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Responsive tweaks ───────────────────────── */
+        @media (max-width: 575px) {
+            .hero h1 { font-size: 1.6rem; }
+            .hero p  { font-size: .9rem; }
+            .hero-stats { gap: 18px; }
+            .hero-stat strong { font-size: 1rem; }
+            .section-title { font-size: 1.15rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  TOP INFO BAR                                ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<div class="top-bar d-none d-md-block">
+    <div class="container d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-hospital"></i>Şehir Hastanesi — Hasta Hizmetleri</span>
+        <div class="d-flex gap-4">
+            <span><i class="bi bi-clock"></i>Teslimat: 20–35 dk</span>
+            <span><i class="bi bi-shield-check"></i>Güvenli Ödeme</span>
+            <span><i class="bi bi-telephone"></i>Dahili: 1234</span>
+        </div>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  HERO HEADER                                 ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<header class="hero">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <div class="hero-badge">
+                    <i class="bi bi-bag-heart-fill"></i> Hastane Market
+                </div>
+                <h1>İhtiyacınız olan her şey<br />odanıza geliyor.</h1>
+                <p>Atıştırmalıktan kişisel bakıma, içecekten kahvaltılığa — birkaç dokunuşla siparişiniz yolda.</p>
+                <div class="hero-stats">
+                    <div class="hero-stat"><strong>200+</strong><span>Ürün</span></div>
+                    <div class="hero-stat"><strong>20 dk</strong><span>Ortalama teslimat</span></div>
+                    <div class="hero-stat"><strong>7/24</strong><span>Hizmet</span></div>
+                </div>
+            </div>
+            <a href="#cart" class="cart-btn" id="headerCartBtn">
+                <i class="bi bi-bag-fill fs-5"></i>
+                Sepetim
+                <span class="cart-count" id="cartBadge">0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  STICKY FILTER BAR                           ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<nav class="filter-bar" id="filterBar">
+    <div class="container">
+        <div class="row g-3 align-items-center mb-3">
+            <!-- Search -->
+            <div class="col-12 col-sm-7 col-md-6">
+                <div class="search-wrap">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Ürün ara… (ör. su, bisküvi, şampuan)" />
+                </div>
+            </div>
+            <!-- Category select -->
+            <div class="col-12 col-sm-5 col-md-4">
+                <select id="categorySelect" class="form-select">
+                    <option value="">Tüm Kategoriler</option>
+                    <option value="Atıştırmalık">Atıştırmalık</option>
+                    <option value="İçecek">İçecek</option>
+                    <option value="Kahvaltılık">Kahvaltılık</option>
+                    <option value="Meyve">Meyve</option>
+                    <option value="Temizlik">Temizlik</option>
+                    <option value="Kişisel Bakım">Kişisel Bakım</option>
+                </select>
+            </div>
+            <!-- Result count -->
+            <div class="col-12 col-md-2 text-md-end">
+                <span id="resultCount" class="text-muted" style="font-size:.83rem;"></span>
+            </div>
+        </div>
+        <!-- Chip row -->
+        <div class="cat-chips">
+            <div class="cat-chip active" data-cat="">
+                <i class="bi bi-grid-3x3-gap-fill"></i> Tümü
+            </div>
+            <div class="cat-chip" data-cat="Atıştırmalık">
+                <i class="bi bi-cookie"></i> Atıştırmalık
+            </div>
+            <div class="cat-chip" data-cat="İçecek">
+                <i class="bi bi-cup-straw"></i> İçecek
+            </div>
+            <div class="cat-chip" data-cat="Kahvaltılık">
+                <i class="bi bi-egg-fried"></i> Kahvaltılık
+            </div>
+            <div class="cat-chip" data-cat="Meyve">
+                <i class="bi bi-apple"></i> Meyve
+            </div>
+            <div class="cat-chip" data-cat="Temizlik">
+                <i class="bi bi-bucket-fill"></i> Temizlik
+            </div>
+            <div class="cat-chip" data-cat="Kişisel Bakım">
+                <i class="bi bi-droplet-half"></i> Kişisel Bakım
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  PRODUCT GRID                                ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<section class="products-section">
+    <div class="container">
+        <div class="section-label">Tüm Ürünler</div>
+        <div class="section-title" id="sectionTitle">Günün Önerileri</div>
+
+        <!-- Skeleton (shown while loading) -->
+        <div id="skeletonGrid" class="row g-3 g-md-4">
+            <!-- 8 skeleton cards -->
+        </div>
+
+        <!-- Product grid -->
+        <div id="productGrid" class="row g-3 g-md-4" style="display:none;"></div>
+
+        <!-- Empty state -->
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div class="empty-icon"><i class="bi bi-search-heart"></i></div>
+            <h4>Ürün bulunamadı</h4>
+            <p>Aradığınız kriterlere uygun ürün bulunamadı.<br />Filtreleri temizleyerek tekrar deneyebilirsiniz.</p>
+            <button class="btn btn-outline-secondary mt-3 rounded-pill" onclick="clearFilters()">
+                <i class="bi bi-arrow-counterclockwise me-2"></i>Filtreleri Temizle
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  PRODUCT DETAIL MODAL                        ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"><i class="bi bi-bag-heart me-2"></i>Ürün Detayı</span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="modal-img-wrap">
+                            <img id="modalImg" src="" alt="" />
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <span id="modalCatBadge" class="product-cat mb-2 d-inline-block"></span>
+                        <h3 id="modalName" class="fw-700 mb-1" style="font-size:1.35rem;font-weight:700;"></h3>
+                        <p class="text-muted" style="font-size:.88rem;line-height:1.6;" id="modalDesc">
+                            Hastane marketimizin özenle seçilmiş ürünlerinden biri. Yüksek kalite standartlarımızla temin edilen bu ürün, hastanemizde konaklayan tüm hastalarımız ve refakatçileri için hazırlanmıştır.
+                        </p>
+
+                        <div class="modal-price mb-3" id="modalPrice"></div>
+
+                        <!-- Qty -->
+                        <div class="mb-3">
+                            <div class="fw-600 mb-2" style="font-size:.88rem;color:var(--hm-muted);">ADET</div>
+                            <div class="qty-control">
+                                <button class="qty-btn" onclick="changeQty(-1)">−</button>
+                                <div class="qty-val" id="qtyDisplay">1</div>
+                                <button class="qty-btn" onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <div class="total-price-box mb-4">
+                            <span class="fw-600" style="color:var(--hm-primary);">Toplam</span>
+                            <span id="totalPrice" class="fw-700 fs-5" style="color:var(--hm-primary-dk);"></span>
+                        </div>
+
+                        <button class="btn-modal-add" id="modalAddBtn">
+                            <i class="bi bi-cart-plus-fill fs-5"></i> Sepete Ekle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  TOAST NOTIFICATION                          ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cartToast" class="toast" role="alert" aria-live="assertive" data-bs-delay="2800">
+        <div class="toast-header">
+            <i class="bi bi-bag-check-fill me-2"></i>
+            <strong class="me-auto">Sepete Eklendi</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body d-flex align-items-center gap-2">
+            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            <span id="toastMsg">Ürün sepete eklendi.</span>
+        </div>
+    </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════╗ -->
+<!-- ║  FOOTER                                      ║ -->
+<!-- ╚══════════════════════════════════════════════╝ -->
+<footer class="site-footer">
+    <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+        <div class="footer-logo">
+            <i class="bi bi-hospital-fill fs-4"></i>
+            Hastane Market
+        </div>
+        <div>Tüm siparişler 20–35 dakika içinde odanıza teslim edilir. Destek: Dahili 1234</div>
+        <div class="d-flex gap-3">
+            <a href="#" class="text-muted text-decoration-none"><i class="bi bi-shield-lock me-1"></i>Gizlilik</a>
+            <a href="#" class="text-muted text-decoration-none"><i class="bi bi-file-text me-1"></i>Koşullar</a>
+        </div>
+    </div>
+</footer>
+
+<!-- ─── Scripts ──────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA — Mock ResultProductDto list
+   In production this comes from:
+   @JsonSerializer.Serialize(Model, …) or an API call
+   ══════════════════════════════════════════════════════ */
+const products = [
+    { productId:1,  productName:"Eti Burçak Bisküvi 130g",        price:45.90,  category:"Atıştırmalık", imageUrl:"https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=400&q=80" },
+    { productId:2,  productName:"Lay's Tuzlu Cips 107g",          price:68.50,  category:"Atıştırmalık", imageUrl:"https://images.unsplash.com/photo-1621447504864-d8686e12698c?w=400&q=80" },
+    { productId:3,  productName:"Erikli Doğal Kaynak Suyu 0.5L",  price:12.00,  category:"İçecek",       imageUrl:"https://images.unsplash.com/photo-1616118132534-381148898bb4?w=400&q=80" },
+    { productId:4,  productName:"Coca-Cola Kutu 330ml",            price:36.90,  category:"İçecek",       imageUrl:"https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=400&q=80" },
+    { productId:5,  productName:"Sütaş Süt 1L",                   price:52.00,  category:"Kahvaltılık",  imageUrl:"https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&q=80" },
+    { productId:6,  productName:"Ülker Çikolatalı Gofret 36g",    price:18.50,  category:"Atıştırmalık", imageUrl:"https://images.unsplash.com/photo-1575377427642-087cf684f29d?w=400&q=80" },
+    { productId:7,  productName:"Destan Bal Kavun 1 Adet",        price:85.00,  category:"Meyve",        imageUrl:"https://images.unsplash.com/photo-1571575309469-7d78db7e1f25?w=400&q=80" },
+    { productId:8,  productName:"İzmir Muz 1 kg",                  price:65.00,  category:"Meyve",        imageUrl:"https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400&q=80" },
+    { productId:9,  productName:"Activia Yoğurt 200g",             price:42.90,  category:"Kahvaltılık",  imageUrl:"https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80" },
+    { productId:10, productName:"Rexona Deodorant Roll-On 50ml",   price:119.90, category:"Kişisel Bakım",imageUrl:"https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?w=400&q=80" },
+    { productId:11, productName:"Head & Shoulders Şampuan 400ml",  price:189.90, category:"Kişisel Bakım",imageUrl:"https://images.unsplash.com/photo-1612817288484-6f916006741a?w=400&q=80" },
+    { productId:12, productName:"Domestos Çamaşır Suyu 1L",        price:79.90,  category:"Temizlik",     imageUrl:"https://images.unsplash.com/photo-1585421514738-01798e348b17?w=400&q=80" },
+    { productId:13, productName:"Fairy Bulaşık Deterjanı 675ml",   price:99.90,  category:"Temizlik",     imageUrl:"https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80" },
+    { productId:14, productName:"Pınar Beyaz Peynir 300g",         price:134.90, category:"Kahvaltılık",  imageUrl:"https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400&q=80" },
+    { productId:15, productName:"Lipton Ice Tea Şeftali 330ml",    price:34.90,  category:"İçecek",       imageUrl:"https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80" },
+    { productId:16, productName:"Ankara Armudu 1 kg",              price:55.00,  category:"Meyve",        imageUrl:"https://images.unsplash.com/photo-1551189014-fe516c8c25c5?w=400&q=80" },
+];
+
+/* ══════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════ */
+let cartCount  = 0;
+let currentQty = 1;
+let currentProduct = null;
+
+const catBadgeMap = {
+    "Atıştırmalık": "badge-atistirmalik",
+    "İçecek":       "badge-icecek",
+    "Kahvaltılık":  "badge-kahvaltilik",
+    "Meyve":        "badge-meyve",
+    "Temizlik":     "badge-temizlik",
+    "Kişisel Bakım":"badge-kisisel",
+};
+
+/* ══════════════════════════════════════════════════════
+   SKELETON
+   ══════════════════════════════════════════════════════ */
+function buildSkeleton() {
+    const grid = document.getElementById('skeletonGrid');
+    let html = '';
+    for (let i = 0; i < 8; i++) {
+        html += `
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="skeleton-card">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                    <div class="skeleton-line" style="width:40%;height:14px;"></div>
+                    <div class="skeleton-line" style="width:80%;height:16px;"></div>
+                    <div class="skeleton-line" style="width:60%;height:16px;"></div>
+                    <div class="skeleton-line" style="width:35%;height:22px;margin-top:8px;"></div>
+                    <div class="skeleton-line" style="width:100%;height:36px;border-radius:10px;"></div>
+                </div>
+            </div>
+        </div>`;
+    }
+    grid.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER PRODUCTS
+   ══════════════════════════════════════════════════════ */
+function renderProducts(list) {
+    const grid  = document.getElementById('productGrid');
+    const empty = document.getElementById('emptyState');
+    const count = document.getElementById('resultCount');
+
+    if (!list.length) {
+        grid.style.display  = 'none';
+        empty.style.display = 'block';
+        count.textContent   = '';
+        return;
+    }
+    empty.style.display = 'none';
+    grid.style.display  = '';
+    count.textContent   = list.length + ' ürün';
+
+    grid.innerHTML = list.map((p, i) => {
+        const badgeCls = catBadgeMap[p.category] || 'badge-default';
+        return `
+        <div class="col-6 col-md-4 col-lg-3 fade-in" style="animation-delay:${i * 40}ms">
+            <div class="product-card h-100" onclick="openModal(${p.productId})">
+                <div class="img-wrap">
+                    <img src="${p.imageUrl}" alt="${p.productName}" loading="lazy" />
+                    <button class="fav-btn" onclick="event.stopPropagation()" title="Favorilere ekle">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+                <div class="product-body">
+                    <span class="product-cat ${badgeCls}">${p.category}</span>
+                    <div class="product-name">${p.productName}</div>
+                    <div class="product-price">₺${p.price.toFixed(2)}</div>
+                    <button class="btn-add" onclick="event.stopPropagation(); quickAdd(${p.productId})">
+                        <i class="bi bi-cart-plus-fill"></i> Sepete Ekle
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   FILTER
+   ══════════════════════════════════════════════════════ */
+function applyFilters() {
+    const query    = document.getElementById('searchInput').value.toLowerCase().trim();
+    const category = document.getElementById('categorySelect').value;
+
+    const filtered = products.filter(p => {
+        const matchName = p.productName.toLowerCase().includes(query);
+        const matchCat  = !category || p.category === category;
+        return matchName && matchCat;
+    });
+
+    const title = category || query
+        ? (category || 'Arama sonuçları')
+        : 'Günün Önerileri';
+    document.getElementById('sectionTitle').textContent = title;
+
+    renderProducts(filtered);
+}
+
+function clearFilters() {
+    document.getElementById('searchInput').value    = '';
+    document.getElementById('categorySelect').value = '';
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('.cat-chip[data-cat=""]').classList.add('active');
+    applyFilters();
+}
+
+/* ══════════════════════════════════════════════════════
+   CHIP CLICK
+   ══════════════════════════════════════════════════════ */
+document.querySelectorAll('.cat-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const cat = chip.dataset.cat;
+        document.getElementById('categorySelect').value = cat;
+        applyFilters();
+    });
+});
+
+document.getElementById('searchInput').addEventListener('input',    applyFilters);
+document.getElementById('categorySelect').addEventListener('change', function() {
+    // sync chips
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    const active = document.querySelector(`.cat-chip[data-cat="${this.value}"]`);
+    if (active) active.classList.add('active');
+    applyFilters();
+});
+
+/* ══════════════════════════════════════════════════════
+   MODAL
+   ══════════════════════════════════════════════════════ */
+function openModal(id) {
+    const p = products.find(x => x.productId === id);
+    if (!p) return;
+    currentProduct = p;
+    currentQty = 1;
+
+    const badgeCls = catBadgeMap[p.category] || 'badge-default';
+    document.getElementById('modalImg').src          = p.imageUrl;
+    document.getElementById('modalImg').alt          = p.productName;
+    document.getElementById('modalName').textContent = p.productName;
+    document.getElementById('modalPrice').textContent= '₺' + p.price.toFixed(2);
+    document.getElementById('modalCatBadge').textContent  = p.category;
+    document.getElementById('modalCatBadge').className    = `product-cat ${badgeCls} d-inline-block mb-2`;
+    document.getElementById('qtyDisplay').textContent = 1;
+    updateTotal();
+
+    document.getElementById('modalAddBtn').onclick = () => {
+        addToCart(p, currentQty);
+        bootstrap.Modal.getInstance(document.getElementById('productModal')).hide();
+    };
+
+    new bootstrap.Modal(document.getElementById('productModal')).show();
+}
+
+function changeQty(delta) {
+    currentQty = Math.max(1, currentQty + delta);
+    document.getElementById('qtyDisplay').textContent = currentQty;
+    updateTotal();
+}
+
+function updateTotal() {
+    if (!currentProduct) return;
+    const total = (currentProduct.price * currentQty).toFixed(2);
+    document.getElementById('totalPrice').textContent = '₺' + total;
+}
+
+/* ══════════════════════════════════════════════════════
+   CART
+   ══════════════════════════════════════════════════════ */
+function quickAdd(id) {
+    const p = products.find(x => x.productId === id);
+    if (p) addToCart(p, 1);
+}
+
+function addToCart(product, qty) {
+    cartCount += qty;
+    document.getElementById('cartBadge').textContent = cartCount;
+
+    // Toast
+    document.getElementById('toastMsg').textContent =
+        `"${product.productName}" sepete eklendi.`;
+    const toastEl = document.getElementById('cartToast');
+    const toast   = bootstrap.Toast.getOrCreateInstance(toastEl);
+    toast.show();
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT — show skeleton, then render after short delay
+   ══════════════════════════════════════════════════════ */
+buildSkeleton();
+
+setTimeout(() => {
+    document.getElementById('skeletonGrid').style.display = 'none';
+    renderProducts(products);
+}, 900);
+</script>
+</body>
+</html>

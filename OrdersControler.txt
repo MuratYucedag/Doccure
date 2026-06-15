@@ -1,0 +1,27 @@
+private readonly IOrderService _orderService;
+
+        public OrdersController(IOrderService orderService)
+        {
+            _orderService = orderService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderList()
+        {
+            var values = await _orderService.GetAllOrderAsync();
+            return Ok(values);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrder(int id)
+        {
+            var value = await _orderService.GetByIdOrderAsync(id);
+            return Ok(value);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder(CreateOrderDto createOrderDto)
+        {
+            await _orderService.CreateOrderAsync(createOrderDto);
+            return Ok("Sipariþ baþarýyla oluþturuldu");
+        }

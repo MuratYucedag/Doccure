@@ -5,14 +5,25 @@ namespace Doccure.MarketService.Services.RedisServices
     public class RedisService : IRedisService
     {
         private readonly IDatabase _database;
-        public Task<string> GetValueAsync(string key)
+        public RedisService(IConfiguration configuration)
         {
-            throw new NotImplementedException();
+            var redis = ConnectionMultiplexer.Connect(configuration["RedisSettings:ConnectionString"]);
+            _database = redis.GetDatabase();
         }
 
-        public Task SetValueAsync(string key, string value)
+        public async Task DeleteKeyAsync(string key)
         {
-            throw new NotImplementedException();
+            await _database.KeyDeleteAsync(key);
+        }
+
+        public async Task<string> GetValueAsync(string key)
+        {
+            return await _database.StringGetAsync(key);
+        }
+
+        public async Task SetValueAsync(string key, string value)
+        {
+            await _database.StringSetAsync(key, value);
         }
     }
 }

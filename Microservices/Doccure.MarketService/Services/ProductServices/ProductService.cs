@@ -1,0 +1,52 @@
+﻿using AutoMapper;
+using Doccure.MarketService.Context;
+using Doccure.MarketService.Dtos.ProductDtos;
+using Doccure.MarketService.Entities;
+using Microsoft.EntityFrameworkCore;
+
+namespace Doccure.MarketService.Services.ProductServices
+{
+    public class ProductService:IProductService
+    {
+        private readonly MarketContext _context;
+        private readonly IMapper _mapper;
+
+        public ProductService(MarketContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+        public async Task<List<ResultProductDto>> GetAllProductAsync()
+        {
+            var values = await _context.Products.ToListAsync();
+            return _mapper.Map<List<ResultProductDto>>(values);
+        }
+        public async Task<GetByIdProductDto> GetByIdProductAsync(int id)
+        {
+            var value = await _context.Products.FindAsync(id);
+            return _mapper.Map<GetByIdProductDto>(value);
+        }
+        public async Task CreateProductAsync(CreateProductDto createProductDto)
+        {
+            var value = _mapper.Map<Product>(createProductDto);
+            _context.Products.Add(value);
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateProductAsync(UpdateProductDto updateProductDto)
+        {
+            var value = _mapper.Map<Product>(updateProductDto);
+            _context.Products.Update(value);
+            await _context.SaveChangesAsync();
+        }
+        public async Task DeleteProductAsync(int id)
+        {
+            var value = await _context.Products.FindAsync(id);
+
+            if (value != null)
+            {
+                _context.Products.Remove(value);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}

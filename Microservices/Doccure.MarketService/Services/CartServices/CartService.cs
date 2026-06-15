@@ -1,0 +1,88 @@
+﻿using System.Text.Json;
+using Doccure.MarketService.Dtos.CartDtos;
+using Doccure.MarketService.Services.RedisServices;
+
+namespace Doccure.MarketService.Services.CartServices
+{
+    public class CartService : ICartService
+    {
+        private readonly IRedisService _redisService;
+
+        public CartService(IRedisService redisService)
+        {
+            _redisService = redisService;
+        }
+
+        public async Task AddItemToCartAsync(int patientId, CartItemDto item)
+        {
+            var key = $"cart:{patientId}";
+
+            var cartJson = await _redisService.GetValueAsync(key);
+
+            var cartItems = string.IsNullOrEmpty(cartJson)
+                ? new List<CartItemDto>()
+                : JsonSerializer.Deserialize<List<CartItemDto>>(cartJson);
+
+            var existingItem = cartItems.FirstOrDefault(x => x.ProductId == item.ProductId);
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity += item.Quantity;
+            }
+            else
+            {
+                cartItems.Add(item);
+            }
+
+            await _redisService.SetValueAsync(
+                key,
+                JsonSerializer.Serialize(cartItems));
+        }
+
+        public async Task<List<CartItemDto>> GetCartAsync(int patientId)
+        {
+            var key = $"cart:{patientId}";
+
+            var cartJson = await _redisService.GetValueAsync(key);
+
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                return new List<CartItemDto>();
+            }
+
+            return JsonSerializer.Deserialize<List<CartItemDto>>(cartJson);
+        }
+
+        public async Task RemoveItemAsync(int patientId, int productId)
+        {
+            var key = $"cart:{patientId}";
+
+            var cartJson = await _redisService.GetValueAsync(key);
+
+            if (string.IsNullOrEmpty(cartJson))
+            {
+                return;
+            }
+
+            var cartItems = JsonSerializer.Deserialize<List<CartItemDto>>(cartJson);
+
+            var itemToRemove = cartItems.FirstOrDefault(x => x.ProductId == productId);
+
+            if (itemToRemove != null)
+            {
+                cartItems.Remove(itemToRemove);
+
+                await _redisService.SetValueAsync(
+                    key,
+                    JsonSerializer.Serialize(cartItems));
+            }
+        }
+
+        public async Task ClearCartAsync(int patientId)
+        {
+            var key = $"cart:{patientId}";
+
+            await _redisService.DeleteKeyAsync(key);
+        }
+    }
+}

@@ -1,15 +1,19 @@
-using Doccure.MarketService.Context;
-using Doccure.MarketService.Services.CartServices;
-using Doccure.MarketService.Services.ProductServices;
-using Doccure.MarketService.Services.RedisServices;
+using Doccure.OrderService.Context;
+using Doccure.OrderService.Services.OrderServices;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<MarketContext>();   
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddSingleton<IRedisService, RedisService>();
-builder.Services.AddSingleton<ICartService, CartService>();
+builder.Services.AddDbContext<OrderContext>(opt =>
+{
+    opt.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")));
+});
+
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddAutoMapper(typeof(Program));
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
